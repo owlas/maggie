@@ -8,11 +8,11 @@
 using std::cout;
 using std::endl;
 
-#include<LangevinEquation.h>
+#include<LangevinEquation.hpp>
 
 int main(void)
 {
-  cout << "Attempting to create LangevinEquation object..." << endl;
-  LangevinEquation myLE(2);
+  cout << "Attempting to create StocLLG object..." << endl;
+  StocLLG llg(1,2,3,4,5,6);
   return 0;
 }
