@@ -9,6 +9,7 @@ using std::cout;
 using std::endl;
 
 #include<LangevinEquation.hpp>
+#include<StocLLG.hpp>
 
 int main(void)
 {
