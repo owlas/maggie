@@ -4,7 +4,7 @@
 // Oliver W. Laslett 2015
 // O.Laslett@soton.ac.uk
 //
-#include <LangevinEquation.h>
+#include <LangevinEquation.hpp>
 
 // Langevin Equation object is required to have a fixed dimension,
 // specify 'd' when constructing an instance.
