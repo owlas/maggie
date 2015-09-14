@@ -2,8 +2,10 @@
 # Make file for compiling the maggie executable
 #
 
-INC_PATH=include/
-OBJ_PATH=objects/
+INC_PATH=include
+OBJ_PATH=objects
+
+LIBS=-lgtest -lpthread
 
 CPP_FLAGS=--std=c++11 -W -Wall -pedantic
 
@@ -15,7 +17,7 @@ default: main
 # Create the main executable - main
 #
 main: src/main.cpp objects/LangevinEquation.o objects/StocLLG.o
-	g++ $(CPP_FLAGS) -I$(INC_PATH) src/main.cpp $(OBJ_PATH)/LangevinEquation.o $(OBJ_PATH)/StocLLG.o -o main
+	g++ $(CPP_FLAGS) -I$(INC_PATH) -o main src/main.cpp $(LIBS) $(OBJ_PATH)/LangevinEquation.o $(OBJ_PATH)/StocLLG.o
 
 
 # LangevinEquation.cpp class is compiled to object
