@@ -16,7 +16,7 @@ typedef boost::multi_array<float,2> matrix_f;
 class StocLLG : public LangevinEquation
 {
  public:
-        StocLLG( float s, float a, float M, float hx, float hy, float hz );
+        StocLLG( float s, float a, float hx, float hy, float hz );
 
   virtual void computeDrift( array_f&, array_f& ) const;  // returns the drift vector
   virtual void computeDiffusion( matrix_f&, array_f& ); // returns the diffusion marix
@@ -30,13 +30,9 @@ class StocLLG : public LangevinEquation
   void setAlpha( float );
   float getAlpha();
 
-  void setMs( float );
-  float getMs();
-
  private:
   array_f h;
   float sigma;
   float alpha;
-  float Ms;
 };
 #endif

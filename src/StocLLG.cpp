@@ -11,13 +11,12 @@ using std::endl;
 #include <StocLLG.hpp>
 
 // Constructor
-StocLLG::StocLLG( float s, float a, float M, float hx, float hy, float hz )
+StocLLG::StocLLG( float s, float a, float hx, float hy, float hz )
   : LangevinEquation( 3 )
   , h( boost::extents[3] )
 {
   setSigma( s );
   setAlpha( a );
-  setMs( M );
   setReducedHeff( hx, hy, hz );
 }
 
@@ -38,10 +37,6 @@ float StocLLG::getSigma() { return sigma; }
 // set and set alpha
 void StocLLG::setAlpha( float s ) { alpha = s; }
 float StocLLG::getAlpha() { return alpha; }
-
-// set and set Ms
-void StocLLG::setMs( float s ) { Ms = s; }
-float StocLLG::getMs() { return Ms; }
 
 // compute the drift term of the stochastic LLG equation
 void StocLLG::computeDrift( array_f& out, array_f& state ) const
