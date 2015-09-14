@@ -1,8 +1,8 @@
 #include <iostream>
-#include <boost/multi_array.hpp>
-
 using std::cout;
 using std::endl;
+
+#include <boost/multi_array.hpp>
 
 typedef boost::multi_array<float,1> array_f;
 
