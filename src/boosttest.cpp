@@ -77,6 +77,18 @@ int main( void )
 
   cout << "Sum of vector [1.2,2.2,3.2] is..." << endl;
   cout << vectorsum( arr ) << endl;
+
+  array_f x( boost::extents[2] );
+  x[0] = 1;
+  x[1] = 0;
+  array_f& xref = x;
+
+  array_f y( boost::extents[2] );
+  y = xref;
+  y[1] = 2;
+  cout << "y is [" << y[0] << "," << y[1] << "]" << endl;  
+  cout << "x is [" << x[0] << "," << x[1] << "]" << endl;
+
   
   return 1;
 }
