@@ -25,8 +25,8 @@ gtest:
 
 # Create the main executable - main
 #
-main: src/main.cpp objects/LangevinEquation.o objects/StocLLG.o objects/Integrator.o objects/RK4.o
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -I$(GTEST_DIR)/include -o main src/main.cpp -L$(LIB_DIR) $(LIBS) $(OBJ_PATH)/LangevinEquation.o $(OBJ_PATH)/StocLLG.o $(OBJ_PATH)/Integrator.o $(OBJ_PATH)/RK4.o
+main: src/main.cpp objects/LangevinEquation.o objects/StocLLG.o objects/Integrator.o objects/RK4.o objects/TwoStateMasterEquation.o
+	g++ $(CPP_FLAGS) -I$(INC_PATH) -I$(GTEST_DIR)/include -o main src/main.cpp -L$(LIB_DIR) $(LIBS) $(OBJ_PATH)/LangevinEquation.o $(OBJ_PATH)/StocLLG.o $(OBJ_PATH)/Integrator.o $(OBJ_PATH)/RK4.o $(OBJ_PATH)/TwoStateMasterEquation.o
 
 
 # LangevinEquation.cpp class is compiled to object
@@ -48,6 +48,11 @@ objects/Integrator.o: src/Integrator.cpp include/Integrator.hpp
 #
 objects/RK4.o: src/RK4.cpp include/RK4.hpp
 	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/RK4.cpp -o objects/RK4.o
+
+# TwoStateMasterEquation.cpp class is compiled to object
+#
+objects/TwoStateMasterEquation.o: src/TwoStateMasterEquation.cpp include/TwoStateMasterEquation.hpp
+	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/TwoStateMasterEquation.cpp -o objects/TwoStateMasterEquation.o
 
 # Clean up executable files
 #
