@@ -10,9 +10,12 @@ using std::endl;
 
 #include<cmath>
 using std::abs;
+using std::cos;
+using std::sin;
 
 #include<LangevinEquation.hpp>
 #include<StocLLG.hpp>
+#include<RK4.hpp>
 #include<gtest/gtest.h>
 #include<boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
@@ -71,6 +74,48 @@ TEST(StochasticLLG, Diffusion)
   EXPECT_EQ( 78, out[2][2] );
 }
 
+// Test the RK4 algorithm
+TEST(RK4, BasicCircle)
+{
+  // declare array for initial state
+  array_f state( boost::extents[2] );
+
+  float t=0; // initial time
+
+  // fill the array state
+  state[0] = 1;
+  state[1] = 0;
+
+  // Basic differential equation
+  class ode : public LangevinEquation
+  {
+  public:
+    ode() : LangevinEquation( 2 ) {}; // constructor
+
+    // Differential equation
+    virtual void computeDrift( array_f& out, array_f& in)
+    {
+      out[0] = in[1];
+      out[1] = -in[0];
+    }
+  } testOde; 
+  
+
+  // Create an instance of the RK4 integrator
+  RK4 inte( testOde, state, t, 0.000001 );
+
+  // Run the integrator for 2000 steps
+  for( int i=0; i<1000; i++ )
+    inte.step();
+
+  // Get the state and time
+  state = inte.getState();
+  t = inte.getTime();
+
+  // Check the solution
+  EXPECT_LE( abs(  cos( t ) - state[0]), 1e-6 );
+  EXPECT_LE( abs( -sin( t ) - state[1]), 1e-6 );
+}
 
   
 
