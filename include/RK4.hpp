@@ -4,6 +4,8 @@
 // Oliver W. Laslett 2015
 // O.Laslett@soton.ac.uk
 //
+#ifndef RK4_H
+#define RK4_H
 #include<Integrator.hpp>
 
 class RK4 : public Integrator
@@ -26,3 +28,5 @@ private:
   array_f k4;
   array_f tmp;
 };
+
+#endif
