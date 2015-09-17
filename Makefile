@@ -52,4 +52,6 @@ objects/RK4.o: src/RK4.cpp include/RK4.hpp
 # Clean up executable files
 #
 clean:
-	rm objects/*
+	rm -f objects/*
+	rm -f gtest-all.o, libgtest.a
+	rm -f main
