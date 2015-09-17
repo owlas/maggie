@@ -13,28 +13,30 @@ using std::endl;
 typedef boost::multi_array<float,1> array_f;
 
 #include<Integrator.hpp>
+#include<stdexcept>
+using std::invalid_argument;
 
 // Constructor
 Integrator::Integrator( LangevinEquation& le, array_f& init_state, float time )
   : state( boost::extents[le.getDim()] )
   , initial_state( boost::extents[le.getDim()] )
 {
+  lEq = &le;
   initial_t = time;
   setTime( time );
   initial_state = init_state;
-setState( init_state );
-lEq = &le;
+  setState( init_state );
 }
 
 // Get state
-  array_f& Integrator::getState() { return state; };
+  array_f& Integrator::getState() { return state; }
 // Set State
 void Integrator::setState( array_f s )
 {
 if( int( s.shape()[0] ) != lEq->getDim() )
     {
-cout << "State dimension does not match Langevin equation dimension" << endl;
-exit( EXIT_FAILURE );
+      throw invalid_argument( "Error: state dimension does not match"
+			      " Langevin equation dimension");
     }
   else
     {
@@ -46,6 +48,9 @@ exit( EXIT_FAILURE );
 float Integrator::getTime() { return t; }
 // set time
 void Integrator::setTime( float time ) { t = time; }
+
+// get the pointer to the integrator
+LangevinEquation &Integrator::getLE() { return *lEq; }
 
 // reset the integrator to the initial condition
 void Integrator::reset()

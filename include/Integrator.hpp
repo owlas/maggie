@@ -27,18 +27,21 @@ class Integrator
   // Set the integrator time
   void setTime( float );
 
+  // Get the pointer to the associated Langevin Equation
+  LangevinEquation &getLE();
+
   // Compute an integration step
-  virtual void step() const = 0;
+  virtual void step() = 0;
 
   // Reset the integrator to initial conditions
   void reset();
 
  private:  
+  LangevinEquation *lEq;
   array_f state;
   array_f initial_state;
   float t;
   float initial_t;
-  LangevinEquation *lEq;
 };  
   
 
