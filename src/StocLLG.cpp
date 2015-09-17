@@ -39,7 +39,7 @@ void StocLLG::setAlpha( float s ) { alpha = s; }
 float StocLLG::getAlpha() { return alpha; }
 
 // compute the drift term of the stochastic LLG equation
-void StocLLG::computeDrift( array_f& out, array_f& state ) const
+void StocLLG::computeDrift( array_f& out, array_f& state )
 {
   out[0] = state[2]*h[1] - state[1]*h[2]
     + alpha*(h[0]*(state[1]*state[1] + state[2]*state[2])
