@@ -2,15 +2,21 @@
 # Make file for compiling the maggie executable
 #
 
+CC=g++
 INC_PATH=include
 OBJ_PATH=objects
+LIB_PATH=lib
+SRC_PATH=src
 
 GTEST_DIR=gtest-1.7.0
 
 LIB_DIR = .
-LIBS=-lgtest -lpthread
+LIBS=-lgtest -lpthread -lmaggie
 
 CPP_FLAGS=--std=c++11 -W -Wall -pedantic
+
+SOURCES=$(wildcard $(LIB_PATH)/*.cpp)
+OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
@@ -19,44 +25,31 @@ default: main
 # gtest builds the gtest module
 #
 gtest:
-	g++ -I$(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $(GTEST_DIR)/src/gtest-all.cc
+	$(CC) -I$(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $(GTEST_DIR)/src/gtest-all.cc
 	ar -rv libgtest.a gtest-all.o
-
 
 # Create the main executable - main
 #
-main: src/main.cpp objects/LangevinEquation.o objects/StocLLG.o objects/Integrator.o objects/RK4.o objects/TwoStateMasterEquation.o
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -I$(GTEST_DIR)/include -o main src/main.cpp -L$(LIB_DIR) $(LIBS) $(OBJ_PATH)/LangevinEquation.o $(OBJ_PATH)/StocLLG.o $(OBJ_PATH)/Integrator.o $(OBJ_PATH)/RK4.o $(OBJ_PATH)/TwoStateMasterEquation.o
+main: src/main.cpp libmaggie.so
+	$(CC) $(CPP_FLAGS) -I$(INC_PATH) -I$(GTEST_DIR)/include -o $@ $(SRC_PATH)/main.cpp -L$(LIB_DIR) $(LIBS)
 
-
-# LangevinEquation.cpp class is compiled to object
+# Shared library maggie.so used for objects
 #
-objects/LangevinEquation.o: src/LangevinEquation.cpp include/LangevinEquation.hpp
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/LangevinEquation.cpp -o objects/LangevinEquation.o
+libmaggie.so: $(OBJ_FILES)
+	$(CC) -shared -o $@ $^
 
-# StocLLG.cpp class is compiled to object
-#
-objects/StocLLG.o: src/StocLLG.cpp include/StocLLG.hpp
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/StocLLG.cpp -o objects/StocLLG.o
 
-# Integrator.cpp class is compiled to object
-#
-objects/Integrator.o: src/Integrator.cpp include/Integrator.hpp
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/Integrator.cpp -o objects/Integrator.o
 
-# RK4.cpp class is compiled to object
+# Compile objects from source
 #
-objects/RK4.o: src/RK4.cpp include/RK4.hpp
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/RK4.cpp -o objects/RK4.o
-
-# TwoStateMasterEquation.cpp class is compiled to object
-#
-objects/TwoStateMasterEquation.o: src/TwoStateMasterEquation.cpp include/TwoStateMasterEquation.hpp
-	g++ $(CPP_FLAGS) -I$(INC_PATH) -c src/TwoStateMasterEquation.cpp -o objects/TwoStateMasterEquation.o
+$(OBJ_PATH)/%.o: $(LIB_PATH)/%.cpp
+	$(CC) $(CPP_FLAGS) -I$(INC_PATH) -c -fPIC -o $@ $<
 
 # Clean up executable files
 #
 clean:
 	rm -f objects/*
-	rm -f gtest-all.o, libgtest.a
 	rm -f main
+
+cleangtest:
+	rm -f gtest-all.o, libgtest.a
