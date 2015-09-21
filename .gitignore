@@ -2,3 +2,6 @@
 *.o
 *.so
 *.a
+
+# Main executable #
+main
