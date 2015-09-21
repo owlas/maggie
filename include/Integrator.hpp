@@ -18,7 +18,7 @@ class Integrator
   Integrator( LangevinEquation &ld, array_f&, float time=0 );
 
   // Get the current state
-  array_f& getState();
+  array_f getState();
   // Set the integrator state
   void setState( array_f );
 

@@ -28,7 +28,7 @@ void StocLLG::setReducedHeff( float hx, float hy, float hz )
   h[2] = hz;
 }
 // get the reduced effective field
-array_f& StocLLG::getReducedHeff() { return h; }
+array_f StocLLG::getReducedHeff() { return h; }
 
 // set and set sigma
 void StocLLG::setSigma( float s ) { sigma = s; }

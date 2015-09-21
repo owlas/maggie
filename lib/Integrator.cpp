@@ -29,7 +29,7 @@ Integrator::Integrator( LangevinEquation& le, array_f& init_state, float time )
 }
 
 // Get state
-  array_f& Integrator::getState() { return state; }
+  array_f Integrator::getState() { return state; }
 // Set State
 void Integrator::setState( array_f s )
 {

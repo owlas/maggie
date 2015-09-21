@@ -22,7 +22,7 @@ class StocLLG : public LangevinEquation
   virtual void computeDiffusion( matrix_f&, array_f& ); // returns the diffusion marix
 
   void setReducedHeff( float, float, float );
-  array_f& getReducedHeff();
+  array_f getReducedHeff();
 
   void setSigma( float );
   float getSigma();
