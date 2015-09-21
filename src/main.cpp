@@ -13,9 +13,7 @@ using std::abs;
 using std::cos;
 using std::sin;
 
-#include<LangevinEquation.hpp>
-#include<StocLLG.hpp>
-#include<RK4.hpp>
+#include<maggie.hpp>
 #include<gtest/gtest.h>
 #include<boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
