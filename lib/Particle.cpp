@@ -10,6 +10,7 @@
 #include<cmath>
 using std::sqrt;
 using std::pow;
+using std::fabs;
 #include<Particle.hpp>
 #include<stdexcept>
 using std::invalid_argument;
@@ -44,8 +45,8 @@ void Particle::setUea( array_f anisAxis )
   if( anisAxis.shape()[0] != 3 )
     throw invalid_argument( "Error: anisotropy axis must be of length"
 			    " 3." );
-  if( sqrt( pow( anisAxis[0], 2 ) + pow( anisAxis[1], 2 )
-	    + pow( anisAxis[2], 2 ) ) != 1 )
+  if( fabs( sqrt( pow( anisAxis[0], 2 ) + pow( anisAxis[1], 2 )
+		   + pow( anisAxis[2], 2 ) ) - 1.0 ) > 1e-7 )
     throw invalid_argument( "Error: anisotropy axis must have a"
 			    " magnitude of unity. Normalise vector" );
 
