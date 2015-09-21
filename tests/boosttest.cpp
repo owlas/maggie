@@ -89,6 +89,23 @@ int main( void )
   cout << "y is [" << y[0] << "," << y[1] << "]" << endl;  
   cout << "x is [" << x[0] << "," << x[1] << "]" << endl;
 
+  // What is the index thing for?
+  typedef boost::multi_array<double,3> cube_d;
+  cube_d c( boost::extents[2][3][4] );
   
+  // Set array to zero
+  for( int i=0; i<2; i++ )
+    for( int j=0; j<3; j++ )
+      for( int k=0; k<4; k++ )
+	c[i][j][k] = 0;
+  cout << "3d array initialised" << endl;
+
+  // Now access out of bounds
+  typedef cube_d::index idx;
+  cout << "expect out of bounds error" << endl;
+  for( idx i=0; i<2; i++ )
+    for( idx j=0; j<4; j++ )
+      for( idx k=0; k<4; k++ )
+	cout << "index cube at " << i << " " << j << " " << k << endl;
   return 1;
 }
