@@ -103,7 +103,7 @@ TEST(RK4, BasicCircle)
   RK4 inte( testOde, state, t, 0.000001 );
 
   // Run the integrator for 2000 steps
-  for( int i=0; i<1000; i++ )
+  for( int i=0; i<500; i++ )
     inte.step();
 
   // Get the state and time
