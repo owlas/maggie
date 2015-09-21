@@ -36,9 +36,11 @@ class Integrator
   // Reset the integrator to initial conditions
   void reset();
 
+protected:
+  array_f state;
+
  private:  
   LangevinEquation *lEq;
-  array_f state;
   array_f initial_state;
   float t;
   float initial_t;
