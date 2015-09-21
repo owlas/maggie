@@ -8,10 +8,11 @@ OBJ_PATH=objects
 LIB_PATH=lib
 SRC_PATH=src
 
-GTEST_DIR=gtest-1.7.0
+GTEST_DIR=googletest/googletest
+GMOCK_DIR=googletest/googlemock
 
 LIB_DIR = .
-LIBS=-lgtest -lpthread -lmaggie
+LIBS=-lgmock -lpthread -lmaggie
 
 CPP_FLAGS=--std=c++11 -W -Wall -pedantic
 
@@ -22,16 +23,23 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 #
 default: main
 
-# gtest builds the gtest module
+# gtest builds the gtest and gmock modules
 #
-gtest:
-	$(CC) -I$(GTEST_DIR)/include -I$(GTEST_DIR) -pthread -c $(GTEST_DIR)/src/gtest-all.cc
-	ar -rv libgtest.a gtest-all.o
+gmock:
+	$(CC) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
+		-isystem $(GMOCK_DIR) -I$(GMOCK_DIR)/include \
+		-pthread -c $(GTEST_DIR)/src/gtest-all.cc
+	$(CC) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
+		-isystem $(GMOCK_DIR) -I$(GMOCK_DIR)/include \
+		-pthread -c $(GMOCK_DIR)/src/gmock-all.cc
+	ar -rv libgmock.a gtest-all.o gmock-all.o
 
 # Create the main executable - main
 #
 main: src/main.cpp libmaggie.so
-	$(CC) $(CPP_FLAGS) -I$(INC_PATH) -I$(GTEST_DIR)/include -o $@ $(SRC_PATH)/main.cpp -L$(LIB_DIR) $(LIBS)
+	$(CC) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
+		-o $@ $(SRC_PATH)/main.cpp -L$(LIB_DIR) $(LIBS)
 
 # Shared library maggie.so used for objects
 #
@@ -51,5 +59,5 @@ clean:
 	rm -f objects/*
 	rm -f main
 
-cleangtest:
+gclean:
 	rm -f gtest-all.o, libgtest.a
