@@ -9,15 +9,18 @@ using std::cout;
 using std::endl;
 
 #include<cmath>
-using std::abs;
 using std::cos;
 using std::sin;
 
 #include<maggie.hpp>
 #include<gtest/gtest.h>
+#include<gmock/gmock.h>
 #include<boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
 typedef boost::multi_array<float,2> matrix_f;
+typedef boost::multi_array<float,3> cube_f;
+
+#include<vector>
 
 // Test construction of StocLLG
 TEST(StochasticLLG, ContructAndDim)
@@ -115,6 +118,104 @@ TEST(RK4, BasicCircle)
   ASSERT_FLOAT_EQ( -sin( t ), state[1] );
 }
 
+// Test for the Particles
+TEST(Particle, SetSize)
+{
+  array_f uea( boost::extents[3] );
+  uea[0] = 1;
+  uea[1] = 0;
+  uea[2] = 0;
+  Particle p( 1, 2, 3, 4, 5, uea );
+  ASSERT_FLOAT_EQ( 33.51032, p.getV() );
+}
+
+// Check that uea is a unit vector
+TEST(Particle, UnitVector)
+{
+  array_f uea( boost::extents[3] );
+  // Not a unit vector
+  uea[0] = 0.3;
+  uea[1] = 0.5;
+  uea[2] = 0.7;
+  ASSERT_THROW( Particle p( 1, 2, 3, 4, 5, uea ),
+		std::invalid_argument );
+  // is a unit vector
+  uea[0] = 0.5773503;
+  uea[1] = 0.5773503;
+  uea[2] = 0.5773503;
+  ASSERT_NO_THROW( Particle p( 1, 2, 3, 4, 5, uea ) );
+}
+
+// Test the particle cluster, are the distances correct?
+TEST(ParticleCluster, Distances)
+{
+  // create list of 3 identical particles
+  array_f uea( boost::extents[3] );
+  uea[0] = 1.0;
+  uea[1] = 0.0;
+  uea[2] = 0.0;  
+  Particle p1( 1,2,3,4,5,uea );
+  std::vector<Particle> plist = {p1, p1, p1};
+
+  // Set the particle locations
+  matrix_f locs( boost::extents[3][3] );
+  
+  // particle 1 at location (0,0,0)
+  for( int i=0; i<3; i++ )
+    locs[0][i] = 0;
+  // particle 2 at location (1,0,0)
+  locs[1][0] = 1;
+  locs[1][1] = 0;
+  locs[1][2] = 0;
+  // particle 3 at location (0,1,1)
+  locs[2][0] = 0;
+  locs[2][1] = 1;
+  locs[2][2] = 1;
+
+  // Create the cluster and get the distances
+  ParticleCluster const pclust( plist, locs );
+  cube_f dists( boost::extents[3][3][3] );
+  dists = pclust.getDistances();
+  
+  // assert the distances are correct
+  // p1 - p1
+  EXPECT_EQ( 0, dists[0][0][0] );
+  EXPECT_EQ( 0, dists[0][0][1] );
+  EXPECT_EQ( 0, dists[0][0][2] );
+  // p1 - p2
+  EXPECT_EQ( 1, dists[1][0][0] );
+  EXPECT_EQ( 0, dists[1][0][1] );
+  EXPECT_EQ( 0, dists[1][0][2] );
+  // p1 - p3
+  EXPECT_EQ( 0, dists[2][0][0] );
+  EXPECT_EQ( 1, dists[2][0][1] );
+  EXPECT_EQ( 1, dists[2][0][2] );
+  // p2 - p1
+  EXPECT_EQ( 1, dists[0][1][0] );
+  EXPECT_EQ( 0, dists[0][1][1] );
+  EXPECT_EQ( 0, dists[0][1][2] );
+  // p2 - p2
+  EXPECT_EQ( 0, dists[1][1][0] );
+  EXPECT_EQ( 0, dists[1][1][1] );
+  EXPECT_EQ( 0, dists[1][1][2] );
+  // p2 - p3
+  EXPECT_EQ( 1, dists[2][1][0] );
+  EXPECT_EQ( 1, dists[2][1][1] );
+  EXPECT_EQ( 1, dists[2][1][2] );
+  // p3 - p1
+  EXPECT_EQ( 0, dists[0][2][0] );
+  EXPECT_EQ( 1, dists[0][2][1] );
+  EXPECT_EQ( 1, dists[0][2][2] );
+  // p3 - p2
+  EXPECT_EQ( 1, dists[1][2][0] );
+  EXPECT_EQ( 1, dists[1][2][1] );
+  EXPECT_EQ( 1, dists[1][2][2] );
+  // p3 - p3
+  EXPECT_EQ( 0, dists[2][2][0] );
+  EXPECT_EQ( 0, dists[2][2][1] );
+  EXPECT_EQ( 0, dists[2][2][2] );
+}
+  
   
 
 int main( int argc, char **argv )
