@@ -16,7 +16,7 @@ class Particle
 public:
   // constructor
   Particle( float gamma, float alpha, float Ms, float D, float K,
-	    float temp, array_f uea );
+	    array_f uea );
 
   // getters for particle properties
   float getGamma();
@@ -26,29 +26,25 @@ public:
   float getK();
   array_f getUea();
   float getV();
-  float getSr();
-  float getT();
 
   // setters for particle properties
   void setGamma( float );
   void setAlpha( float );
   void setMs( float );
-  void setT( float );
   void setSize( float );
   void setK( float );
   void setUea( array_f );
 
+  // Compute the Neel-Brown transition rates over the barrier
+  
+
 private:
-  const float KB = 1.38064852e-23;
-  void computeStability(); // to be called on parameter update
   array_f uea;
   float gamma;
   float alpha;
   float ms;
   float d;
   float k;
-  float t;
   float v;
-  float sr;
 };
 #endif

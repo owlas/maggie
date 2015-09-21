@@ -16,42 +16,27 @@ using std::invalid_argument;
 
 // constructor
 Particle::Particle( float g, float a, float m, float diam, float anis,
-		    float temp, array_f anisAxis )
+		    array_f anisAxis )
   : uea( boost::extents[3] )
   , gamma( g )
   , alpha( a )
   , ms( m )
   , k( anis )
-  , t( temp )
 {
   setUea( anisAxis );
   setSize( diam );
 }
 
-// stability ratio is recomputed for each update of parameters
-void Particle::computeStability() { sr = k*v/(KB*t); }
-
 // setters for particle properties
 void Particle::setGamma( float g ) { gamma=g; }
 void Particle::setMs( float m ) { ms=m; }
 void Particle::setAlpha( float a ) { alpha=a; }
-void Particle::setT( float temp )
-{
-  t = temp;
-  computeStability();
-}
+void Particle::setK( float anis ) { k = anis; }
 
 void Particle::setSize( float diam )
 {
   d = diam;
   v = ( 4.0/3 )*M_PI*pow( d/2.0, 3 );
-  computeStability();
-}
-
-void Particle::setK( float anis )
-{
-  k = anis;
-  computeStability();
 }
 
 void Particle::setUea( array_f anisAxis )
@@ -75,5 +60,3 @@ float Particle::getD() { return d; }
 float Particle::getK() { return k; }
 array_f Particle::getUea() { return uea; }
 float Particle::getV() { return v; }
-float Particle::getSr() { return sr; }
-float Particle::getT() { return t; }
