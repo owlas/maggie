@@ -111,8 +111,8 @@ TEST(RK4, BasicCircle)
   t = inte.getTime();
 
   // Check the solution
-  EXPECT_LE( abs(  cos( t ) - state[0]), 1e-6 );
-  EXPECT_LE( abs( -sin( t ) - state[1]), 1e-6 );
+  ASSERT_FLOAT_EQ( cos( t ), state[0] );
+  ASSERT_FLOAT_EQ( -sin( t ), state[1] );
 }
 
   
