@@ -32,6 +32,9 @@ public:
   // Set the locations and compute distances
   void setLocs( matrix_f );
 
+  // Compute the stability ratio of each particle
+  std::vector<float> computeStability( float temperature ) const;
+
   // getters
   unsigned int getNParticles() const;
   matrix_f getLocations() const;
@@ -40,6 +43,7 @@ public:
 
 private:
   unsigned int const N;
+  const float KB = 1.3806485e-23;
   std::vector<Particle> particles;
   matrix_f locs;
   array3_f dist;
