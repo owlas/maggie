@@ -54,10 +54,10 @@ void Particle::setUea( array_f anisAxis )
 }
 
 // getters for properties
-float Particle::getGamma() { return gamma; }
-float Particle::getAlpha() { return alpha; }
-float Particle::getMs() { return ms; }
-float Particle::getD() { return d; }
-float Particle::getK() { return k; }
-array_f Particle::getUea() { return uea; }
-float Particle::getV() { return v; }
+float Particle::getGamma() const { return gamma; }
+float Particle::getAlpha() const { return alpha; }
+float Particle::getMs() const { return ms; }
+float Particle::getD() const { return d; }
+float Particle::getK() const { return k; }
+array_f Particle::getUea() const { return uea; }
+float Particle::getV() const { return v; }

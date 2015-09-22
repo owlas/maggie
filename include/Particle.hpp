@@ -19,13 +19,13 @@ public:
 	    array_f uea );
 
   // getters for particle properties
-  float getGamma();
-  float getAlpha();
-  float getMs();
-  float getD();
-  float getK();
-  array_f getUea();
-  float getV();
+  float getGamma() const;
+  float getAlpha() const;
+  float getMs() const;
+  float getD() const;
+  float getK() const;
+  array_f getUea() const;
+  float getV() const;
 
   // setters for particle properties
   void setGamma( float );
