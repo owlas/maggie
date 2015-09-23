@@ -14,8 +14,9 @@
 #include<cmath>
 #include<vector>
 #include<boost/multi_array.hpp>
-typedef boost::multi_array<float,2> matrix_f;
-typedef boost::multi_array<float,3> array3_f;
+using array_f = boost::multi_array<float,1>;
+using matrix_f = boost::multi_array<float,2>;
+using array3_f = boost::multi_array<float,3>;
 
 
 class ParticleCluster
