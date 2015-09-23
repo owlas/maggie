@@ -34,7 +34,7 @@ public:
   void setLocs( matrix_f );
 
   // Compute the stability ratio of each particle
-  array_f computeStability( float temperature ) const;
+  std::vector<float> computeStability( float temperature ) const;
 
   // Compute the energy barrier for each particle
   array_f computeBarriers( float happ ) const;
