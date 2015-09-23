@@ -6,6 +6,11 @@ using std::endl;
 
 typedef boost::multi_array<float,1> array_f;
 
+#include<boost/random.hpp>
+using boost::variate_generator;
+using boost::mt19937;
+using boost::normal_distribution;
+
 // class definition
 class Test
 {
@@ -100,12 +105,43 @@ int main( void )
 	c[i][j][k] = 0;
   cout << "3d array initialised" << endl;
 
-  // Now access out of bounds
+  /* // Now access out of bounds
   typedef cube_d::index idx;
   cout << "expect out of bounds error" << endl;
   for( idx i=0; i<2; i++ )
     for( idx j=0; j<4; j++ )
       for( idx k=0; k<4; k++ )
 	cout << "index cube at " << i << " " << j << " " << k << endl;
-  return 1;
+  return 1; */
+
+
+  // Lets run some tests with random numbers
+  // 
+
+  // This is a class that prints a random number upon creation. It
+  // relies on an external generator but recreates the actual variate
+  // generator each time.
+  // 
+  // We want behaviour such that the rng is always random, even when
+  // we create new variate generators.
+  class PrintNumber
+  {
+  public:
+    PrintNumber( mt19937 &rng )
+      : dist(0,1)
+      , gen( rng, dist )
+    {
+      cout << gen() << endl;
+    }
+
+  private:
+    normal_distribution<float> dist;
+    variate_generator<mt19937 &, normal_distribution<float> > gen;
+  };
+
+  // Now create a generator
+  mt19937 rng(100);
+
+  for( int i=0; i<10; i++ )
+    PrintNumber pr( rng );
 }
