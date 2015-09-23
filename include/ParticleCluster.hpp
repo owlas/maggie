@@ -34,7 +34,8 @@ public:
   void setLocs( matrix_f );
 
   // Compute the stability ratio of each particle
-  std::vector<float> computeStability( float temperature ) const;
+  array_f computeStability( float temperature ) const;
+ 
 
   // getters
   unsigned int getNParticles() const;

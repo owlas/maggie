@@ -45,10 +45,9 @@ matrix_f ParticleCluster::getLocations()  const { return locs; }
 array3_f ParticleCluster::getDistances() const { return dist; }
 
 // Compute the stability ratio for each of the particles
-std::vector<float> ParticleCluster::computeStability( float T ) const
+array_f ParticleCluster::computeStability( float T ) const
 {
-  std::vector<float> srs;
-  srs.reserve( N );
+  array_f srs( boost::extents[N] );
 
   for( unsigned int i=0; i<N; i++ )
     srs[i] = ( particles[i].getK() * particles[i].getV() / ( KB*T ) );
