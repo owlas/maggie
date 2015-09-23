@@ -35,7 +35,9 @@ public:
 
   // Compute the stability ratio of each particle
   array_f computeStability( float temperature ) const;
- 
+
+  // Compute the energy barrier for each particle
+  array_f computeBarriers( float happ ) const;
 
   // getters
   unsigned int getNParticles() const;
