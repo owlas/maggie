@@ -5,6 +5,7 @@
 namespace Constants
 {
   const float KB = 1.3806485e-23;
+  const float GYROMAG = 1.76086e11;
 }
 
 #endif
