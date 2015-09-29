@@ -47,7 +47,6 @@ public:
 
 private:
   unsigned int const N;
-  const float KB = 1.3806485e-23;
   std::vector<Particle> particles;
   matrix_f locs;
   array3_f dist;

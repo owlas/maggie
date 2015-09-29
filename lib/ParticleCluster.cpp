@@ -51,7 +51,8 @@ std::vector<float> ParticleCluster::computeStability( float T ) const
   srs.assign( N,0 );
 
   for( unsigned int i=0; i<N; i++ )
-    srs[i] = ( particles[i].getK() * particles[i].getV() / ( KB*T ) );
+    srs[i] = ( particles[i].getK() * particles[i].getV()
+               / ( Constants::KB*T ) );
   
   return srs;
 }
@@ -101,3 +102,4 @@ array_f ParticleCluster::computeBarriers( float happ ) const
   somereturn[0] = happ;
   return somereturn;
 }
+
