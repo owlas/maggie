@@ -6,14 +6,7 @@
 // Oliver W. Laslett (2015)
 // O.Laslett@soton.ac.uk
 // 
-#define _USE_MATH_DEFINES
-#include<cmath>
-using std::sqrt;
-using std::pow;
-using std::fabs;
 #include<Particle.hpp>
-#include<stdexcept>
-using std::invalid_argument;
 
 // constructor
 Particle::Particle( float g, float a, float m, float diam, float anis,
@@ -61,3 +54,36 @@ float Particle::getD() const { return d; }
 float Particle::getK() const { return k; }
 array_f Particle::getUea() const { return uea; }
 float Particle::getV() const { return v; }
+
+// Compute the energy barriers of the system in an aligned field. 
+// happ is the reduced field intensity i.e. h/Hk
+array_f
+  Particle::alignedEnergyBarriers( float happ ) const
+{
+  array_f eBarriers( boost::extents[2] );
+  if( happ>1 )
+    throw invalid_argument( "currently aligned energy barriers are "
+                             "only calculated for H < H_k" );
+  eBarriers[0] = k*v*pow( 1-happ, 2 );
+  eBarriers[1] = k*v*pow( 1+happ, 2 );
+
+  return eBarriers;
+}
+
+
+// Compute the Neel-Arrhenius transition rates from energy barrier
+// calculations in at a set temperature
+array_f neelTransitionRates( float T, float b1, float b2 )
+{
+  // Assume tau_0
+  float tau0 = 10e-10;
+
+  array_f rates( boost::extents[2] );
+  
+  rates[0] = 1/( tau0*exp( b1/( Constants::KB*T ) ) );
+  rates[1] = 1/( tau0*exp( b2/( Constants::KB*T ) ) );
+
+  return rates;
+}
+
+  

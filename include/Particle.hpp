@@ -8,8 +8,20 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+#define _USE_MATH_DEFINES
+#include<cmath>
+using std::sqrt;
+using std::pow;
+using std::fabs;
+using std::exp;
+
+#include<Constants.hpp>
+
 #include<boost/multi_array.hpp>
-typedef boost::multi_array<float, 1> array_f;
+using array_f = boost::multi_array<float, 1>;
+
+#include<stdexcept>
+using std::invalid_argument;
 
 class Particle
 {
@@ -35,7 +47,13 @@ public:
   void setK( float );
   void setUea( array_f );
 
-  // Compute the Neel-Brown transition rates over the barrier
+  // Compute the energy barriers for the case of an applied field
+  // parallel to the uniaxial anisotropy axis and with an intensity of
+  // less that H_k. i.e. h = H/H_k < 1
+  array_f alignedEnergyBarriers( float happ ) const;
+
+  // Compute the Neel-Arrhenius transition rates at a given temperature
+  array_f neelTransitionRates( float temp, float barrier1, float barrier2 );
   
 
 private:
