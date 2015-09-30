@@ -146,6 +146,33 @@ TEST(Particle, UnitVector)
   ASSERT_NO_THROW( Particle p( 1, 2, 3, 4, 5, uea ) );
 }
 
+// Check computation of the energy barriers
+TEST(Particle, EnergyBarriers)
+{
+  array_f uea( boost::extents[3] );
+  uea[0] = 0;
+  uea[0] = 0;
+  uea[0] = 1;
+  Particle p( Constants::GYROMAG, 0.1, 3.5e5, 4e-9, 1e4, uea );
+
+  // Cannot have reduced fields > 1 (i.e. H>H_k)
+  ASSERT_THROW( p.alignedEnergyBarriers( 1.5 ),
+                std::invalid_argument );
+
+  // Check computation
+  array_f ans( boost::extents[2] );
+  ans = p.alignedEnergyBarriers( 0.2 );
+
+  ASSERT_FLOAT_EQ( 2.14466058e-22, ans[0] );
+  ASSERT_FLOAT_EQ( 4.82548631e-22, ans[1] );
+}
+
+// Check the computaiton of the transition rates
+TEST(Particle, TransitionRates)
+{
+  // test here
+}
+
 // Test the particle cluster, are the distances correct?
 TEST(ParticleCluster, Distances)
 {
@@ -214,6 +241,13 @@ TEST(ParticleCluster, Distances)
   EXPECT_EQ( 0, dists[2][2][0] );
   EXPECT_EQ( 0, dists[2][2][1] );
   EXPECT_EQ( 0, dists[2][2][2] );
+}
+
+
+// Test run of the Heun and LLG algorithms
+TEST( StocLLG, HeunIntegrationSolution )
+{
+  // write test for heun integration here.
 }
   
   
