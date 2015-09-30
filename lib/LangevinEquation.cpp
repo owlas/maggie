@@ -23,9 +23,10 @@ int LangevinEquation::getDim()
 }
 
 // Langevin Equation might only have drift 
-void LangevinEquation::computeDiffusion( matrix_f& out, array_f& in )
+void LangevinEquation::computeDiffusion( matrix_f& out,
+                                         array_f& /*no input*/,
+                                         float /*no time*/ )
 {
-  in.shape(); // suppress warning in compiler - fix this
   for( int i=0; i<dim; i++ )
     for( int j=0; j<dim; j++ )
       out[i][j] = 0;

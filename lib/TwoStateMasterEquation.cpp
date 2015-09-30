@@ -32,7 +32,7 @@ float TwoStateMasterEquation::getRate1() { return w1; }
 float TwoStateMasterEquation::getRate2() { return w2; }
 
 // Compute the two-state master equation
-void TwoStateMasterEquation::computeDrift( array_f& out, array_f& in )
+void TwoStateMasterEquation::computeDrift( array_f& out, array_f& in, float )
 {
   if( in[0] + in[1] == 1.0 )
     throw invalid_argument( "Error: Input vector should be a"

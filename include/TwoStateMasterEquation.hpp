@@ -18,7 +18,7 @@ public:
   TwoStateMasterEquation( float rate1, float rate2 );
 
   // Compute the drift vecctor for the current state
-  virtual void computeDrift( array_f& out, array_f& in );
+  virtual void computeDrift( array_f& out, array_f& in, float t );
 
   // set the transition rates
   void setRates( float rate1, float rate2 );

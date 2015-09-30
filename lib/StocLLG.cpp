@@ -39,7 +39,7 @@ void StocLLG::setAlpha( float s ) { alpha = s; }
 float StocLLG::getAlpha() { return alpha; }
 
 // compute the drift term of the stochastic LLG equation
-void StocLLG::computeDrift( array_f& out, array_f& state )
+void StocLLG::computeDrift( array_f& out, array_f& state, float )
 {
   out[0] = state[2]*h[1] - state[1]*h[2]
     + alpha*(h[0]*(state[1]*state[1] + state[2]*state[2])
@@ -56,7 +56,7 @@ void StocLLG::computeDrift( array_f& out, array_f& state )
 }
 
 // compute the diffusion matrix for the stochastic LLG equation
-void StocLLG::computeDiffusion( matrix_f& out, array_f& state)
+void StocLLG::computeDiffusion( matrix_f& out, array_f& state, float )
 {
   out[0][0] = alpha*sigma*(state[1]*state[1]+state[2]*state[2]);
   out[0][1] = sigma*(state[2]-alpha*state[0]*state[1]);

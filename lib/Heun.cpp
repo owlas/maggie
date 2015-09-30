@@ -31,8 +31,8 @@ void Heun::step()
   for( int i=0; i<dim; i++ )
     dw[i] = sqrt(h) * gen();
   
-  getLE().computeDrift( tmp1, state );
-  getLE().computeDiffusion( tmp2, state );
+  getLE().computeDrift( tmp1, state, getTime() );
+  getLE().computeDiffusion( tmp2, state, getTime() );
   
   for( int i=0; i<dim; i++ )
     {
@@ -42,8 +42,8 @@ void Heun::step()
       xPred[i] = state[i] + tmp1[i]*h + wienerProducts[i];
     }
 
-  getLE().computeDrift( tmp1Up, xPred );
-  getLE().computeDiffusion( tmp2Up, xPred );
+  getLE().computeDrift( tmp1Up, xPred, getTime() );
+  getLE().computeDiffusion( tmp2Up, xPred, getTime() );
   
   for( int i=0; i<dim; i++ )
     {

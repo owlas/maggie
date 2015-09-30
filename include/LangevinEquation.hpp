@@ -19,8 +19,8 @@ class LangevinEquation
   int getDim(); // get dimensions of equation
   
   // Return Langevin components from a given state vector
-  virtual void computeDrift( array_f& out, array_f& in ) = 0;
-  virtual void computeDiffusion( matrix_f& out, array_f& in ); 
+  virtual void computeDrift( array_f& out, array_f& in, float t ) = 0;
+  virtual void computeDiffusion( matrix_f& out, array_f& in, float t ); 
 
  private:
   const int dim;

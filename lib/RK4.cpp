@@ -27,22 +27,22 @@ void RK4::step()
 {
   // Step 1
   int i=0;
-  getLE().computeDrift( k1, state );
+  getLE().computeDrift( k1, state, getTime() );
   for( i=0; i<dim; i++ )
     tmp[i] = k1[i]*h/2.0 + state[i];
 
   // Step 2
-  getLE().computeDrift( k2, tmp );
+  getLE().computeDrift( k2, tmp, getTime() );
   for( i=0; i<dim; i++ )
     tmp[i] = k2[i]*h/2.0 + state[i];
 
   // Step 3
-  getLE().computeDrift( k3, tmp );
+  getLE().computeDrift( k3, tmp, getTime() );
   for( i=0; i<dim; i++ )
     tmp[i] = k3[i]*h + state[i];
 
   // Step 4 and update state
-  getLE().computeDrift( k4, tmp );
+  getLE().computeDrift( k4, tmp, getTime() );
   for( i=1; i<dim; i++ )
     tmp[i] = state[i]
       + ( h/6 )*( k1[i] + 2*k2[i] + 2*k3[i] + k4[i] );

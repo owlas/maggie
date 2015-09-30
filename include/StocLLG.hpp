@@ -18,8 +18,10 @@ class StocLLG : public LangevinEquation
  public:
         StocLLG( float s, float a, float hx, float hy, float hz );
 
-  virtual void computeDrift( array_f&, array_f& );  // returns the drift vector
-  virtual void computeDiffusion( matrix_f&, array_f& ); // returns the diffusion marix
+  // returns the drift vector
+  virtual void computeDrift( array_f&, array_f&, float );
+  // returns the diffusion marix
+  virtual void computeDiffusion( matrix_f&, array_f&, float );
 
   void setReducedHeff( float, float, float );
   array_f getReducedHeff();

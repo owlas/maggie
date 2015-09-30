@@ -41,7 +41,7 @@ TEST(StochasticLLG, Drift)
 
   // Set up StocLLG and compute drift
   StocLLG llg( 2, 3, 1, 2, 3 );
-  llg.computeDrift( out, in );
+  llg.computeDrift( out, in, 0 );
 
   // Are the solutions correct?
   EXPECT_EQ( -34, out[0] );
@@ -61,7 +61,7 @@ TEST(StochasticLLG, Diffusion)
 
   // set up the StocLLG and compute diffusion
   StocLLG llg( 2, 3, 1, 2, 3 );
-  llg.computeDiffusion( out, in );
+  llg.computeDiffusion( out, in, 0 );
   
   // are the solutions correct?
   EXPECT_EQ( 150, out[0][0] );
@@ -94,7 +94,7 @@ TEST(RK4, BasicCircle)
     ode() : LangevinEquation( 2 ) {}; // constructor
 
     // Differential equation
-    virtual void computeDrift( array_f& out, array_f& in)
+    virtual void computeDrift( array_f& out, array_f& in, float )
     {
       out[0] = in[1];
       out[1] = -in[0];
