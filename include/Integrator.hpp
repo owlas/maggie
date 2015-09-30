@@ -18,17 +18,17 @@ class Integrator
   Integrator( LangevinEquation &ld, array_f&, float time=0 );
 
   // Get the current state
-  array_f getState();
+  array_f getState() const;
   // Set the integrator state
   void setState( array_f );
 
   // Get the current time
-  float getTime();
+  float getTime() const;
   // Set the integrator time
   void setTime( float );
 
   // Get the pointer to the associated Langevin Equation
-  LangevinEquation &getLE();
+  LangevinEquation &getLE() const;
 
   // Compute an integration step
   virtual void step() = 0;

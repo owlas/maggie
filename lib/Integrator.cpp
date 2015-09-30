@@ -29,7 +29,7 @@ Integrator::Integrator( LangevinEquation& le, array_f& init_state, float time )
 }
 
 // Get state
-  array_f Integrator::getState() { return state; }
+  array_f Integrator::getState() const { return state; }
 // Set State
 void Integrator::setState( array_f s )
 {
@@ -45,12 +45,12 @@ if( int( s.shape()[0] ) != lEq->getDim() )
 }
 
 // get time
-float Integrator::getTime() { return t; }
+float Integrator::getTime() const { return t; }
 // set time
 void Integrator::setTime( float time ) { t = time; }
 
 // get the pointer to the integrator
-LangevinEquation &Integrator::getLE() { return *lEq; }
+LangevinEquation &Integrator::getLE() const { return *lEq; }
 
 // reset the integrator to the initial condition
 void Integrator::reset()
