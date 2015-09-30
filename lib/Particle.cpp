@@ -73,7 +73,8 @@ array_f
 
 // Compute the Neel-Arrhenius transition rates from energy barrier
 // calculations in at a set temperature
-array_f neelTransitionRates( float T, float b1, float b2 )
+array_f
+  Particle::neelTransitionRates( float T, float b1, float b2 ) const
 {
   // Assume tau_0
   float tau0 = 10e-10;

@@ -53,7 +53,8 @@ public:
   array_f alignedEnergyBarriers( float happ ) const;
 
   // Compute the Neel-Arrhenius transition rates at a given temperature
-  array_f neelTransitionRates( float temp, float barrier1, float barrier2 );
+  array_f neelTransitionRates( float temp, float barrier1,
+                               float barrier2 )     const;
   
 
 private:
