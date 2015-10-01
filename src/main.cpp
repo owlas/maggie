@@ -249,7 +249,46 @@ TEST( StocLLG, HeunIntegrationSolution )
 {
   // write test for heun integration here.
 }
+
+// Test the quadrature rule
+// First test is simple, and checks against a straight line
+// integration.
+TEST( Quadrature, LinearFunction )
+{
+  // integrate between 0 and 7 with default tolerance
+  // on a simple linear function
+  Quad::Quadrature q( []( float x ){ return 2*x+3; }, 0.0, 7.0 );
+  float res = q.qTrap();
+
+  // check that the solution is correct
+  ASSERT_FLOAT_EQ( 70.0, res );
+}
+
+// Does it work for an odd function?
+TEST( Quadrature, OddFunctionOver0 )
+{
+  // integrate a linear function odd function
+  // from -2 to 2 to  get 0 area
+  Quad::Quadrature q( []( float x){ return 1.2*x; }, -2.0, 2.0 );
+  float res = q.qTrap();
+
+  ASSERT_FLOAT_EQ( 0.0, res );
+}
+
+// Test the vector function
+TEST( Quadrature, LinearFunctionFromVector )
+{
+  // generate a vector of data
+  const int N=10000;
+  const float h = 7.0/N;
+  array_f vec( boost::extents[N] );
+  for( int i=0; i<N; i++ ) vec[i] = 2*i*h+3;
   
+  // get the result
+  float res = Quad::trapVec( vec, h );
+  
+  ASSERT_FLOAT_EQ( 70.0, res );
+}
   
 
 int main( int argc, char **argv )
