@@ -84,8 +84,8 @@ TEST(RK4, BasicCircle)
   float t=0; // initial time
 
   // fill the array state
-  state[0] = 1;
-  state[1] = 0;
+  state[0] = 1.0;
+  state[1] = 0.0;
 
   // Basic differential equation
   class ode : public LangevinEquation
