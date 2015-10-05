@@ -10,34 +10,41 @@
 
 #include<TwoStateMasterEquation.hpp>
 #include<stdexcept>
+#include<iostream>
+using std::cout;
+using std::endl;
 using std::invalid_argument;
 
 // constructor
 TwoStateMasterEquation::TwoStateMasterEquation( float rate1,
 						float rate2 )
   : LangevinEquation( 2 )
+  , w1( [ rate1 ]( float ){ return rate1; } )
+  , w2( [ rate2 ]( float ){ return rate2; } )
 {
-  setRates( rate1, rate2 );
+  // empty
 }
 
-// setter and getters for the rates
-void TwoStateMasterEquation::setRates( float rate1, float rate2 )
+TwoStateMasterEquation::TwoStateMasterEquation
+( std::function<float( float )> rateFunc1,
+  std::function<float( float )> rateFunc2 )
+  : LangevinEquation( 2 )
+  , w1( rateFunc1 )
+  , w2( rateFunc2 )
 {
-  w1 = rate1;
-  w2 = rate2;
+  // empty
 }
 
-float TwoStateMasterEquation::getRate1() { return w1; }
 
-float TwoStateMasterEquation::getRate2() { return w2; }
+// get the rates at a certain time
+float TwoStateMasterEquation::getRate1( float t ) { return w1( t ); }
+
+float TwoStateMasterEquation::getRate2( float t ) { return w2( t ); }
 
 // Compute the two-state master equation
-void TwoStateMasterEquation::computeDrift( array_f& out, array_f& in, float )
+void TwoStateMasterEquation::computeDrift( array_f& out, array_f& in,
+                                           float t )
 {
-  if( in[0] + in[1] == 1.0 )
-    throw invalid_argument( "Error: Input vector should be a"
-			    " probability vector => sum of elements"
-			    " must be equal to unity" );
-  out[0] = ( 1 - in[0] )*w2 - in[0]*w1;
-  out[1] = 1- out[0];
+  out[0] = -( w1( t )+w2( t ) )*in[0] + w2( t );
+  out[1] = -( w2( t )+w2( t ) )*in[1] + w1( t );
 }
