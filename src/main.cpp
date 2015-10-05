@@ -289,6 +289,49 @@ TEST( Quadrature, LinearFunctionFromVector )
   
   ASSERT_FLOAT_EQ( 70.0, res );
 }
+
+
+// Test the two state master equation
+// Is the sum of the probabilities always unity?
+TEST( TwoStateMasterEquation, ConservationOfProbability )
+{
+  using func1DFloat=std::function<float( float ) >;
+
+  cout.precision(10);
+
+  // two simple functions for the transition rates
+  func1DFloat w1 = []( float t ){ return t*0.01 + 0.3; };
+  func1DFloat w2 = []( float t ){ return std::pow( t,2 )*0.1 + 0.5; };
+
+  // create the two state master eqution
+  TwoStateMasterEquation eq( w1, w2 );
+  
+  // Integrate from an initial condition
+  array_f init( boost::extents[2] );
+  init[0] = 0.5;
+  init[1] = 0.5;
+
+  RK4 integrator( eq, init, 0, 1e-7 );
+
+  // step the integrator and check that the probability is conserved
+  // throughout.
+  array_f state( boost::extents[2] );
+
+  state = integrator.getState();
+  for( int i=0; i<200; i++ )
+    {
+      integrator.step();
+      state = integrator.getState();
+      ASSERT_LE( std::abs( 1.0-state[0]-state[1] ), 1e-5 );
+    }
+}
+
+
+// Write test here for input output behaviour
+TEST( IOTests, ReadAndWrite )
+{
+        
+}
   
 
 int main( int argc, char **argv )
