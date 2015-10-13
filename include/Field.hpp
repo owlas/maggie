@@ -10,11 +10,53 @@
 #include<cmath>
 
 
-namespace Field {
+class Field
+{
+public:
+  Field( float );
 
-float sin( float h, float f, float t );
-float square( float h, float f, float t );
-float cos( float h, float f, float );
+  void setH( float );
+  float getH() const;
+  virtual float getField( float ) const = 0;
+  
+private:
+  float h;
+};
 
-}
+class FieldACSine : public Field
+{
+public:
+  FieldACSine( float h, float f );
+  void setF( float );
+  float getF() const;
+  virtual float getField( float ) const;
+
+private:
+  float f;
+};
+
+class FieldACCosine : public Field
+{
+public:
+  FieldACCosine( float h, float f );
+  void setF( float );
+  float getF() const;
+  virtual float getField( float ) const;
+
+private:
+  float f;
+};
+
+class FieldACSquare : public Field
+{
+public:
+  FieldACSquare( float h, float f );
+  void setF( float );
+  float getF() const;
+  virtual float getField( float ) const;
+
+private:
+  float f;
+};
+
 #endif
