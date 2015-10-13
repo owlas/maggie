@@ -5,6 +5,9 @@
 // Oliver Laslett (2015)
 // O.Laslett@soton.ac.uk
 //
+#ifndef MNPME_H
+#define MNPME_H
+
 #include<LangevinEquation.hpp>
 #include<Constants.hpp>
 #include<Field.hpp>
@@ -18,7 +21,7 @@ public:
   SingleMNPMasterEquation( float temperature,
                            float anisotropy_constant,
                            float paticle_radius,
-                           std::function<float( float )> field_func,
+                           const Field &field,
                            float field_angle );
 
   // compute the difference in energy between the two states of the
@@ -34,6 +37,8 @@ private:
   float r;
   float v;
   float psi;
-  std::function<float(float)> field;
+  const Field *fieldPtr;
   const float TAU0=10e-10;
 };
+
+#endif
