@@ -10,11 +10,10 @@
 
 #include<iostream>
 #include<fstream>
-#include<stdexcept>
 #include<boost/multi_array.hpp>
 
 
 // saves a boost array to a file with the supplied name
-template<typename T>
-int boostToFile( T &array, std::string name );
+int boostToFile( boost::multi_array<float,1> &array, std::string name );
+int boostToFile( boost::multi_array<float,2> &array, std::string name );
 #endif

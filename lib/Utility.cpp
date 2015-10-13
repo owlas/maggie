@@ -5,35 +5,33 @@
 //
 #include<Utility.hpp>
 
-template<typename T>
-int boostToFile( T &array, std::string name )
+int boostToFile( boost::multi_array<float,1> &array, std::string name )
 {
-  // Get the dimensions
-  int nDims = array.Dimensionality();
-
   // Open the file
   std::ofstream fid;
   fid.open( name );
 
-  if( nDims == 1 )
-    {
-      for( int i=0; i<array.shape()[0]; i++ )
-        fid << array[i] << " ";
-    }
-  else if( nDims == 2 )
-    {
-      for( int i=0; i<array()[0]; i++ )
-        {
-          for( int j=0; j<array()[1]; j++ )
-            fid << array[i][j] << " ";
-          fid << "\n";
-        }
-    }
-  else
-    throw std::invalid_argument( "Can only save boost arrays with less"
-                                 " than two dimensions." );
+  for( int i=0; i<array.shape()[0]; i++ )
+    fid << array[i] << " ";
 
   fid.close();
   return 1;
 
+}
+
+int boostToFile( boost::multi_array<float,2> &array, std::string name )
+{
+  // Open the file
+  std::ofstream fid;
+  fid.open( name );
+
+  for( int unsigned i=0; i<array.shape()[0]; i++ )
+    {
+      for( int unsigned j=0; j<array.shape()[1]; j++ )
+        fid << array[i][j] << " ";
+      fid << "\n";
+    }
+
+  fid.close();
+  return 1;
 }
