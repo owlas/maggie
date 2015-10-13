@@ -13,40 +13,34 @@ Field::Field( float field )
 void Field::setH( float field ) { h=field; }
 float Field::getH() const { return h; }
 
-// Sine field
-FieldACSine::FieldACSine( float field, float freq )
-  : Field( field )
+// Abstrsct class for periodic time-varying fields
+FieldPeriodic::FieldPeriodic( float field, float freq )
+        : Field( field )
 {
   setF( freq );
 }
-void FieldACSine::setF( float freq ) { f=freq; }
-float FieldACSine::getF() const { return f; }
+void FieldPeriodic::setF( float freq ) { f=freq; }
+float FieldPeriodic::getF() const { return f; }
+
+// Sine field
+FieldACSine::FieldACSine( float field, float freq )
+  : FieldPeriodic( field, freq ) {}
 float FieldACSine::getField( float t ) const
 {
   return getH()*std::sin( 2*M_PI*getF()*t );
 }
 
-// Sine field
+// Cosine field
 FieldACCosine::FieldACCosine( float field, float freq )
-  : Field( field )
-{
-  setF( freq );
-}
-void FieldACCosine::setF( float freq ) { f=freq; }
-float FieldACCosine::getF() const { return f; }
+  : FieldPeriodic( field, freq ) {}
 float FieldACCosine::getField( float t ) const
 {
   return getH()*std::cos( 2*M_PI*getF()*t );
 }
 
-// Sine field
+// Square wave
 FieldACSquare::FieldACSquare( float field, float freq )
-  : Field( field )
-{
-  setF( freq );
-}
-void FieldACSquare::setF( float freq ) { f=freq; }
-float FieldACSquare::getF() const { return f; }
+  : FieldPeriodic( field, freq ) {}
 float FieldACSquare::getField( float t ) const
 {
   return getH()*( int( t*getF()*2 )%2 ? -1 : 1 );

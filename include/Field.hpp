@@ -23,40 +23,36 @@ private:
   float h;
 };
 
-class FieldACSine : public Field
+class FieldPeriodic : public Field
+{
+public:
+  FieldPeriodic( float h, float f );
+  void setF( float );
+  float getF() const;
+  virtual float getField( float ) const = 0;
+private:
+  float f;
+};
+
+class FieldACSine : public FieldPeriodic
 {
 public:
   FieldACSine( float h, float f );
-  void setF( float );
-  float getF() const;
   virtual float getField( float ) const;
-
-private:
-  float f;
 };
 
-class FieldACCosine : public Field
+class FieldACCosine : public FieldPeriodic
 {
 public:
   FieldACCosine( float h, float f );
-  void setF( float );
-  float getF() const;
   virtual float getField( float ) const;
-
-private:
-  float f;
 };
 
-class FieldACSquare : public Field
+class FieldACSquare : public FieldPeriodic
 {
 public:
   FieldACSquare( float h, float f );
-  void setF( float );
-  float getF() const;
   virtual float getField( float ) const;
-
-private:
-  float f;
 };
 
 #endif
