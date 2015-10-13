@@ -77,7 +77,7 @@ array_f
   Particle::neelTransitionRates( float T, float b1, float b2 ) const
 {
   // Assume tau_0
-  float tau0 = 10e-10;
+  float tau0 = 1e-10;
 
   array_f rates( boost::extents[2] );
   
