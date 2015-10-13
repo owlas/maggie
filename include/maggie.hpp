@@ -17,3 +17,5 @@
 #include<Constants.hpp>
 #include<Quadrature.hpp>
 #include<Utility.hpp>
+#include<Field.hpp>
+#include<SingleMNPMasterEquation.hpp>
