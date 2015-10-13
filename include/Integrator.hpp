@@ -34,7 +34,9 @@ class Integrator
   virtual void step() = 0;
 
   // Reset the integrator to initial conditions
+  // or a new initial condition
   void reset();
+  void reset( array_f );
 
 protected:
   array_f state;

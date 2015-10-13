@@ -58,3 +58,10 @@ void Integrator::reset()
   state = initial_state;
   t = initial_t;
 }
+
+// reset the integrator with a new inital condition
+void Integrator::reset( array_f new_init )
+{
+  initial_state = new_init;
+  reset();
+}
