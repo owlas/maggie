@@ -91,4 +91,26 @@ namespace Quad
     s += sum;
     return s;
   }
+
+  float trapVec( array_f yvec, array_f xvec )
+  {
+    float sum;
+    unsigned int i;
+    const unsigned int len = yvec.shape()[0];
+    if( xvec.shape()[0] != len )
+      throw std::invalid_argument( "vectors must be of the same"
+				   " length." );
+
+    // assert that the vector is at lest of length 3
+    if( len<2 )
+      throw std::invalid_argument( "Vector for integration must be of"
+                                   " minimum length 3" );
+    
+    // sum the points
+    for( sum=0.0, i=1; i<len; i++ )
+      sum += ( xvec[i]-xvec[i-1] )*( yvec[i]+yvec[i-1] );
+
+    sum/=2.0;
+    return sum;
+  }
 }

@@ -50,6 +50,7 @@ namespace Quad
   // integrates from x = start to x = end at intervals of h
   // and vec = y( x ) for start, start+h, start+2h, ...
   float trapVec( array_f vec, const float h );
+  float trapVec( array_f yvec, array_f xvec );
 }
 #endif
 
