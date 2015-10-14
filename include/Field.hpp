@@ -8,7 +8,7 @@
 
 #define _USE_MATH_DEFINES
 #include<cmath>
-
+#include<stdexcept>
 
 class Field
 {
@@ -53,6 +53,20 @@ class FieldACSquare : public FieldPeriodic
 public:
   FieldACSquare( float h, float f );
   virtual float getField( float ) const;
+};
+
+class FieldACRamp : public FieldPeriodic
+{
+public:
+  FieldACRamp( float h, float f, float rTime );
+  virtual float getField( float ) const;
+  float getRT() const;
+  void setRT( float );
+private:
+  float rt;
+  float left;
+  float right;
+  float ramp;
 };
 
 #endif
