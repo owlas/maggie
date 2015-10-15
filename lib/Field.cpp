@@ -75,9 +75,9 @@ float FieldACRamp::getField( float t ) const
 {
   float tcyc = std::fmod( t, 1/( getF() ) );
   float T2 = 1/( 2*getF() );
-  return tcyc<left ? getH()*tcyc*ramp :
+  return tcyc<left ? tcyc*ramp :
     tcyc<right ? getH() :
-    tcyc<( T2+left ) ? getH()*( 1-ramp*( tcyc-right ) ) :
+    tcyc<( T2+left ) ? getH() - ramp*( tcyc-right ) :
     tcyc<( T2+right ) ? -getH() :
-    getH()*( ramp*( tcyc-T2-right )-1 );
+    -getH() + ramp*( tcyc-T2-right );
 }
