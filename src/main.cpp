@@ -332,6 +332,50 @@ TEST( IOTests, ReadAndWrite )
 {
         
 }
+
+// Test the results of the Kramers calculations
+TEST( Kramers, MaxLocation )
+{
+  float h=0.3, psi=0.7;  
+  ASSERT_LE( std::abs( 1.862366031 -
+		       KramersTrig::theta_max( h, psi ) )
+	     , pow( h,4 ) );
+}
+
+TEST( Kramers, MinLocationOne )
+{
+  float h=0.3, psi=0.7;  
+  ASSERT_LE( std::abs( 0.157479602 -
+		       KramersTrig::theta_min1( h, psi ) )
+	     , pow( h,4 ) );
+}
+
+TEST( Kramers, MinLocationTwo )
+{
+  float h=0.3, psi=0.7;
+  ASSERT_LE( std::abs( 2.885440350 -
+		       KramersTrig::theta_min2( h, psi ) )
+	     , pow( h,4 ) );
+}
+
+// Check the energy barrier calculations in reduced energy
+// i.e. e=E/(2VK)
+TEST( Kramers, EBarOne )
+{
+  float h=0.3, psi=0.7, s=3.0;
+  float betaV = KramersTrig::k_ebar_1( s, h, psi );
+  float res = betaV/s/2.0;
+  ASSERT_LE( std::abs( 0.584159039 - res )
+	     , pow( h,4 ) );
+}
+TEST( Kramers, EBarTwo )
+{
+  float h=0.3, psi=0.7, s=3.0;
+  float betaV = KramersTrig::k_ebar_2( s, h, psi );
+  float res = betaV/s/2.0;
+  ASSERT_LE( std::abs( 0.134437709 - res )
+	     , pow( h,4 ) );
+}
   
 
 int main( int argc, char **argv )
