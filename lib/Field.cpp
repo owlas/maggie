@@ -13,6 +13,12 @@ Field::Field( float field )
 void Field::setH( float field ) { h=field; }
 float Field::getH() const { return h; }
 
+// The most basic field is simply a constant
+FieldConstant::FieldConstant( float field )
+  : Field( field ) {}
+float FieldConstant::getField( float ) const
+{ return getH(); }
+
 // Abstrsct class for periodic time-varying fields
 FieldPeriodic::FieldPeriodic( float field, float freq )
         : Field( field )

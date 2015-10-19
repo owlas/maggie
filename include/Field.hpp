@@ -23,6 +23,13 @@ private:
   float h;
 };
 
+class FieldConstant : public Field
+{
+public:
+  FieldConstant( float h );
+  virtual float getField( float ) const;
+};
+
 class FieldPeriodic : public Field
 {
 public:
