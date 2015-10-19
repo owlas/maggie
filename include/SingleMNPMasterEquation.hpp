@@ -11,22 +11,34 @@
 #include<LangevinEquation.hpp>
 #include<Constants.hpp>
 #include<Field.hpp>
+#include<KramersTrig.hpp>
 #include<stdexcept>
 #include<functional>
 
 class SingleMNPMasterEquation : public LangevinEquation
 {
 public:
-  // constructor
-  SingleMNPMasterEquation( float temperature,
-                           float anisotropy_constant,
-                           float paticle_radius,
-                           const Field &field,
-                           float field_angle );
+  // constructor for the general case
+  SingleMNPMasterEquation( float anis,
+			   float temp,
+			   const Field &field,
+			   float fieldangle,
+			   float radius,
+			   float alpha,
+			   float Ms,
+			   float gamma=Constants::GYROMAG );
+
+  // delegated constructor for aligned case
+  SingleMNPMasterEquation( float anis,
+			   float temp,
+			   const Field &field,
+			   float radius );
+
+
 
   // compute the difference in energy between the two states of the
   // system
-  float ediff( float t );  
+  float ediff( float t ); 
 
   // Compute the drift of the master equation
   virtual void computeDrift( array_f& out, array_f& in, float t );
@@ -35,10 +47,12 @@ private:
   float k;
   float T;
   float r;
-  float v;
   float psi;
+  float a;
+  float M;
+  float gam;
+  float v;
   const Field *fieldPtr;
-  const float TAU0=10e-10;
 };
 
 #endif
