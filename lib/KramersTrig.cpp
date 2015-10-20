@@ -65,10 +65,9 @@ float KramersTrig::k_angular_1( float s, float h, float psi,
   float res;
   res = 2;
   res += 2*h*cos( psi );
-  res -= pow( h,2 )*pow( sin( psi ),2 )*
-    ( 1 - 3*h*cos( psi )+pow( h,2 )*( 21+19*cos( 2*psi ) )/8.0
-      - pow( h,3 )*cos( psi )*( 5+2*cos( 2*psi ) )
-      + pow( h,4 )*( 321+284*cos( 2*psi ) - 29*cos( 4*psi ) )/64.0 );
+  res -= pow( h,2 )*pow( sin( psi ),2 );
+  res += 3*pow( h,3 )*cos( psi )*pow( sin( psi ),2 );
+  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/16.0;
   res *= s*gamma/Ms;
   return res;
 }
@@ -80,10 +79,9 @@ float KramersTrig::k_angular_2( float s, float h, float psi,
   float res;
   res = 2;
   res -= 2*h*cos( psi );
-  res -= pow( h,2 )*pow( sin( psi ),2 )*
-    ( 1 + 3*h*cos( psi )+pow( h,2 )*( 21+19*cos( 2*psi ) )/8.0
-      + pow( h,3 )*cos( psi )*( 5+2*cos( 2*psi ) )
-      + pow( h,4 )*( 321+284*cos( 2*psi ) - 29*cos( 4*psi ) )/64.0 );
+  res -= pow( h,2 )*pow( sin( psi ),2 );
+  res -= 3*pow( h,3 )*cos( psi )*pow( sin( psi ),2 );
+  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/16.0;
   res *= s*gamma/Ms;
   return res;
 }
@@ -95,8 +93,7 @@ float KramersTrig::k_coef_1( float s, float h, float psi )
   float res;
   res = 1;
   res += pow( h,2 )*pow( cos( psi ),2 )
-    *( 0.5+h*sin( psi )+3*pow( h,2 )*( 5-3*cos( 2*psi ) )/16.0
-       +2*pow( h,3 )*sin( psi ) );
+    *( 0.5+h*sin( psi )+3*pow( h,2 )*( 5-3*cos( 2*psi ) )/16.0 );
   res *= 2*s*h*sin( psi );
   return res;
 }
@@ -110,9 +107,6 @@ float KramersTrig::k_coef_2( float s, float h, float psi )
   res += pow( h,2 )*pow( cos( psi ),2 );
   res += 5*pow( h,3 )*sin( 2*psi )*cos( psi )/4.0;
   res += pow( h,4 )*pow( sin( 2*psi ),2 );
-  res += 11*pow( h,5 )*cos( psi )*sin( 2*psi )
-    *( 5-3*cos( 2*psi ) )/32.0;
-  res += 7*pow( h,6 )*pow( sin( 2*psi ),2 )/4.0;
   res *= 2*s;
   return res;
 }
