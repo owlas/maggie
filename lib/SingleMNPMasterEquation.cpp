@@ -82,3 +82,11 @@ float SingleMNPMasterEquation::ediff( float t )
     }
 }
 
+float SingleMNPMasterEquation::state_rotation( float t ) const 
+{
+  float h = fieldPtr->getField( t );
+  if( h*sin( psi ) < 0.03 )
+    return 0;
+  else
+    return KramersTrig::theta_min1( h, psi );
+}

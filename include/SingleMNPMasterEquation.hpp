@@ -40,6 +40,9 @@ public:
   // system
   float ediff( float t ); 
 
+  // compute the angle of the minima
+  float state_rotation( float t ) const;
+
   // Compute the drift of the master equation
   virtual void computeDrift( array_f& out, array_f& in, float t );
 
