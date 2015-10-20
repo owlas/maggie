@@ -5,3 +5,6 @@
 
 # Main executable #
 main
+
+# Backup files
+*~
