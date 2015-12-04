@@ -9,8 +9,8 @@ using std::cout;
 using std::endl;
 
 #include<cmath>
-using std::cos;
-using std::sin;
+using std::cos; using std::sin;
+using std::sqrt; using std::exp;
 
 #include<maggie.hpp>
 #include<gtest/gtest.h>
@@ -19,6 +19,9 @@ using std::sin;
 typedef boost::multi_array<float,1> array_f;
 typedef boost::multi_array<float,2> matrix_f;
 typedef boost::multi_array<float,3> cube_f;
+#include<boost/random.hpp>
+using mt19937=boost::random::mt19937;
+using normal_f=boost::random::normal_distribution<float>;
 
 #include<vector>
 
@@ -243,6 +246,68 @@ TEST(ParticleCluster, Distances)
   EXPECT_EQ( 0, dists[2][2][2] );
 }
 
+
+// Test the integration scheme
+TEST( Heun, HeunOrnsteinUhlenbeck )
+{
+  // Time step
+  float dt = 1e-10;
+
+  // Class for the Ornstein-Uhlenbeck process
+  class OH : public LangevinEquation
+  {
+  public:
+    OH() : LangevinEquation( 1 ) {};
+    virtual void computeDrift( array_f& out, array_f& in, float )
+    {
+      out[0] = theta*( mu-in[0] );
+    }
+    virtual void computeDiffusion( matrix_f& out, array_f&, float )
+    {
+      out[0][0] = sigma;
+    }
+
+    // Parameters for OU process
+    float theta=1.3, mu=2, sigma=0.1;
+  } testSDE;
+
+  // create the RNG
+  mt19937 rng;
+  mt19937 rng_an;
+
+  // Create a variate generator for the analytic solution
+  normal_f dist(0, sqrt( dt ) );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_an, dist );
+
+  // Create the integrator
+  array_f init( boost::extents[1] ); init[0]=-3;
+  auto inte = Heun( testSDE, init, 0.0, dt, rng );
+
+  // Track the solutions
+  float numericalSol = init[0];
+  float analyticSol = init[0];
+
+  float theta = testSDE.theta;
+  float mu = testSDE.mu;
+  float sigma = testSDE.sigma;
+
+  for( int i=0; i<5000; i++ )
+    {
+      // Numerical solution
+      inte.step();
+      numericalSol = inte.getState()[0];
+
+      // Analytic solution
+      // FROM http://henley.ac.uk/web/FILES/REP/Monte_Carlo_Simulation_of_Stochastic_Processes.pdf
+      
+      analyticSol = analyticSol*exp( -theta*dt ) + mu*( 1-exp( -theta*dt ) )
+	+ sigma*sqrt( ( 1-exp( -2*theta*dt ) )/( 2*theta ) ) * vg();
+
+      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
+	<< "Steps completed =" << i;
+    }
+}
 
 // Test run of the Heun and LLG algorithms
 TEST( StocLLG, HeunIntegrationSolution )

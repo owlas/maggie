@@ -19,3 +19,4 @@
 #include<Utility.hpp>
 #include<Field.hpp>
 #include<SingleMNPMasterEquation.hpp>
+#include<Heun.hpp>
