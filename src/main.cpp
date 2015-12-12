@@ -280,11 +280,14 @@ TEST( Heun, HeunWiener )
   array_f init( boost::extents[1] ); init[0]=0;
   auto inte = Heun( testSDE, init, 0.0, dt, rng );
 
+  // Set the initial condition for the analytic solution
+  float analyticSol = init[0];
+
   // Integrate for 5000 steps and compare against analytical
   for( array_f::index i=0; i!=5000; i++ )
   {
     inte.step();
-    numericalSol = inte.getState()[0];
+    float numericalSol = inte.getState()[0];
     analyticSol += vg();
 
     ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
