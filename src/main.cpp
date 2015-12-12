@@ -246,6 +246,52 @@ TEST(ParticleCluster, Distances)
   EXPECT_EQ( 0, dists[2][2][2] );
 }
 
+// Test the stochastic integrator on a simple Wiener process
+TEST( Heun, HeunWiener )
+{
+  // Time step
+  const float dt = 1e-10;
+
+  // Langevin equation representing a Wiener process
+  class Wiener : public LangevinEquation
+  {
+  public:
+    Wiener() : LangevinEquation( 1 ) {};
+    virtual void computeDrift( array_f& out, array_f&, float )
+    {
+      out[0] = 0;
+    }
+    virtual void computeDiffusion( matrix_f& out, array_f&, float )
+    {
+      out[0][0] = 1;
+    }
+  } testSDE;
+
+  // Create random number generators with same seed
+  mt19937 rng(1234);
+  mt19937 rng_an(1234);
+
+  // Create a variate generator for the analytic solution
+  normal_f dist(0, sqrt( dt ) );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_an, dist );
+
+  // Set up numerical integration
+  array_f init( boost::extents[1] ); init[0]=0;
+  auto inte = Heun( testSDE, init, 0.0, dt, rng );
+
+  // Integrate for 5000 steps and compare against analytical
+  for( array_f::index i=0; i!=5000; i++ )
+  {
+    inte.step();
+    numericalSol = inte.getState()[0];
+    analyticSol += vg();
+
+    ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
+                  << "Steps completed =" << i;
+  }
+}
+
 
 // Test the integration scheme
 TEST( Heun, HeunOrnsteinUhlenbeck )
