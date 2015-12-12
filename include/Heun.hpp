@@ -20,7 +20,7 @@ using matrix_f = boost::multi_array<float,2>;
 
 class Heun : public Integrator
 {
-  
+
 public:
   // Constructor
   Heun( LangevinEquation &le, array_f& init_state,
@@ -30,13 +30,12 @@ public:
   virtual void step();
 
 private:
-  float h;
-  int dim;
+  const float h;
+  const int dim;
   array_f dw;
   array_f xPred;
   array_f tmp1;
   array_f tmp1Up;
-  array_f wienerProducts;
   matrix_f tmp2;
   matrix_f tmp2Up;
   normal_distribution<float> dist;

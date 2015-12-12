@@ -17,7 +17,6 @@ Heun::Heun( LangevinEquation &le, array_f& init_state,
   , xPred( boost::extents[dim])
   , tmp1( boost::extents[dim])
   , tmp1Up( boost::extents[dim])
-  , wienerProducts( boost::extents[dim])
   , tmp2( boost::extents[dim][dim] )
   , tmp2Up( boost::extents[dim][dim] )
   , dist(0,1)
@@ -28,32 +27,30 @@ Heun::Heun( LangevinEquation &le, array_f& init_state,
 
 void Heun::step()
 {
+  // Generate 1D array of Wiener increments
   for( int i=0; i<dim; i++ )
     dw[i] = sqrt(h) * gen();
-  
+
+  // PREDICTION
   getLE().computeDrift( tmp1, state, getTime() );
   getLE().computeDiffusion( tmp2, state, getTime() );
-  
-  for( int i=0; i<dim; i++ )
+  for( array_f::index i=0; i!=dim; i++ )
     {
-      wienerProducts[i] = 0;
-      for( int j=0; j<dim; j++ )
-	wienerProducts[i] += tmp2[i][j]*dw[j];
-      xPred[i] = state[i] + tmp1[i]*h + wienerProducts[i];
+      xPred[i] = state[i] + tmp1[i]*h;
+      for ( array_f::index j=0; j!=dim; j++ )
+				xPred[i] += tmp2[i][j]*dw[j];
     }
 
-  getLE().computeDrift( tmp1Up, xPred, getTime() );
-  getLE().computeDiffusion( tmp2Up, xPred, getTime() );
-  
+  getLE().computeDrift( tmp1Up, xPred, getTime()+h );
+  getLE().computeDiffusion( tmp2Up, xPred, getTime()+h );
+
   for( int i=0; i<dim; i++ )
     {
+			xPred[i] = state[i] + 0.5*h*( tmp1Up[i] + tmp1[i] );
       for( int j=0; j<dim; j++ )
-	wienerProducts[i] += tmp2Up[i][j]*dw[j];
-      wienerProducts[i] *= 0.5;
-      xPred[i] = state[i] + 0.5*h*( tmp1[i] + tmp1Up[i] )
-	+ wienerProducts[i];
+				xPred[i] += 0.5*dw[j]*( tmp2Up[i][j] + tmp2[i][j] );
     }
-  
+
   setState( xPred );
   setTime( getTime()+h );
 }
