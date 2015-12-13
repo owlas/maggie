@@ -65,7 +65,7 @@ TEST(StochasticLLG, Diffusion)
   // set up the StocLLG and compute diffusion
   StocLLG llg( 2, 3, 1, 2, 3 );
   llg.computeDiffusion( out, in, 0 );
-  
+
   // are the solutions correct?
   EXPECT_EQ( 150, out[0][0] );
   EXPECT_EQ( -28, out[0][1] );
@@ -102,8 +102,8 @@ TEST(RK4, BasicCircle)
       out[0] = in[1];
       out[1] = -in[0];
     }
-  } testOde; 
-  
+  } testOde;
+
 
   // Create an instance of the RK4 integrator
   RK4 inte( testOde, state, t, 0.000001 );
@@ -183,13 +183,13 @@ TEST(ParticleCluster, Distances)
   array_f uea( boost::extents[3] );
   uea[0] = 1.0;
   uea[1] = 0.0;
-  uea[2] = 0.0;  
+  uea[2] = 0.0;
   Particle p1( 1,2,3,4,5,uea );
   std::vector<Particle> plist = {p1, p1, p1};
 
   // Set the particle locations
   matrix_f locs( boost::extents[3][3] );
-  
+
   // particle 1 at location (0,0,0)
   for( int i=0; i<3; i++ )
     locs[0][i] = 0;
@@ -206,7 +206,7 @@ TEST(ParticleCluster, Distances)
   ParticleCluster const pclust( plist, locs );
   cube_f dists( boost::extents[3][3][3] );
   dists = pclust.getDistances();
-  
+
   // assert the distances are correct
   // p1 - p1
   EXPECT_EQ( 0, dists[0][0][0] );
@@ -397,10 +397,10 @@ TEST( Quadrature, LinearFunctionFromVector )
   const float h = 7.0/N;
   array_f vec( boost::extents[N] );
   for( int i=0; i<N; i++ ) vec[i] = 2*i*h+3;
-  
+
   // get the result
   float res = Quad::trapVec( vec, h );
-  
+
   ASSERT_FLOAT_EQ( 70.0, res );
 }
 
@@ -419,7 +419,7 @@ TEST( TwoStateMasterEquation, ConservationOfProbability )
 
   // create the two state master eqution
   TwoStateMasterEquation eq( w1, w2 );
-  
+
   // Integrate from an initial condition
   array_f init( boost::extents[2] );
   init[0] = 0.5;
@@ -444,13 +444,13 @@ TEST( TwoStateMasterEquation, ConservationOfProbability )
 // Write test here for input output behaviour
 TEST( IOTests, ReadAndWrite )
 {
-        
+
 }
 
 // Test the results of the Kramers calculations
 TEST( Kramers, MaxLocation )
 {
-  float h=0.3, psi=0.7;  
+  float h=0.3, psi=0.7;
   ASSERT_LE( std::abs( 1.862366031 -
 		       KramersTrig::theta_max( h, psi ) )
 	     , pow( h,4 ) );
@@ -458,7 +458,7 @@ TEST( Kramers, MaxLocation )
 
 TEST( Kramers, MinLocationOne )
 {
-  float h=0.3, psi=0.7;  
+  float h=0.3, psi=0.7;
   ASSERT_LE( std::abs( 0.157479602 -
 		       KramersTrig::theta_min1( h, psi ) )
 	     , pow( h,4 ) );
@@ -490,7 +490,7 @@ TEST( Kramers, EBarTwo )
   ASSERT_LE( std::abs( 0.134437709 - res )
 	     , pow( h,4 ) );
 }
-  
+
 
 int main( int argc, char **argv )
 {
