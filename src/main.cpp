@@ -317,15 +317,15 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
     }
 
     // Parameters for OU process
-    float theta=1.3, mu=2, sigma=0.1;
+    float theta=10, mu=-1.0, sigma=0.8;
   } testSDE;
 
   // create the RNG
-  mt19937 rng;
-  mt19937 rng_an;
+  mt19937 rng(555);
+  mt19937 rng_an(555);
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, sqrt( dt ) );
+  normal_f dist(0, 1 );
   boost::random::variate_generator<mt19937, normal_f>
     vg( rng_an, dist );
 
@@ -341,7 +341,7 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
   float mu = testSDE.mu;
   float sigma = testSDE.sigma;
 
-  for( int i=0; i<5000; i++ )
+  for( int i=0; i<300; i++ )
     {
       // Numerical solution
       inte.step();
@@ -349,14 +349,14 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
 
       // Analytic solution
       // FROM http://henley.ac.uk/web/FILES/REP/Monte_Carlo_Simulation_of_Stochastic_Processes.pdf
-      
+
       analyticSol = analyticSol*exp( -theta*dt ) + mu*( 1-exp( -theta*dt ) )
 	+ sigma*sqrt( ( 1-exp( -2*theta*dt ) )/( 2*theta ) ) * vg();
 
-      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
-	<< "Steps completed =" << i;
+      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-4 )
+        << "Steps completed: " << i << std::endl;
     }
-}
+  }
 
 // Test run of the Heun and LLG algorithms
 TEST( StocLLG, HeunIntegrationSolution )
