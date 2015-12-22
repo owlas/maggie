@@ -253,19 +253,7 @@ TEST( Heun, HeunWiener )
   const float dt = 1e-10;
 
   // Langevin equation representing a Wiener process
-  class Wiener : public LangevinEquation
-  {
-  public:
-    Wiener() : LangevinEquation( 1 ) {};
-    virtual void computeDrift( array_f& out, array_f&, float )
-    {
-      out[0] = 0;
-    }
-    virtual void computeDiffusion( matrix_f& out, array_f&, float )
-    {
-      out[0][0] = 1;
-    }
-  } testSDE;
+  Wiener testSDE;
 
   // Create random number generators with same seed
   mt19937 rng(1234);
@@ -295,30 +283,14 @@ TEST( Heun, HeunWiener )
   }
 }
 
-
-// Test the integration scheme
+// Test the integration scheme with an OU process
 TEST( Heun, HeunOrnsteinUhlenbeck )
 {
   // Time step
   float dt = 1e-10;
 
   // Class for the Ornstein-Uhlenbeck process
-  class OH : public LangevinEquation
-  {
-  public:
-    OH() : LangevinEquation( 1 ) {};
-    virtual void computeDrift( array_f& out, array_f& in, float )
-    {
-      out[0] = theta*( mu-in[0] );
-    }
-    virtual void computeDiffusion( matrix_f& out, array_f&, float )
-    {
-      out[0][0] = sigma;
-    }
-
-    // Parameters for OU process
-    float theta=10, mu=-1.0, sigma=0.8;
-  } testSDE;
+  OH testSDE( 10.0, -1.0, 0.8 );
 
   // create the RNG
   mt19937 rng(555);
@@ -337,9 +309,9 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
   float numericalSol = init[0];
   float analyticSol = init[0];
 
-  float theta = testSDE.theta;
-  float mu = testSDE.mu;
-  float sigma = testSDE.sigma;
+  float theta = testSDE.getTheta();
+  float mu = testSDE.getMu();
+  float sigma = testSDE.getSigma();
 
   for( int i=0; i<300; i++ )
     {
