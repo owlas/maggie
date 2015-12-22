@@ -328,13 +328,177 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
       ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-4 )
         << "Steps completed: " << i << std::endl;
     }
+}
+
+// Test the convergence of the Heun scheme
+TEST( Heun, OUStrongConvergence )
+{
+  // Create Ornstein-Uhlenbeck process
+  OH testSDE( 10.0, -1.0, 0.8 );
+
+  // Compute the true solution at the final time
+  float t_final = 1e-6;
+  float t_step = 1e-10;
+  int N = t_final/t_step;
+  float answer = 0.0;
+  float theta = testSDE.getTheta();
+  float mu = testSDE.getMu();
+  float sigma = testSDE.getSigma();
+  mt19937 rng_a(1111);
+  normal_f dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_a, dist );
+  for( array_f::index i=0; i!=N; i++ )
+  {
+    answer = answer*exp( -theta*t_step ) + mu*( 1-exp( -theta*t_step ) )
+              + sigma*sqrt( ( 1-exp( -2*theta*t_step ) )/( 2*theta ) ) * vg();
   }
+
+  // Compute the solution numerically for different values of t_final. Do this
+  // for 1000 steps to generate the expected difference in the paths, in order
+  // to obtain the strong convergence
+  int Nerr = 5;
+  array_f error( boost::extents[Nerr] );
+  for( auto i=error.begin(); i!=error.end(); i++ )
+    *i=0;
+
+  // Set up the integrator
+  mt19937 rng(1111);
+  array_f x0( boost::extents[1] ); x0[0]=0.0;
+  auto inte = Heun( testSDE, x0, 0.0, t_step, rng );
+
+  // Compare the error
+
+}
 
 // Test run of the Heun and LLG algorithms
 TEST( StocLLG, HeunIntegrationSolution )
 {
   // write test for heun integration here.
 }
+
+// Test Milstein on the simplest ODE
+TEST( Milstein, MilConstantDrift )
+{
+  const float dt = 1e-3;
+  
+  // The ODE
+  float drift = 2.5;
+  ODEConstantDrift testODE( drift );
+
+  // RNGs still needed for integrator
+  mt19937 rng(1234);
+  mt19937 rng_2( 28907 );
+
+  // Set up numerical integration
+  array_f init( boost::extents[1] ); init[0]=0;
+  auto inte = Milstein( testODE, init, 0.0, dt, rng, rng_2 );
+
+  // Set the initial condition for the analytic solution
+  float analyticSol = init[0];
+
+  // Integrate for 5000 steps and compare against analytical
+  for( array_f::index i=0; i!=5000; i++ )
+  {
+    inte.step();
+    float numericalSol = inte.getState()[0];
+    analyticSol += dt*drift;
+
+    ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
+                  << "Steps completed =" << i;
+  }
+}
+
+// Test the stochastic integrator on a simple Wiener process
+TEST( Milstein, MilWiener )
+{
+  // Time step
+  const float dt = 1e-5;
+
+  // Langevin equation representing a Wiener process
+  Wiener testSDE;
+
+  // Create random number generators with same seed
+  mt19937 rng(1234);
+  mt19937 rng_an(1234);
+  mt19937 rng_2( 28907 );
+
+  // Create a variate generator for the analytic solution
+  normal_f dist(0, sqrt( dt ) );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_an, dist );
+
+  // Set up numerical integration
+  array_f init( boost::extents[1] ); init[0]=0;
+  auto inte = Milstein( testSDE, init, 0.0, dt, rng, rng_2 );
+
+  // Set the initial condition for the analytic solution
+  float analyticSol = init[0];
+
+  // Integrate for 5000 steps and compare against analytical
+  for( array_f::index i=0; i!=10000; i++ )
+  {
+    inte.step();
+    float numericalSol = inte.getState()[0];
+    analyticSol += vg();
+
+    ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
+                  << "Steps completed =" << i;
+  }
+}
+
+// Test the integration scheme with an OU process
+TEST( Milstein, MilOrnsteinUhlenbeck )
+{
+  // Time step
+  float dt = 1e-5;
+
+  // Class for the Ornstein-Uhlenbeck process
+  OH testSDE( 10.0, -1.0, 0.8 );
+
+  // create the RNG
+  mt19937 rng(555);
+  mt19937 rng_an(555);
+  mt19937 rng_2( 79874 );
+
+  // Create a variate generator for the analytic solution
+  normal_f dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_an, dist );
+
+  // Create the integrator
+  array_f init( boost::extents[1] ); init[0]=-3;
+  auto inte = Milstein( testSDE, init, 0.0, dt, rng, rng_2 );
+
+  // Track the solutions
+  float numericalSol = init[0];
+  float analyticSol = init[0];
+
+  float theta = testSDE.getTheta();
+  float mu = testSDE.getMu();
+  float sigma = testSDE.getSigma();
+
+  int N=3000;
+  for( int i=0; i<N; i++ )
+    {
+      // Numerical solution
+      inte.step();
+      numericalSol = inte.getState()[0];
+
+      // Analytic solution
+      // FROM http://henley.ac.uk/web/FILES/REP/Monte_Carlo_Simulation_of_Stochastic_Processes.pdf
+
+      analyticSol = analyticSol*exp( -theta*dt ) + mu*( 1-exp( -theta*dt ) )
+	+ sigma*sqrt( ( 1-exp( -2*theta*dt ) )/( 2*theta ) ) * vg();
+
+      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-4 )
+        << "Steps completed: " << i << std::endl;
+    }
+}
+
+
+// Integration test - does the Milstein work with StocLLG?
+// 
 
 // Test the quadrature rule
 // First test is simple, and checks against a straight line
