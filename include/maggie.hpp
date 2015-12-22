@@ -20,3 +20,5 @@
 #include<Field.hpp>
 #include<SingleMNPMasterEquation.hpp>
 #include<Heun.hpp>
+#include<Milstein.hpp>
+#include<SDE.hpp>
