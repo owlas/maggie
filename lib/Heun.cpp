@@ -46,9 +46,9 @@ void Heun::step()
 
   for( int i=0; i<dim; i++ )
     {
-			xPred[i] = state[i] + 0.5*h*( tmp1Up[i] + tmp1[i] );
+      xPred[i] = state[i] + 0.5*h*( tmp1Up[i] + tmp1[i] );
       for( int j=0; j<dim; j++ )
-				xPred[i] += 0.5*dw[j]*( tmp2Up[i][j] + tmp2[i][j] );
+	xPred[i] += 0.5*dw[j]*( tmp2Up[i][j] + tmp2[i][j] );
     }
 
   setState( xPred );
