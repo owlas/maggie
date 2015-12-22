@@ -22,6 +22,9 @@ class StocLLG : public LangevinEquation
   virtual void computeDrift( array_f&, array_f&, float );
   // returns the diffusion marix
   virtual void computeDiffusion( matrix_f&, array_f&, float );
+  // returns a vector of derivative sums for Taylor
+  virtual void computeDiffusionDerivatives( array3_f &out, array_f &in,
+					    float );
 
   void setReducedHeff( float, float, float );
   array_f getReducedHeff();

@@ -68,3 +68,45 @@ void StocLLG::computeDiffusion( matrix_f& out, array_f& state, float )
   out[2][1] = -sigma*(state[0]+alpha*state[1]*state[2]);
   out[2][2] = alpha*sigma*(state[0]*state[0]+state[1]*state[1]);
 }
+
+// compute the Taylor derivative sums L
+void StocLLG::computeDiffusionDerivatives( array3_f &out, array_f &state,
+					   float )
+{
+  out[0][0][0] = 0;
+  out[0][0][1] = 2*alpha*sigma*state[1];
+  out[0][0][2] = 2*alpha*sigma*state[2];
+
+  out[0][1][0] = -alpha*sigma*state[1];
+  out[0][1][1] = -alpha*sigma*state[2];
+  out[0][1][2] = sigma;
+
+  out[0][2][0] = -alpha*sigma*state[2];
+  out[0][2][1] = -sigma;
+  out[0][2][2] = -alpha*sigma*state[0];
+
+  out[1][0][0] = -alpha*sigma*state[1];
+  out[1][0][1] = -alpha*sigma*state[0];
+  out[1][0][2] = -sigma;
+
+  out[1][1][0] = 2*alpha*sigma*state[0];
+  out[1][1][1] = 0;
+  out[1][1][2] = 2*alpha*sigma*state[2];
+
+  out[1][2][0] = sigma;
+  out[1][2][1] = -alpha*sigma*state[2];
+  out[1][2][2] = -alpha*sigma*state[1];
+
+  out[2][0][0] = -alpha*sigma*state[2];
+  out[2][0][1] = sigma;
+  out[2][0][2] = -alpha*sigma*state[0];
+
+  out[2][1][0] = -sigma;
+  out[2][1][1] = -alpha*sigma*state[2];
+  out[2][1][2] = -alpha*sigma*state[1];
+
+  out[2][2][0] = 2*alpha*sigma*state[0];
+  out[2][2][1] = 2*alpha*sigma*state[2];
+  out[2][2][2] = 0;
+}
+
