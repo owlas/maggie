@@ -27,7 +27,12 @@ void LangevinEquation::computeDiffusion( matrix_f& out,
                                          array_f& /*no input*/,
                                          float /*no time*/ )
 {
-  for( int i=0; i<dim; i++ )
-    for( int j=0; j<dim; j++ )
-      out[i][j] = 0;
+  std::fill( out.data(), out.data()+out.num_elements(), 0 );
+}
+
+// Langevin equation can be defined without specifying derivatives
+void LangevinEquation::computeDiffusionDerivatives( array3_f &out, array_f&,
+						    float )
+{
+  std::fill( out.data(), out.data()+out.num_elements(), 0 );
 }
