@@ -5,30 +5,30 @@
 //
 #include<Utility.hpp>
 
-int boostToFile( boost::multi_array<float,1> &array, std::string name )
+int boostToFile( array_f &array, std::string name )
 {
   // Open the file
   std::ofstream fid;
   fid.open( name );
 
-  for( int i=0; i<array.shape()[0]; i++ )
-    fid << array[i] << " ";
+  for( const auto &i : array )
+    fid << i << " ";
 
   fid.close();
   return 1;
 
 }
 
-int boostToFile( boost::multi_array<float,2> &array, std::string name )
+int boostToFile( matrix_f &array, std::string name )
 {
   // Open the file
   std::ofstream fid;
   fid.open( name );
 
-  for( int unsigned i=0; i<array.shape()[0]; i++ )
+  for( const auto &i : array )
     {
-      for( int unsigned j=0; j<array.shape()[1]; j++ )
-        fid << array[i][j] << " ";
+      for( const auto &j : i )
+        fid << j << " ";
       fid << "\n";
     }
 
