@@ -14,7 +14,7 @@ GMOCK_DIR=googletest/googlemock
 LIB_DIR = .
 LIBS=-lgmock -lpthread -lmaggie
 
-CPP_FLAGS=--std=c++11 -W -Wall -pedantic
+CPP_FLAGS=--std=c++11 -W -Wall -pedantic -Wno-unused-local-typedefs -g
 
 SOURCES=$(wildcard $(LIB_PATH)/*.cpp)
 OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
@@ -51,7 +51,9 @@ libmaggie.so: $(OBJ_FILES)
 # Compile objects from source
 #
 $(OBJ_PATH)/%.o: $(LIB_PATH)/%.cpp
-	$(CC) $(CPP_FLAGS) -I$(INC_PATH) -c -fPIC -o $@ $<
+	$(CC) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -c -fPIC \
+		-o $@ $<
 
 # Clean up executable files
 #
