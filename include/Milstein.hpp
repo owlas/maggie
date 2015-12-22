@@ -35,7 +35,6 @@ public:
   // may only be applicable for stratonovich
   void setP( int pset );
   int getP() const;
-  float multipleIntegral();
 
 private:
   const float h;
