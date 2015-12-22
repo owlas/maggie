@@ -3,13 +3,15 @@ using std::cout;
 using std::endl;
 
 #include <boost/multi_array.hpp>
-
 typedef boost::multi_array<float,1> array_f;
+typedef boost::multi_array<float,2> matrix_f;
 
 #include<boost/random.hpp>
 using boost::variate_generator;
 using boost::mt19937;
 using boost::normal_distribution;
+
+#include <algorithm>
 
 // class definition
 class Test
@@ -144,4 +146,43 @@ int main( void )
 
   for( int i=0; i<10; i++ )
     PrintNumber pr( rng );
+
+  // Test the boost array iterators
+  cout << "Testing boost array iterator" << endl;
+  array_f xit( boost::extents[5] );
+  for( auto &i : xit )
+    i=5;
+  cout << "This array should be [5,5,5,5,5]\nans=[";
+  for ( auto i : xit )
+    cout << i << ",";
+  cout << "]" << endl;
+
+  // Test filling a multi_array
+  matrix_f testmat( boost::extents[3][4] );
+  std::fill( testmat.data(), testmat.data()+testmat.num_elements(), 3.3 );
+  cout << "This matrix should be full of 3.3" << endl;
+  cout << "[";
+  for( const auto& i : testmat )
+    {
+      for( const auto& j : i )
+	cout << j << ",";
+      cout << endl;
+    }
+  cout << "]" << endl;
+
+  // Testing filling a matrix with random variates
+  normal_distribution<float> dist( 0,1 );
+  variate_generator<mt19937&, normal_distribution<float> > gen( rng, dist );
+  cout << "This matrix should be full of random values" << endl;
+  
+  for( auto i=0; i!=testmat.num_elements(); i++ )
+    *(testmat.data() + i ) = gen();
+  cout << "[";
+  for( const auto& i : testmat )
+    {
+      for( const auto& j : i )
+	cout << j << ",";
+      cout << endl;
+    }
+  cout << "]" << endl;  
 }
