@@ -50,8 +50,8 @@ void Milstein::step()
 
   // rh0 for the calculation below
   float rho=0.0;
-  for( unsigned int r=0; r!=p; r++ )
-    rho += 1/pow( r, 2 );
+  for( unsigned int r=0; r!=p; ++r )
+    rho += 1/pow( r+1, 2 );
   rho *= 1/( 2*pow( M_PI, 2 ) );
   rho += 1.0/12.;
 
@@ -76,7 +76,7 @@ void Milstein::step()
 	      tmp22[j1][j2] += ( zeta[j1][r]*( sqrt( 2 )*dw2[j2]
 					       + eta[j2][r] )
 				 - zeta[j2][r]*( sqrt( 2 )*dw2[j1]
-						 + eta[j1][r] ) ) / r;
+						 + eta[j1][r] ) ) / (r+1);
 	    tmp22[j1][j2] *= h/( 2*M_PI );
 	    tmp22[j1][j2] += h*( 0.5*dw2[j1]*dw2[j2] + sqrt( rho ) 
 				 *( mu[j1]*dw2[j2] - mu[j2]*dw2[j1] ) );
