@@ -499,6 +499,77 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
 
 // Integration test - does the Milstein work with StocLLG?
 // 
+TEST( IntegrationTests, MilsteinLLG )
+{
+  // set up parameters, langevin equation and initial condition
+  const float K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
+  , KB{ 1.980648813e-23 }, T{ 300 }, alpha{ 0.1 }, sigma{ K*V/( KB*T ) }
+  , MU0{ 1.25663706e-6 }, Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }
+  , gamma{ 1.7609e11 };
+
+  StocLLG llg( sigma, alpha, 0.0, 0.0, hz );
+
+  array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
+
+  // set up integrator
+  const float tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
+  , dt{ 1e-14 }, dtau{ dt*tfactor };
+
+  mt19937 rng( 1234 );
+  mt19937 rng_a( 1234 );
+  mt19937 rng_2( 777777 );
+  normal_f dist( 0, sqrt( dtau ) );
+  normal_f dist_a( 0, sqrt( dt ) );
+  boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
+  boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
+
+  auto inte = Milstein( llg, m0, 0.0, dtau, rng, rng_2);
+  
+  // set to manual mode
+  inte.setManualWienerMode( true );
+  array_f dw( boost::extents[3] );
+  for( auto& i : dw )
+    i=0.0;
+
+  // solutions
+  array_f nmSol( boost::extents[3] );
+  array_f anSol( boost::extents[3] );
+
+  int N=1000;
+  for( array_f::index i=0; i!=N; ++i )
+    {
+      // step but restrict wiener process to 1D in z-component
+      dw[2] = vg();
+      inte.setWienerIncrements( dw );
+      inte.step();
+      nmSol = inte.getState();
+      float t = inte.getTime()/tfactor;
+
+      // Analytic solution from Hannay
+      float kb{ 1.38064881e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
+      , H{ 400*M_PI }, V{ 4.0/3.0*M_PI*pow( 2.5e-7,3 ) }, T{ 300 }
+      , Ms{ 1400 }, sigma{ 2*alpha*kb*T/( gamma*Ms*V ) };
+      anSol[0] =
+	1/std::cosh( alpha*gamma*( H*t+sigma*vg_a() ) / ( 1+pow( alpha, 2 ) ) )
+	* std::cos( gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+
+      anSol[1] =
+	1/std::cosh( alpha*gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) )
+	* std::sin( gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+
+      anSol[2] =
+	std::tanh( alpha*gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+
+      ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-4 )
+	<< "Steps completed: " << i << std::endl;
+      ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-4 )
+	<< "Steps completed: " << i << std::endl;
+      ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-4 )
+	<< "Steps completed: " << i << std::endl;
+    }
+
+}
+
 
 // Test the quadrature rule
 // First test is simple, and checks against a straight line
