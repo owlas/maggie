@@ -39,9 +39,10 @@ void Milstein::step()
   getLE().computeDiffusion( tmp2, state, getTime() );
   getLE().computeDiffusionDerivatives( tmp3, state, getTime() );
 
-  // Compute a Wiener process increment
-  for( auto &i : dw )
-    i = gen_1();
+  // Compute a Wiener process increment (unless manual mode)
+  if( !manualWiener )
+    for( auto &i : dw )
+      i = gen_1();
 
   // Scaled Wiener process for computation of multiple integrals below
   for( array_f::index i=0; i!=dim; i++ )
@@ -104,3 +105,6 @@ void Milstein::step()
 void Milstein::setP( const int pset ) { p=pset; }
 int Milstein::getP() const { return p; }
 
+// Set the manual wiener process mode
+void Milstein::setManualWienerMode( const bool s ) { manualWiener=s; }
+void Milstein::setWienerIncrements( const array_f a ) { dw=a; }

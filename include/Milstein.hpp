@@ -36,6 +36,11 @@ public:
   void setP( int pset );
   int getP() const;
 
+  // Manual wiener process mode
+  // allow user to control internal wiener increments themselves
+  void setManualWienerMode( const bool );
+  void setWienerIncrements( const array_f );
+
 private:
   const float h;
   const int dim;
@@ -54,5 +59,6 @@ private:
   array_f mu;
   matrix_f eta;
   matrix_f zeta;
+  bool manualWiener{ false };
 };
 #endif
