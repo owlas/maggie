@@ -21,7 +21,7 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
-default: main
+default: runtests convergence_tests
 
 # gtest builds the gtest and gmock modules
 #
@@ -34,12 +34,19 @@ gmock:
 		-pthread -c $(GMOCK_DIR)/src/gmock-all.cc
 	ar -rv libgmock.a gtest-all.o gmock-all.o
 
-# Create the main executable - main
+# Create the tests executable - tests
 #
-main: src/main.cpp libmaggie.so
+runtests: src/tests.cpp libmaggie.so
 	$(CC) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
-		-o $@ $(SRC_PATH)/main.cpp -L$(LIB_DIR) $(LIBS)
+		-o $@ $(SRC_PATH)/tests.cpp -L$(LIB_DIR) $(LIBS)
+
+# Create the convergence tests
+#
+convergence_tests: src/convergence_tests.cpp libmaggie.so
+	$(CC) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
+		-o $@ $(SRC_PATH)/convergence_tests.cpp -L$(LIB_DIR) $(LIBS)
 
 # Shared library maggie.so used for objects
 #
