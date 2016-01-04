@@ -49,6 +49,33 @@ private:
   float a;
 };
 
+
+// Scalar SDE with constant drift and additive noise
+// dx = ax * dt + b * dW
+class SDE_AXpB : public LangevinEquation
+{
+public:
+  SDE_AXpB( float a, float b );
+  virtual void computeDrift( array_f& out, array_f&, float );
+  virtual void computeDiffusion( matrix_f& out, array_f&, float );
+
+private:
+  float a, b;
+};
+
+// Scalar SDE with constant drift and multiplicative noise
+// dx = ax * dt + bx * dW
+class SDE_AXpBX : public LangevinEquation
+{
+public:
+  SDE_AXpBX( float a, float b );
+  virtual void computeDrift( array_f& out, array_f&, float );
+  virtual void computeDiffusion( matrix_f& out, array_f&, float );
+
+private:
+  float a, b;
+};
+
 // Stochastic differential equation with constant multiplicative noise
 // dX = aX dt + bX dW
 class MultiplicativeConstantNoise : LangevinEquation

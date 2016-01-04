@@ -52,6 +52,38 @@ ODEConstantDrift::ODEConstantDrift( float drift )
   //empty
 }
 
+SDE_AXpB::SDE_AXpB( float drift, float diff )
+  : LangevinEquation( 1 )
+  , a( drift )
+  , b( diff )
+{}
+
+void SDE_AXpB::computeDrift( array_f& out, array_f& in, float )
+{
+  out[0] = a*in[0];
+}
+
+void SDE_AXpB::computeDiffusion( matrix_f& out, array_f&, float )
+{
+  out[0][0] = b;
+}
+
+SDE_AXpBX::SDE_AXpBX( float drift, float diff )
+  : LangevinEquation( 1 )
+  , a( drift )
+  , b( diff )
+{}
+
+void SDE_AXpBX::computeDrift( array_f& out, array_f& in, float )
+{
+  out[0] = a*in[0];
+}
+
+void SDE_AXpBX::computeDiffusion( matrix_f& out, array_f& in, float )
+{
+  out[0][0] = b*in[0];
+}
+
 void ODEConstantDrift::computeDrift( array_f& out, array_f&, float )
 {
   out[0] = a;
