@@ -17,16 +17,18 @@ class OH : public LangevinEquation
 {
 public:
   // constructor
-  OH( float theta, float mu, float sigma );
-  virtual void computeDrift( array_f& out, array_f& in, float );
-  virtual void computeDiffusion( matrix_f& out, array_f& in, float );
+  OH( const float theta, const float mu, const float sigma );
+  virtual void computeDrift( array_f& out, const array_f& in,
+			     const float ) const;
+  virtual void computeDiffusion( matrix_f& out, const array_f& in,
+				 const float ) const;
 
   float getTheta() const;
   float getMu() const;
   float getSigma() const;
   
 private:
-  float theta, mu, sigma;
+  const float theta, mu, sigma;
 };
 
 // Wiener process
@@ -34,19 +36,22 @@ class Wiener : public LangevinEquation
 {
 public:
   Wiener();
-  virtual void computeDrift( array_f& out, array_f&, float );
-  virtual void computeDiffusion( matrix_f& out, array_f&, float );
+  virtual void computeDrift( array_f& out, const array_f&,
+			     const float ) const;
+  virtual void computeDiffusion( matrix_f& out, const array_f&,
+				 const float ) const;
 };
 
 // Simple deterministic ODE with constant drift
 class ODEConstantDrift : public LangevinEquation
 {
 public:
-  ODEConstantDrift( float );
-  virtual void computeDrift( array_f& out, array_f&, float );
+  ODEConstantDrift( const float );
+  virtual void computeDrift( array_f& out, const array_f&,
+			     const float ) const;
 
 private:
-  float a;
+  const float a;
 };
 
 
@@ -55,12 +60,14 @@ private:
 class SDE_AXpB : public LangevinEquation
 {
 public:
-  SDE_AXpB( float a, float b );
-  virtual void computeDrift( array_f& out, array_f&, float );
-  virtual void computeDiffusion( matrix_f& out, array_f&, float );
+  SDE_AXpB( const float a, const float b );
+  virtual void computeDrift( array_f& out, const array_f&,
+			     const float ) const;
+  virtual void computeDiffusion( matrix_f& out, const array_f&,
+				 const float ) const;
 
 private:
-  float a, b;
+  const float a, b;
 };
 
 // Scalar SDE with constant drift and multiplicative noise
@@ -68,12 +75,14 @@ private:
 class SDE_AXpBX : public LangevinEquation
 {
 public:
-  SDE_AXpBX( float a, float b );
-  virtual void computeDrift( array_f& out, array_f&, float );
-  virtual void computeDiffusion( matrix_f& out, array_f&, float );
+  SDE_AXpBX( const float a, const float b );
+  virtual void computeDrift( array_f& out, const array_f&,
+			     const float ) const;
+  virtual void computeDiffusion( matrix_f& out, const array_f&,
+				 const float ) const;
 
 private:
-  float a, b;
+  const float a, b;
 };
 
 // Stochastic differential equation with constant multiplicative noise
@@ -81,13 +90,15 @@ private:
 class MultiplicativeConstantNoise : LangevinEquation
 {
 public:
-  MultiplicativeConstantNoise( float a, float b );
-  virtual void computeDrift( array_f& out, array_f& in, float );
-  virtual void computeDiffusion( matrix_f& out, array_f& in, float );
-  virtual void computeDiffusionDerivatives( array3_f& out, array_f& in,
-					    float );
+  MultiplicativeConstantNoise( const float a, const float b );
+  virtual void computeDrift( array_f& out, const array_f& in,
+			     const float ) const;
+  virtual void computeDiffusion( matrix_f& out, const array_f& in,
+				 const float ) const;
+  virtual void computeDiffusionDerivatives( array3_f& out, const array_f& in,
+					    const float ) const;
 
 private:
-  float a, b;
+  const float a, b;
 };
 #endif

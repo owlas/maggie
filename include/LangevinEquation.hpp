@@ -16,19 +16,21 @@ typedef boost::multi_array<float,3> array3_f;
 class LangevinEquation
 {
  public:
-  LangevinEquation( int dim );
+  LangevinEquation( const int dim );
   
-  int getDim(); // get dimensions of equation
+  int getDim() const; // get dimensions of equation
   
   // Return Langevin components from a given state vector
-  virtual void computeDrift( array_f& out, array_f& in, float t ) = 0;
-  virtual void computeDiffusion( matrix_f& out, array_f& in, float t ); 
+  virtual void computeDrift( array_f& out, const array_f& in,
+			     const float t ) const = 0;
+  virtual void computeDiffusion( matrix_f& out, const array_f& in,
+				 const float t ) const; 
 
   // Langevin equations can specify derivative terms for the diffusion matrix
   // BB[i][j][k] = PD of B[i][j] w.r.t. state[k]
   // 
-  virtual void computeDiffusionDerivatives( array3_f &out, array_f &in,
-					    float t );
+  virtual void computeDiffusionDerivatives( array3_f &out, const array_f &in,
+					    const float t ) const;
 
  private:
   const int dim;

@@ -11,7 +11,8 @@ using std::endl;
 #include <StocLLG.hpp>
 
 // Constructor
-StocLLG::StocLLG( float s, float a, float hx, float hy, float hz )
+StocLLG::StocLLG( const float s, const float a,
+		  const float hx, const float hy, const float hz )
   : LangevinEquation( 3 )
   , h( boost::extents[3] )
 {
@@ -21,25 +22,26 @@ StocLLG::StocLLG( float s, float a, float hx, float hy, float hz )
 }
 
 // set the reduced effective field
-void StocLLG::setReducedHeff( float hx, float hy, float hz )
+void StocLLG::setReducedHeff( const float hx, const float hy, const float hz )
 {
   h[0] = hx;
   h[1] = hy;
   h[2] = hz;
 }
 // get the reduced effective field
-array_f StocLLG::getReducedHeff() { return h; }
+array_f StocLLG::getReducedHeff() const { return h; }
 
 // set and set sigma
-void StocLLG::setSigma( float s ) { sigma = s; }
-float StocLLG::getSigma() { return sigma; }
+void StocLLG::setSigma( const float s ) { sigma = s; }
+float StocLLG::getSigma() const { return sigma; }
 
 // set and set alpha
-void StocLLG::setAlpha( float s ) { alpha = s; }
-float StocLLG::getAlpha() { return alpha; }
+void StocLLG::setAlpha( const float s ) { alpha = s; }
+float StocLLG::getAlpha() const { return alpha; }
 
 // compute the drift term of the stochastic LLG equation
-void StocLLG::computeDrift( array_f& out, array_f& state, float )
+void StocLLG::computeDrift( array_f& out, const array_f& state,
+			    const float ) const
 {
   out[0] = state[2]*h[1] - state[1]*h[2]
     + alpha*(h[0]*(state[1]*state[1] + state[2]*state[2])
@@ -56,7 +58,8 @@ void StocLLG::computeDrift( array_f& out, array_f& state, float )
 }
 
 // compute the diffusion matrix for the stochastic LLG equation
-void StocLLG::computeDiffusion( matrix_f& out, array_f& state, float )
+void StocLLG::computeDiffusion( matrix_f& out, const array_f& state,
+				const float ) const
 {
   out[0][0] = alpha*sigma*(state[1]*state[1]+state[2]*state[2]);
   out[0][1] = sigma*(state[2]-alpha*state[0]*state[1]);
@@ -70,8 +73,9 @@ void StocLLG::computeDiffusion( matrix_f& out, array_f& state, float )
 }
 
 // compute the Taylor derivative sums L
-void StocLLG::computeDiffusionDerivatives( array3_f &out, array_f &state,
-					   float )
+void StocLLG::computeDiffusionDerivatives( array3_f &out,
+					   const array_f &state,
+					   const float ) const
 {
   out[0][0][0] = 0;
   out[0][0][1] = 2*alpha*sigma*state[1];

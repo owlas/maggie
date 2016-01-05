@@ -10,29 +10,30 @@
 // specify 'd' when constructing an instance.
 
 // Constructor
-LangevinEquation::LangevinEquation(int d)
+LangevinEquation::LangevinEquation(const int d)
   : dim(d)
 {
   // empty
 }
 
 // Get the dimensions of the equation
-int LangevinEquation::getDim()
+int LangevinEquation::getDim() const
 {
   return dim;
 }
 
 // Langevin Equation might only have drift 
 void LangevinEquation::computeDiffusion( matrix_f& out,
-                                         array_f& /*no input*/,
-                                         float /*no time*/ )
+                                         const array_f& /*no input*/,
+                                         const float /*no time*/ ) const
 {
   std::fill( out.data(), out.data()+out.num_elements(), 0 );
 }
 
 // Langevin equation can be defined without specifying derivatives
-void LangevinEquation::computeDiffusionDerivatives( array3_f &out, array_f&,
-						    float )
+void LangevinEquation::computeDiffusionDerivatives( array3_f &out,
+						    const array_f&,
+						    const float ) const
 {
   std::fill( out.data(), out.data()+out.num_elements(), 0 );
 }

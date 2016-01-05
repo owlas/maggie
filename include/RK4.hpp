@@ -13,15 +13,15 @@ class RK4 : public Integrator
 
 public:
   //Constructor
-  RK4( LangevinEquation &le, array_f& init_state, float init_time,
-       float dt );
+  RK4( const LangevinEquation &le, const array_f& init_state,
+       const float init_time, const float dt );
 
   // Step the integrator once
   virtual void step();
 
 private:
-  float h;
-  float dim;
+  const float h;
+  const float dim;
   array_f k1;
   array_f k2;
   array_f k3;

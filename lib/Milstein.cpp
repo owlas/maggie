@@ -9,8 +9,9 @@
 #include <Milstein.hpp>
 
 // Constructor
-Milstein::Milstein( LangevinEquation &le, array_f& init_state,
-		    float time, float dt, mt19937& rng_1, mt19937& rng_2 )
+Milstein::Milstein( const LangevinEquation &le, const array_f& init_state,
+		    const float time, const float dt,
+		    mt19937& rng_1, mt19937& rng_2 )
   : Integrator( le, init_state, time )
   , h( dt )
   , dim( le.getDim() )

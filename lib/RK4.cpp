@@ -8,8 +8,8 @@
 #include<iostream>
 
 // Constructor
-RK4::RK4( LangevinEquation &le, array_f& init_state, float init_time,
-	  float dt )
+RK4::RK4( const LangevinEquation &le, const array_f& init_state,
+	  const float init_time, const float dt )
   : Integrator( le, init_state, init_time )
   , h( dt )
   , dim( le.getDim() )

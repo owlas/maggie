@@ -17,11 +17,12 @@ typedef boost::multi_array<float,1> array_f;
 using std::invalid_argument;
 
 // Constructor
-Integrator::Integrator( LangevinEquation& le, array_f& init_state, float time )
+Integrator::Integrator( const LangevinEquation& le, const array_f& init_state,
+			const float time )
   : state( boost::extents[le.getDim()] )
+  , lEq( &le )
   , initial_state( boost::extents[le.getDim()] )
 {
-  lEq = &le;
   initial_t = time;
   setTime( time );
   initial_state = init_state;
@@ -29,9 +30,9 @@ Integrator::Integrator( LangevinEquation& le, array_f& init_state, float time )
 }
 
 // Get state
-  array_f Integrator::getState() const { return state; }
+array_f Integrator::getState() const { return state; }
 // Set State
-void Integrator::setState( array_f s )
+void Integrator::setState( const array_f s )
 {
 if( int( s.shape()[0] ) != lEq->getDim() )
     {
@@ -47,10 +48,10 @@ if( int( s.shape()[0] ) != lEq->getDim() )
 // get time
 float Integrator::getTime() const { return t; }
 // set time
-void Integrator::setTime( float time ) { t = time; }
+void Integrator::setTime( const float time ) { t = time; }
 
 // get the pointer to the integrator
-LangevinEquation &Integrator::getLE() const { return *lEq; }
+const LangevinEquation &Integrator::getLE() const { return *lEq; }
 
 // reset the integrator to the initial condition
 void Integrator::reset()
@@ -60,7 +61,7 @@ void Integrator::reset()
 }
 
 // reset the integrator with a new inital condition
-void Integrator::reset( array_f new_init )
+void Integrator::reset( const array_f new_init )
 {
   initial_state = new_init;
   reset();

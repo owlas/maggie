@@ -16,24 +16,26 @@ typedef boost::multi_array<float,2> matrix_f;
 class StocLLG : public LangevinEquation
 {
  public:
-        StocLLG( float s, float a, float hx, float hy, float hz );
+        StocLLG( const float s, const float a,
+		 const float hx, const float hy, const float hz );
 
   // returns the drift vector
-  virtual void computeDrift( array_f&, array_f&, float );
+  virtual void computeDrift( array_f&, const array_f&, const float ) const;
   // returns the diffusion marix
-  virtual void computeDiffusion( matrix_f&, array_f&, float );
+  virtual void computeDiffusion( matrix_f&, const array_f&,
+				 const float ) const;
   // returns a vector of derivative sums for Taylor
-  virtual void computeDiffusionDerivatives( array3_f &out, array_f &in,
-					    float );
+  virtual void computeDiffusionDerivatives( array3_f &out, const array_f &in,
+					    const float ) const;
 
-  void setReducedHeff( float, float, float );
-  array_f getReducedHeff();
+  void setReducedHeff( const float, const float, const float );
+  array_f getReducedHeff() const;
 
-  void setSigma( float );
-  float getSigma();
+  void setSigma( const float );
+  float getSigma() const;
   
-  void setAlpha( float );
-  float getAlpha();
+  void setAlpha( const float );
+  float getAlpha() const;
 
  private:
   array_f h;

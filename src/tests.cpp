@@ -97,7 +97,8 @@ TEST(RK4, BasicCircle)
     ode() : LangevinEquation( 2 ) {}; // constructor
 
     // Differential equation
-    virtual void computeDrift( array_f& out, array_f& in, float )
+    virtual void computeDrift( array_f& out, const array_f& in, const float )
+      const
     {
       out[0] = in[1];
       out[1] = -in[0];

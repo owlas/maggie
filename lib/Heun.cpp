@@ -8,8 +8,8 @@
 
 
 // Constructor
-Heun::Heun( LangevinEquation &le, array_f& init_state,
-	    float time, float dt, mt19937& rng )
+Heun::Heun( const LangevinEquation &le, const array_f& init_state,
+	    const float time, const float dt, mt19937& rng )
   : Integrator( le, init_state, time)
   , h( dt )
   , dim( le.getDim() )

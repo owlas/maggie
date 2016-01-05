@@ -16,22 +16,23 @@ class TwoStateMasterEquation : public LangevinEquation
 public:
 
   // constructor for fixed rates
-  TwoStateMasterEquation( float rate1, float rate2 );
+  TwoStateMasterEquation( const float rate1, const float rate2 );
 
   // constructor for variable rates
-  TwoStateMasterEquation( std::function<float( float )> rateFunc1,
-                          std::function<float( float )> rateFunc2 );
+  TwoStateMasterEquation( const std::function<float( float )> rateFunc1,
+                          const std::function<float( float )> rateFunc2 );
 
   // Compute the drift vecctor for the current state
-  virtual void computeDrift( array_f& out, array_f& in, float t );
+  virtual void computeDrift( array_f& out, const array_f& in, const float t )
+    const;
 
   // get rate one and two at a set time
-  float getRate1( float t=0);
-  float getRate2( float t=0);
+  float getRate1( const float t=0) const;
+  float getRate2( const float t=0) const;
 
 private:
-  std::function<float( float )> w1;
-  std::function<float( float )> w2;
+  const std::function<float( float )> w1;
+  const std::function<float( float )> w2;
 };
 
 #endif

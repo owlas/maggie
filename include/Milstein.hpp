@@ -25,15 +25,16 @@ class Milstein : public Integrator
 {
 public:
   // Constructor
-  Milstein( LangevinEquation &le, array_f& init_state, float time,
-	    float dt, mt19937 &rng_1, mt19937 &rng_2 ); 
+  Milstein( const LangevinEquation &le, const array_f& init_state,
+	    const float time, const float dt,
+	    mt19937 &rng_1, mt19937 &rng_2 ); 
 
   // One step of the integrator
   virtual void step();
 
   // Fourier series approximation of double integral
   // may only be applicable for stratonovich
-  void setP( int pset );
+  void setP( const int pset );
   int getP() const;
 
   // Manual wiener process mode

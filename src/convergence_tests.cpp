@@ -16,14 +16,14 @@ using normal_f=boost::random::normal_distribution<float>;
 int main() {
 
   // Run two numerical solvers for
-  int N_dt{ 5 }; // different time steps and
-  int N_samples{ 2000 }; // different runs
+  const int N_dt{ 5 }; // different time steps and
+  const int N_samples{ 2000 }; // different runs
 
-  float sim_length{ 1.0 }; // time of simualtion
+  const float sim_length{ 1.0 }; // time of simualtion
 
   // Stochastic differential equation is scalar constant drift
-  float a{ 1.5 };
-  float b{ 0.1 };
+  const float a{ 1.5 };
+  const float b{ 0.1 };
   SDE_AXpBX sde( a, b );
 
   // Store the strong convergence errors
@@ -35,7 +35,7 @@ int main() {
   for( int i=0; i!=N_dt; i++ )
     {
       // compute the next time step
-      float dt{ float( pow(2,-3)*pow( 2, -1*i ) ) };
+      const float dt{ float( pow(2,-3)*pow( 2, -1*i ) ) };
 
       // Create random number generators
       mt19937 rng_heu( 99 );
@@ -64,7 +64,7 @@ int main() {
 	  inte_mil.reset();
 	  
 	  // Run the integrators for simulation length
-	  int N_steps{ int( sim_length / dt ) };
+	  const int N_steps{ int( sim_length / dt ) };
 	  for( int n=0; n!=N_steps; n++ )
 	    {
 	      inte_heu.step();
