@@ -2,9 +2,10 @@
 *.o
 *.so
 *.a
+*.pyc
 
-# Main executable #
-main
+# executables #
+runtests
 
 # Backup files
 *~
