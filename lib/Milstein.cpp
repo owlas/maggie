@@ -9,26 +9,27 @@
 #include <Milstein.hpp>
 
 // Constructor
-Milstein::Milstein( const LangevinEquation &le, const array_f& init_state,
+Milstein::Milstein( const SDE &le, const array_f& init_state,
 		    const float time, const float dt,
 		    mt19937& rng_1, mt19937& rng_2 )
-  : Integrator( le, init_state, time )
+  : Integrator<SDE>( le, init_state, time )
   , h( dt )
   , dim( le.getDim() )
+  , wDim( le.getWDim() )
   , dist_1( 0,sqrt( h ) )
   , dist_2( 0,1 )
   , gen_1( rng_1, dist_1 )
   , gen_2( rng_2, dist_2 )
   , next_state( boost::extents[dim] )
-  , dw( boost::extents[dim] )
-  , dw2( boost::extents[dim] )
+  , dw( boost::extents[wDim] )
+  , dw2( boost::extents[wDim] )
   , tmp1( boost::extents[dim] )
-  , tmp2( boost::extents[dim][dim] )
-  , tmp22( boost::extents[dim][dim] )
-  , tmp3( boost::extents[dim][dim][dim] )
-  , mu( boost::extents[dim] )
-  , eta( boost::extents[dim][p] )
-  , zeta( boost::extents[dim][p] )
+  , tmp2( boost::extents[dim][wDim] )
+  , tmp22( boost::extents[wDim][wDim] )
+  , tmp3( boost::extents[dim][wDim][dim] )
+  , mu( boost::extents[wDim] )
+  , eta( boost::extents[wDim][p] )
+  , zeta( boost::extents[wDim][p] )
 {
   // empty
 }
@@ -46,7 +47,7 @@ void Milstein::step()
       i = gen_1();
 
   // Scaled Wiener process for computation of multiple integrals below
-  for( array_f::index i=0; i!=dim; i++ )
+  for( array_f::index i=0; i<wDim; ++i )
     dw2[i] = dw[i]/sqrt( h );
 
   // rh0 for the calculation below
@@ -65,15 +66,15 @@ void Milstein::step()
     *( zeta.data()+i ) = gen_2();
 
   // Compute the multiple Stratonovich integrals
-  for( matrix_f::index j1=0; j1!= dim; j1++ )
-    for( matrix_f::index j2=0; j2!=dim; j2++ )
+  for( array_f::index j1=0; j1!= wDim; ++j1 )
+    for( array_f::index j2=0; j2!=wDim; ++j2 )
       {
 	if( j1==j2 )
 	  tmp22[j1][j2] = 0.5*pow( dw[j1],2 );
 	else
 	  {
 	    tmp22[j1][j2] = 0;
-	    for( array_f::index r=0; r!=p; r++ )
+	    for( array_f::index r=0; r!=p; ++r )
 	      tmp22[j1][j2] += ( zeta[j1][r]*( sqrt( 2 )*dw2[j2]
 					       + eta[j2][r] )
 				 - zeta[j2][r]*( sqrt( 2 )*dw2[j1]
@@ -85,17 +86,17 @@ void Milstein::step()
       }
 
   // Compute the next state for each vector
-  for( array_f::index k=0; k!=dim; k++ )
+  for( array_f::index k=0; k!=dim; ++k )
     {
       next_state[k] = state[k] + tmp1[k]*h;
 
-      for( array_f::index j=0; j!=dim; j++ )
+      for( array_f::index j=0; j!=wDim; j++ )
 	  next_state[k] += tmp2[k][j]*dw[j];
 
-      for( array_f::index j1=0; j1!=dim; j1++ )
-	for( array_f::index j2=0; j2!=dim; j2++ )
+      for( array_f::index j1=0; j1!=wDim; j1++ )
+	for( array_f::index j2=0; j2!=wDim; j2++ )
 	  for( array_f::index j3=0; j3!=dim; j3++ )
-	    next_state[k] += tmp2[j3][j1]*tmp3[k][j2][j1]*tmp22[j1][j2];
+	    next_state[k] += tmp2[j3][j1]*tmp3[k][j2][j3]*tmp22[j1][j2];
     }
 
   setState( next_state );

@@ -18,7 +18,7 @@ using std::invalid_argument;
 // constructor
 TwoStateMasterEquation::TwoStateMasterEquation( const float rate1,
 						const float rate2 )
-  : LangevinEquation( 2 )
+  : ODE( 2 )
   , w1( [ rate1 ]( float ){ return rate1; } )
   , w2( [ rate2 ]( float ){ return rate2; } )
 {
@@ -28,7 +28,7 @@ TwoStateMasterEquation::TwoStateMasterEquation( const float rate1,
 TwoStateMasterEquation::TwoStateMasterEquation
 ( const std::function<float( float )> rateFunc1,
   const std::function<float( float )> rateFunc2 )
-  : LangevinEquation( 2 )
+  : ODE( 2 )
   , w1( rateFunc1 )
   , w2( rateFunc2 )
 {

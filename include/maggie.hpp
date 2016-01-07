@@ -7,7 +7,9 @@
 // O.Laslett@soton.ac.uk
 // 
 
-#include<LangevinEquation.hpp>
+#include<ODE.hpp>
+#include<SDE.hpp>
+#include<SDEs.hpp>
 #include<StocLLG.hpp>
 #include<TwoStateMasterEquation.hpp>
 #include<Integrator.hpp>
@@ -21,4 +23,3 @@
 #include<SingleMNPMasterEquation.hpp>
 #include<Heun.hpp>
 #include<Milstein.hpp>
-#include<SDE.hpp>

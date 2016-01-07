@@ -7,13 +7,13 @@
 #ifndef STOCLLG_H
 #define STOCLLG_H
 
-#include <LangevinEquation.hpp>
+#include <SDE.hpp>
 
 #include <boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
 typedef boost::multi_array<float,2> matrix_f;
 
-class StocLLG : public LangevinEquation
+class StocLLG : public SDE
 {
  public:
         StocLLG( const float s, const float a,

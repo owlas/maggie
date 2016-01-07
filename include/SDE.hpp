@@ -1,104 +1,37 @@
-// SDE.hpp -- header file containing implementations of various stochastic
-// differential equations as Langevin Equation objects.
-// 
-// O.Laslett@soton.ac.uk <O.Laslett@soton.ac.uk>
-// 2015 
-// 
+// SDE.h
+// Header for abstract base class
+//
+// Oliver W. Laslett 2015
+// O.Laslett@soton.ac.uk
+//
 #ifndef SDE_H
 #define SDE_H
 
-#include <LangevinEquation.hpp>
+#include <algorithm>
+#include <ODE.hpp>
 #include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
+typedef boost::multi_array<float,1> array_f;
+typedef boost::multi_array<float,2> matrix_f;
+typedef boost::multi_array<float,3> array3_f;
 
-// Ornstein-Uhlenbeck process
-class OH : public LangevinEquation
+class SDE : public ODE
 {
-public:
-  // constructor
-  OH( const float theta, const float mu, const float sigma );
-  virtual void computeDrift( array_f& out, const array_f& in,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f& in,
-				 const float ) const;
-
-  float getTheta() const;
-  float getMu() const;
-  float getSigma() const;
+ public:
+  SDE( const int dim, const int wDim );
   
-private:
-  const float theta, mu, sigma;
-};
-
-// Wiener process
-class Wiener : public LangevinEquation
-{
-public:
-  Wiener();
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
-};
-
-// Simple deterministic ODE with constant drift
-class ODEConstantDrift : public LangevinEquation
-{
-public:
-  ODEConstantDrift( const float );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-
-private:
-  const float a;
-};
-
-
-// Scalar SDE with constant drift and additive noise
-// dx = ax * dt + b * dW
-class SDE_AXpB : public LangevinEquation
-{
-public:
-  SDE_AXpB( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
-
-private:
-  const float a, b;
-};
-
-// Scalar SDE with constant drift and multiplicative noise
-// dx = ax * dt + bx * dW
-class SDE_AXpBX : public LangevinEquation
-{
-public:
-  SDE_AXpBX( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
-
-private:
-  const float a, b;
-};
-
-// Stochastic differential equation with constant multiplicative noise
-// dX = aX dt + bX dW
-class MultiplicativeConstantNoise : LangevinEquation
-{
-public:
-  MultiplicativeConstantNoise( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f& in,
-			     const float ) const;
+  int getWDim() const; // get dimensions of equation
+  
+  // Return Langevin components from a given state vector
   virtual void computeDiffusion( matrix_f& out, const array_f& in,
-				 const float ) const;
-  virtual void computeDiffusionDerivatives( array3_f& out, const array_f& in,
-					    const float ) const;
+				 const float t ) const = 0; 
 
-private:
-  const float a, b;
+  // Langevin equations can specify derivative terms for the diffusion matrix
+  // BB[i][j][k] = PD of B[i][j] w.r.t. state[k]
+  // 
+  virtual void computeDiffusionDerivatives( array3_f &out, const array_f &in,
+					    const float t ) const;
+
+ private:
+  const int wDim;
 };
 #endif

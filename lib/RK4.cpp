@@ -8,9 +8,9 @@
 #include<iostream>
 
 // Constructor
-RK4::RK4( const LangevinEquation &le, const array_f& init_state,
+RK4::RK4( const ODE &le, const array_f& init_state,
 	  const float init_time, const float dt )
-  : Integrator( le, init_state, init_time )
+  : Integrator<ODE>( le, init_state, init_time )
   , h( dt )
   , dim( le.getDim() )
   , k1( boost::extents[dim] )

@@ -15,7 +15,7 @@ SingleMNPMasterEquation( float anis,
 			 float alpha,
 			 float Ms,
 			 float gamma )
-  : LangevinEquation( 2 )
+  : ODE( 2 )
   , k( anis )
   , T( temp )
   , r( radius )

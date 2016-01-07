@@ -8,14 +8,14 @@
 #ifndef MNPME_H
 #define MNPME_H
 
-#include<LangevinEquation.hpp>
+#include<ODE.hpp>
 #include<Constants.hpp>
 #include<Field.hpp>
 #include<KramersTrig.hpp>
 #include<stdexcept>
 #include<functional>
 
-class SingleMNPMasterEquation : public LangevinEquation
+class SingleMNPMasterEquation : public ODE
 {
 public:
   // constructor for the general case

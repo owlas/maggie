@@ -7,15 +7,22 @@
 #ifndef INTEGRATOR_H
 #define INTEGRATOR_H
 
-#include<LangevinEquation.hpp>
+#include<SDE.hpp>
 #include<boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
+#include<iostream>
+using std::cout;
+using std::endl;
+#include<Integrator.hpp>
+#include<stdexcept>
+using std::invalid_argument;
 
+template<class T>
 class Integrator
 {
  public:
 
-  Integrator( const LangevinEquation &ld, const array_f&,
+  Integrator( const T& equation, const array_f&,
 	      const float time=0 );
 
   // Get the current state
@@ -29,7 +36,7 @@ class Integrator
   void setTime( const float );
 
   // Get the pointer to the associated Langevin Equation
-  const LangevinEquation &getLE() const;
+  const T& getLE() const;
 
   // Compute an integration step
   virtual void step() = 0;
@@ -43,12 +50,11 @@ protected:
   array_f state;
 
  private:  
-  const LangevinEquation *lEq;
+  const T* lEq;
   array_f initial_state;
   float t;
   float initial_t;
-};  
+};
   
-
+#include "tpp/Integrator.tpp"
 #endif
-

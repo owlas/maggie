@@ -1,24 +1,14 @@
-// Integrator.cpp
+// Integrator.tpp
 // Implementation for the abstract Integrator class
 //
 // Oliver W. Laslett 2015
 // O.Laslett@soton.ac.uk
 //
-#include<iostream>
-using std::cout;
-using std::endl;
-
-#include<LangevinEquation.hpp>
-#include<boost/multi_array.hpp>
-typedef boost::multi_array<float,1> array_f;
-
-#include<Integrator.hpp>
-#include<stdexcept>
-using std::invalid_argument;
 
 // Constructor
-Integrator::Integrator( const LangevinEquation& le, const array_f& init_state,
-			const float time )
+template<class T>
+Integrator<T>::Integrator( const T& le, const array_f& init_state,
+			   const float time )
   : state( boost::extents[le.getDim()] )
   , lEq( &le )
   , initial_state( boost::extents[le.getDim()] )
@@ -30,9 +20,11 @@ Integrator::Integrator( const LangevinEquation& le, const array_f& init_state,
 }
 
 // Get state
-array_f Integrator::getState() const { return state; }
+template<class T>
+array_f Integrator<T>::getState() const { return state; }
 // Set State
-void Integrator::setState( const array_f s )
+template<class T>
+void Integrator<T>::setState( const array_f s )
 {
 if( int( s.shape()[0] ) != lEq->getDim() )
     {
@@ -46,23 +38,33 @@ if( int( s.shape()[0] ) != lEq->getDim() )
 }
 
 // get time
-float Integrator::getTime() const { return t; }
+template<class T>
+float Integrator<T>::getTime() const { return t; }
 // set time
-void Integrator::setTime( const float time ) { t = time; }
+template<class T>
+void Integrator<T>::setTime( const float time ) { t = time; }
 
 // get the pointer to the integrator
-const LangevinEquation &Integrator::getLE() const { return *lEq; }
+template<class T>
+const T& Integrator<T>::getLE() const { return *lEq; }
 
 // reset the integrator to the initial condition
-void Integrator::reset()
+template<class T>
+void Integrator<T>::reset()
 {
   state = initial_state;
   t = initial_t;
 }
 
 // reset the integrator with a new inital condition
-void Integrator::reset( const array_f new_init )
+template<class T>
+void Integrator<T>::reset( const array_f new_init )
 {
   initial_state = new_init;
   reset();
 }
+
+
+// Explicitly instantiate template instances
+template class Integrator<ODE>;
+template class Integrator<SDE>;

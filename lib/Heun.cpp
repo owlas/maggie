@@ -8,9 +8,9 @@
 
 
 // Constructor
-Heun::Heun( const LangevinEquation &le, const array_f& init_state,
+Heun::Heun( const SDE &le, const array_f& init_state,
 	    const float time, const float dt, mt19937& rng )
-  : Integrator( le, init_state, time)
+  : Integrator<SDE>( le, init_state, time)
   , h( dt )
   , dim( le.getDim() )
   , dw( boost::extents[dim])
@@ -28,8 +28,9 @@ Heun::Heun( const LangevinEquation &le, const array_f& init_state,
 void Heun::step()
 {
   // Generate 1D array of Wiener increments
-  for( int i=0; i<dim; i++ )
-    dw[i] = sqrt(h) * gen();
+  if( !manualWiener )
+    for( auto &i : dw )
+      i = sqrt(h) * gen();
 
   // PREDICTION
   getLE().computeDrift( tmp1, state, getTime() );
@@ -54,3 +55,7 @@ void Heun::step()
   setState( xPred );
   setTime( getTime()+h );
 }
+
+// Set the manual wiener process mode
+void Heun::setManualWienerMode( const bool s ) { manualWiener=s; }
+void Heun::setWienerIncrements( const array_f a ) { dw=a; }

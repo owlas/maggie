@@ -12,6 +12,7 @@
 using array_f = boost::multi_array<float,1>;
 using matrix_f = boost::multi_array<float,2>;
 using array3_f = boost::multi_array<float,3>;
+
 #include <boost/random.hpp>
 using boost::variate_generator;
 using boost::mt19937;
@@ -21,11 +22,11 @@ using boost::normal_distribution;
 using std::sqrt; using std::pow;
 #include <algorithm>
 
-class Milstein : public Integrator
+class Milstein : public Integrator<SDE>
 {
 public:
   // Constructor
-  Milstein( const LangevinEquation &le, const array_f& init_state,
+  Milstein( const SDE &le, const array_f& init_state,
 	    const float time, const float dt,
 	    mt19937 &rng_1, mt19937 &rng_2 ); 
 
@@ -44,7 +45,7 @@ public:
 
 private:
   const float h;
-  const int dim;
+  const int dim, wDim;
   normal_distribution<float> dist_1;
   normal_distribution<float> dist_2;
   variate_generator<mt19937&, normal_distribution<float> > gen_1;

@@ -13,7 +13,7 @@ using std::endl;
 // Constructor
 StocLLG::StocLLG( const float s, const float a,
 		  const float hx, const float hy, const float hz )
-  : LangevinEquation( 3 )
+  : SDE( 3,3 )
   , h( boost::extents[3] )
 {
   setSigma( s );

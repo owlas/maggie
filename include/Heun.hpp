@@ -18,16 +18,21 @@ using boost::normal_distribution;
 using array_f = boost::multi_array<float,1>;
 using matrix_f = boost::multi_array<float,2>;
 
-class Heun : public Integrator
+class Heun : public Integrator<SDE>
 {
 
 public:
   // Constructor
-  Heun( const LangevinEquation &le, const array_f& init_state,
+  Heun( const SDE &sde, const array_f& init_state,
 	const float time, const float dt, mt19937 &rng );
 
   // Step the integrator once
   virtual void step();
+
+  // Manual wiener process mode
+  // allow user to control internal wiener increments themselves
+  void setManualWienerMode( const bool );
+  void setWienerIncrements( const array_f );
 
 private:
   const float h;
@@ -40,5 +45,6 @@ private:
   matrix_f tmp2Up;
   normal_distribution<float> dist;
   variate_generator<mt19937 &, normal_distribution<float> > gen;
+  bool manualWiener{ false };
 };
 #endif

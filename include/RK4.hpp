@@ -8,12 +8,12 @@
 #define RK4_H
 #include<Integrator.hpp>
 
-class RK4 : public Integrator
+class RK4 : public Integrator<ODE>
 {
 
 public:
   //Constructor
-  RK4( const LangevinEquation &le, const array_f& init_state,
+  RK4( const ODE &le, const array_f& init_state,
        const float init_time, const float dt );
 
   // Step the integrator once

@@ -1,127 +1,32 @@
-// SDE.cpp -- implementation of stochastic differential equations as a
-// Langevin Equation object.
-// 
-// Oliver Laslett <O.Laslett@soton.ac.uk>
-// 2015
-// 
-
+// SDE.cpp
+// Implementation for abstract base class
+//
+// Oliver W. Laslett 2015
+// O.Laslett@soton.ac.uk
+//
 #include <SDE.hpp>
 
-OH::OH( const float t, const float m, const float s )
-  : LangevinEquation( 1 )
-  , theta( t )
-  , mu( m )
-  , sigma( s )
-{
-  // empty
-}
-float OH::getTheta() const { return theta; }
-float OH::getMu() const { return mu; }
-float OH::getSigma() const { return sigma; }
+// Langevin Equation object is required to have a fixed dimension,
+// specify 'd' when constructing an instance.
 
-void OH::computeDrift( array_f& out, const array_f& in, const float ) const
-{
-  out[0] = theta*( mu-in[0] );
-}
-
-void OH::computeDiffusion( matrix_f& out, const array_f&, const float ) const
-{
-  out[0][0] = sigma;
-}
-
-Wiener::Wiener()
-  : LangevinEquation( 1 )
+// Constructor
+SDE::SDE( const int d, const int m )
+  : ODE( d )
+  , wDim( m )
 {
   // empty
 }
 
-void Wiener::computeDrift( array_f& out, const array_f&, const float ) const
+// Get the dimensions of the equation
+int SDE::getWDim() const
 {
-  out[0] = 0;
+  return wDim;
 }
 
-void Wiener::computeDiffusion( matrix_f& out, const array_f&, const float )
-  const
-{
-  out[0][0] = 1;
-}
-
-ODEConstantDrift::ODEConstantDrift( const float drift )
-  : LangevinEquation( 1 )
-  , a( drift )
-{
-  //empty
-}
-
-void ODEConstantDrift::computeDrift( array_f& out, const array_f&,
-				     const float ) const
-{
-  out[0] = a;
-}
-
-SDE_AXpB::SDE_AXpB( const float drift, const float diff )
-  : LangevinEquation( 1 )
-  , a( drift )
-  , b( diff )
-{}
-
-void SDE_AXpB::computeDrift( array_f& out, const array_f& in, const float )
-  const
-{
-  out[0] = a*in[0];
-}
-
-void SDE_AXpB::computeDiffusion( matrix_f& out, const array_f&, const float )
-  const
-{
-  out[0][0] = b;
-}
-
-SDE_AXpBX::SDE_AXpBX( const float drift, const float diff )
-  : LangevinEquation( 1 )
-  , a( drift )
-  , b( diff )
-{}
-
-void SDE_AXpBX::computeDrift( array_f& out, const array_f& in, const float )
-  const
-{
-  out[0] = a*in[0];
-}
-
-void SDE_AXpBX::computeDiffusion( matrix_f& out, const array_f& in,
-				  const float ) const
-{
-  out[0][0] = b*in[0];
-}
-
-MultiplicativeConstantNoise::MultiplicativeConstantNoise( const float drift,
-							  const float diffusion )
-  : LangevinEquation( 1 )
-  , a( drift )
-  , b( diffusion )
-{
-  //empty
-}
-
-void MultiplicativeConstantNoise::computeDrift( array_f& out,
-						const array_f& in,
-						const float ) const
-{
-  out[0] = a*in[0];
-}
-
-void MultiplicativeConstantNoise::computeDiffusion( matrix_f& out,
-						    const array_f& in,
+// Langevin equation can be defined without specifying derivatives
+void SDE::computeDiffusionDerivatives( array3_f &out,
+						    const array_f&,
 						    const float ) const
 {
-  out[0][0] = b*in[0];
-}
-
-void MultiplicativeConstantNoise::computeDiffusionDerivatives( array3_f& out,
-							       const array_f&,
-							       const float )
-  const
-{
-  out[0][0][0] = b;
+  std::fill( out.data(), out.data()+out.num_elements(), 0 );
 }

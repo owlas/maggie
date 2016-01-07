@@ -8,10 +8,10 @@
 #ifndef TWOSTATEME_H
 #define TWOSTATEME_H
 
-#include<LangevinEquation.hpp>
+#include<ODE.hpp>
 #include<functional>
 
-class TwoStateMasterEquation : public LangevinEquation
+class TwoStateMasterEquation : public ODE
 {
 public:
 
