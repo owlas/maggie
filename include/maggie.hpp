@@ -6,6 +6,8 @@
 // Oliver W. Laslett (2015)
 // O.Laslett@soton.ac.uk
 // 
+#ifndef MAGGIE_H
+#define MAGGIE_H
 
 #include<ODE.hpp>
 #include<SDE.hpp>
@@ -23,3 +25,5 @@
 #include<SingleMNPMasterEquation.hpp>
 #include<Heun.hpp>
 #include<Milstein.hpp>
+
+#endif
