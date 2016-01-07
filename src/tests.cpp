@@ -91,10 +91,10 @@ TEST(RK4, BasicCircle)
   state[1] = 0.0;
 
   // Basic differential equation
-  class ode : public LangevinEquation
+  class ode : public ODE
   {
   public:
-    ode() : LangevinEquation( 2 ) {}; // constructor
+    ode() : ODE( 2 ) {}; // constructor
 
     // Differential equation
     virtual void computeDrift( array_f& out, const array_f& in, const float )
@@ -378,38 +378,6 @@ TEST( StocLLG, HeunIntegrationSolution )
   // write test for heun integration here.
 }
 
-// Test Milstein on the simplest ODE
-TEST( Milstein, MilConstantDrift )
-{
-  const float dt = 1e-3;
-  
-  // The ODE
-  float drift = 2.5;
-  ODEConstantDrift testODE( drift );
-
-  // RNGs still needed for integrator
-  mt19937 rng(1234);
-  mt19937 rng_2( 28907 );
-
-  // Set up numerical integration
-  array_f init( boost::extents[1] ); init[0]=0;
-  auto inte = Milstein( testODE, init, 0.0, dt, rng, rng_2 );
-
-  // Set the initial condition for the analytic solution
-  float analyticSol = init[0];
-
-  // Integrate for 5000 steps and compare against analytical
-  for( array_f::index i=0; i!=5000; i++ )
-  {
-    inte.step();
-    float numericalSol = inte.getState()[0];
-    analyticSol += dt*drift;
-
-    ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
-                  << "Steps completed =" << i;
-  }
-}
-
 // Test the stochastic integrator on a simple Wiener process
 TEST( Milstein, MilWiener )
 {
@@ -480,6 +448,7 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
   float sigma = testSDE.getSigma();
 
   int N=3000;
+  matrix_f plot( boost::extents[2][N] );
   for( int i=0; i<N; i++ )
     {
       // Numerical solution
@@ -494,7 +463,11 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
 
       ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-4 )
         << "Steps completed: " << i << std::endl;
+
+      plot[0][i] = numericalSol;
+      plot[1][i] = analyticSol;
     }
+  //boostToFile( plot, "test.out" );
 }
 
 
@@ -504,9 +477,11 @@ TEST( IntegrationTests, MilsteinLLG )
 {
   // set up parameters, langevin equation and initial condition
   const float K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
-  , KB{ 1.980648813e-23 }, T{ 300 }, alpha{ 0.1 }, sigma{ K*V/( KB*T ) }
-  , MU0{ 1.25663706e-6 }, Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }
-  , gamma{ 1.7609e11 };
+  , KB{ 1.38064852e-23 }, T{ 300 }, alpha{ 0.1 }, MU0{ 1.25663706e-6 }
+  , Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }, gamma{ 1.7609e11 };
+
+  const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
+  const float sigma = float( s );
 
   StocLLG llg( sigma, alpha, 0.0, 0.0, hz );
 
@@ -524,19 +499,21 @@ TEST( IntegrationTests, MilsteinLLG )
   boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
   boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
 
-  auto inte = Milstein( llg, m0, 0.0, dtau, rng, rng_2);
+  auto inte = Milstein( llg, m0, 0.0, dtau, rng, rng_2 );
   
   // set to manual mode
   inte.setManualWienerMode( true );
   array_f dw( boost::extents[3] );
   for( auto& i : dw )
     i=0.0;
-
+  float W{ 0.0 }; // Wiener process (sum over dw)
   // solutions
   array_f nmSol( boost::extents[3] );
   array_f anSol( boost::extents[3] );
 
-  int N=1000;
+  int N=100000;
+  // to plot
+  matrix_f plot( boost::extents[2][N] );
   for( array_f::index i=0; i!=N; ++i )
     {
       // step but restrict wiener process to 1D in z-component
@@ -545,29 +522,35 @@ TEST( IntegrationTests, MilsteinLLG )
       inte.step();
       nmSol = inte.getState();
       float t = inte.getTime()/tfactor;
+      W += vg_a();
 
       // Analytic solution from Hannay
-      float kb{ 1.38064881e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
+      float kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
       , H{ 400*M_PI }, V{ 4.0/3.0*M_PI*pow( 2.5e-7,3 ) }, T{ 300 }
-      , Ms{ 1400 }, sigma{ 2*alpha*kb*T/( gamma*Ms*V ) };
+      , Ms{ 1400 }, sigma{ std::sqrt( 2*alpha*kb*T/( gamma*Ms*V ) ) };
       anSol[0] =
-	1/std::cosh( alpha*gamma*( H*t+sigma*vg_a() ) / ( 1+pow( alpha, 2 ) ) )
-	* std::cos( gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+	1/std::cosh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha, 2 ) ) )
+	* std::cos( gamma*( H*t+sigma*W )/( 1+pow( alpha,2 ) ) );
 
       anSol[1] =
-	1/std::cosh( alpha*gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) )
-	* std::sin( gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+	1/std::cosh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) )
+	* std::sin( gamma*( H*t+sigma*W )/( 1+pow( alpha,2 ) ) );
 
       anSol[2] =
-	std::tanh( alpha*gamma*( H*t+sigma*vg_a() )/( 1+pow( alpha,2 ) ) );
+	std::tanh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) );
 
-      ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-4 )
+      ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-2 )
 	<< "Steps completed: " << i << std::endl;
-      ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-4 )
+      ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-2 )
 	<< "Steps completed: " << i << std::endl;
-      ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-4 )
-	<< "Steps completed: " << i << std::endl;
+      ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-2 )
+      << "Steps completed: " << i << std::endl;
+      
+      plot[0][i] = nmSol[2];
+      plot[1][i] = anSol[2];
     }
+
+  boostToFile( plot, "test.out" );
 
 }
 
