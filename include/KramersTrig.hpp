@@ -4,6 +4,9 @@
 // Oliver Laslett (2015)
 // O.Laslett@soton.ac.uk
 //
+#ifndef KRAM_H
+#define KRAM_H
+
 #define _USE_MATH_DEFINES
 
 #include<maggie.hpp>
@@ -36,3 +39,5 @@ namespace KramersTrig
   float theta_min1( float h, float psi );
   float theta_min2( float h, float psi );
 }
+
+#endif
