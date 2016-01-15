@@ -326,51 +326,65 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
       analyticSol = analyticSol*exp( -theta*dt ) + mu*( 1-exp( -theta*dt ) )
 	+ sigma*sqrt( ( 1-exp( -2*theta*dt ) )/( 2*theta ) ) * vg();
 
-      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-4 )
+      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-3 )
         << "Steps completed: " << i << std::endl;
     }
 }
 
-// Test the convergence of the Heun scheme
-TEST( Heun, OUStrongConvergence )
+// Test the integration scheme with an OU process
+TEST( Euler, EulerOrnsteinUhlenbeck )
 {
-  // Create Ornstein-Uhlenbeck process
+  // Time step
+  float dt = 1e-6;
+
+  // Class for the Ornstein-Uhlenbeck process
   OH testSDE( 10.0, -1.0, 0.8 );
 
-  // Compute the true solution at the final time
-  float t_final = 1e-6;
-  float t_step = 1e-10;
-  int N = t_final/t_step;
-  float answer = 0.0;
+  // create the RNG
+  mt19937 rng(555);
+  mt19937 rng_an(555);
+
+  // Create a variate generator for the analytic solution
+  normal_f dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_f>
+    vg( rng_an, dist );
+
+  // Create the integrator
+  array_f init( boost::extents[1] ); init[0]=-3;
+  auto inte = Euler( testSDE, init, 0.0, dt, rng );
+
+  // Track the solutions
+  float numericalSol = init[0];
+  float analyticSol = init[0];
+
   float theta = testSDE.getTheta();
   float mu = testSDE.getMu();
   float sigma = testSDE.getSigma();
-  mt19937 rng_a(1111);
-  normal_f dist(0, 1 );
-  boost::random::variate_generator<mt19937, normal_f>
-    vg( rng_a, dist );
-  for( array_f::index i=0; i!=N; i++ )
-  {
-    answer = answer*exp( -theta*t_step ) + mu*( 1-exp( -theta*t_step ) )
-              + sigma*sqrt( ( 1-exp( -2*theta*t_step ) )/( 2*theta ) ) * vg();
-  }
 
-  // Compute the solution numerically for different values of t_final. Do this
-  // for 1000 steps to generate the expected difference in the paths, in order
-  // to obtain the strong convergence
-  int Nerr = 5;
-  array_f error( boost::extents[Nerr] );
-  for( auto i=error.begin(); i!=error.end(); i++ )
-    *i=0;
+  int N=3000;
+  matrix_f plot( boost::extents[2][N]);
+  for( int i=0; i<N; i++ )
+    {
+      // Numerical solution
+      inte.step();
+      numericalSol = inte.getState()[0];
 
-  // Set up the integrator
-  mt19937 rng(1111);
-  array_f x0( boost::extents[1] ); x0[0]=0.0;
-  auto inte = Heun( testSDE, x0, 0.0, t_step, rng );
+      // Analytic solution
+      // FROM http://henley.ac.uk/web/FILES/REP/Monte_Carlo_Simulation_of_Stochastic_Processes.pdf
 
-  // Compare the error
+      analyticSol = analyticSol*exp( -theta*dt ) + mu*( 1-exp( -theta*dt ) )
+	+ sigma*sqrt( ( 1-exp( -2*theta*dt ) )/( 2*theta ) ) * vg();
 
+      plot[0][i] = numericalSol;
+      plot[1][i] = analyticSol;
+
+      ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-3 )
+        << "Steps completed: " << i << std::endl;
+    }
+
+  boostToFile( plot, "test.out" );
 }
+
 
 // Test run of the Heun and LLG algorithms
 TEST( StocLLG, HeunIntegrationSolution )
@@ -415,6 +429,7 @@ TEST( Milstein, MilWiener )
                   << "Steps completed =" << i;
   }
 }
+
 
 // Test the integration scheme with an OU process
 TEST( Milstein, MilOrnsteinUhlenbeck )
@@ -472,7 +487,7 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
 
 
 // Integration test - does the Milstein work with StocLLG?
-// 
+//
 TEST( IntegrationTests, MilsteinLLG )
 {
   // set up parameters, langevin equation and initial condition
@@ -500,7 +515,7 @@ TEST( IntegrationTests, MilsteinLLG )
   boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
 
   auto inte = Milstein( llg, m0, 0.0, dtau, rng, rng_2 );
-  
+
   // set to manual mode
   inte.setManualWienerMode( true );
   array_f dw( boost::extents[3] );
@@ -545,12 +560,11 @@ TEST( IntegrationTests, MilsteinLLG )
 	<< "Steps completed: " << i << std::endl;
       ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-2 )
       << "Steps completed: " << i << std::endl;
-      
+
       plot[0][i] = nmSol[2];
       plot[1][i] = anSol[2];
     }
-
-  boostToFile( plot, "test.out" );
+  //boostToFile( plot, "test.out" );
 
 }
 
