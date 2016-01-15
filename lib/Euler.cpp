@@ -37,4 +37,7 @@ void Euler::step()
         for( array_f::index j=0; j!=wDim; ++j )
             xpred[i] += tmp2[i][j]*dw[j];
     }
+
+    setState( xpred );
+    setTime( getTime() + h );
 }
