@@ -27,6 +27,7 @@ Milstein::Milstein( const SDE &le, const array_f& init_state,
   , tmp2( boost::extents[dim][wDim] )
   , tmp22( boost::extents[wDim][wDim] )
   , tmp3( boost::extents[dim][wDim][dim] )
+  , p( 10 )
   , mu( boost::extents[wDim] )
   , eta( boost::extents[wDim][p] )
   , zeta( boost::extents[wDim][p] )

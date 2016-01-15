@@ -57,7 +57,7 @@ private:
   matrix_f tmp2;
   matrix_f tmp22;
   array3_f tmp3;
-  unsigned int p{ 10 }; // Fourier series truncation - default value
+  unsigned int p; // Fourier series truncation
   array_f mu;
   matrix_f eta;
   matrix_f zeta;
