@@ -10,8 +10,10 @@
 #include <SDE.hpp>
 
 #include <boost/multi_array.hpp>
-typedef boost::multi_array<float,1> array_f;
-typedef boost::multi_array<float,2> matrix_f;
+using array_f =  boost::multi_array<float,1>;
+using matrix_f = boost::multi_array<float,2>;
+using cube_f = boost::multi_array<float,3>;
+
 
 class StocLLG : public SDE
 {
@@ -33,13 +35,25 @@ class StocLLG : public SDE
 
   void setSigma( const float );
   float getSigma() const;
-  
+
   void setAlpha( const float );
   float getAlpha() const;
 
  private:
-  array_f h;
-  float sigma;
-  float alpha;
+    array_f h;
+    float sigma;
+    float alpha;
+};
+
+// This is the Ito version of the Stochastic LLG
+class StocLLGIto : public StocLLG
+{
+public:
+    StocLLGIto( const float s, const float a,
+                const float hx, const float hy, const float hz );
+
+    // returns the drift vector
+    void computeDrift( array_f&, const array_f&, const float ) const;
+
 };
 #endif

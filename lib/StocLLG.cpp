@@ -114,3 +114,27 @@ void StocLLG::computeDiffusionDerivatives( array3_f &out,
   out[2][2][2] = 0;
 }
 
+// constructor for the stoc llg
+StocLLGIto::StocLLGIto( const float s, const float a, const float hx,
+                        const float hy, const float hz )
+    : StocLLG( s, a, hx, hy, hz )
+{}
+
+// compute the drift in ito form
+void StocLLGIto::computeDrift(array_f& out, const array_f& in,
+                              const float t) const
+{
+    const int d{ getDim() };
+    const int m{ getWDim() };
+    matrix_f b( boost::extents[d][m] );
+    cube_f bDash( boost::extents[d][m][d]);
+
+    StocLLG::computeDrift(out, in, t);
+    computeDiffusion(b, in, t );
+    computeDiffusionDerivatives(bDash, in, t );
+
+    for ( array_f::index i=0; i!=d; ++i )
+        for( array_f::index j=0; j!=m; ++j )
+            for( array_f::index k=0; j!=d; ++k )
+                out[i] += 0.5 * b[k][j] * bDash[i][j][k];
+}
