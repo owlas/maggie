@@ -288,7 +288,7 @@ TEST( Heun, HeunWiener )
 TEST( Heun, HeunOrnsteinUhlenbeck )
 {
   // Time step
-  float dt = 1e-10;
+  float dt = 1e-5;
 
   // Class for the Ornstein-Uhlenbeck process
   OH testSDE( 10.0, -1.0, 0.8 );
@@ -314,7 +314,7 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
   float mu = testSDE.getMu();
   float sigma = testSDE.getSigma();
 
-  for( int i=0; i<300; i++ )
+  for( int i=0; i<3000; i++ )
     {
       // Numerical solution
       inte.step();
