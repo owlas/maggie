@@ -1,11 +1,11 @@
 // MAGGIE LIBRARY
-// 
+//
 // Interface for the maggie library, currently just imports the header
 // files from the library objects, rewrite this soon.
-// 
+//
 // Oliver W. Laslett (2015)
 // O.Laslett@soton.ac.uk
-// 
+//
 #ifndef MAGGIE_H
 #define MAGGIE_H
 
@@ -25,5 +25,6 @@
 #include<SingleMNPMasterEquation.hpp>
 #include<Heun.hpp>
 #include<Milstein.hpp>
+#include<Euler.hpp>
 
 #endif
