@@ -11,16 +11,17 @@
 Heun::Heun( const SDE &le, const array_f& init_state,
 	    const float time, const float dt, mt19937& rng )
   : Integrator<SDE>( le, init_state, time)
-  , h( dt )
-  , dim( le.getDim() )
-  , dw( boost::extents[dim])
-  , xPred( boost::extents[dim])
-  , tmp1( boost::extents[dim])
-  , tmp1Up( boost::extents[dim])
-  , tmp2( boost::extents[dim][dim] )
-  , tmp2Up( boost::extents[dim][dim] )
-  , dist(0,1)
-  , gen( rng, dist )
+    , h( dt )
+    , dim( le.getDim() )
+    , wDim( le.getWDim() )
+    , dw( boost::extents[wDim])
+    , xPred( boost::extents[dim])
+    , tmp1( boost::extents[dim])
+    , tmp1Up( boost::extents[dim])
+    , tmp2( boost::extents[dim][wDim] )
+    , tmp2Up( boost::extents[dim][wDim] )
+    , dist(0,1)
+    , gen( rng, dist )
 {
   // empty
 }
@@ -48,7 +49,7 @@ void Heun::step()
   for( int i=0; i<dim; i++ )
     {
       xPred[i] = state[i] + 0.5*h*( tmp1Up[i] + tmp1[i] );
-      for( int j=0; j<dim; j++ )
+      for( int j=0; j<wDim; j++ )
 	xPred[i] += 0.5*dw[j]*( tmp2Up[i][j] + tmp2[i][j] );
     }
 

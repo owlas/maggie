@@ -36,7 +36,7 @@ public:
 
 private:
   const float h;
-  const int dim;
+    const int dim, wDim;
   array_f dw;
   array_f xPred;
   array_f tmp1;
