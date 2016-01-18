@@ -53,4 +53,3 @@ void RK4<T>::step()
 
 // explicit template instantiation
 template class RK4<float>;
-template class RK4<double>;

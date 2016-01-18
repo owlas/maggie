@@ -42,8 +42,9 @@ class StocLLG : public SDE<T>
 
  private:
     array<T> h;
-    float sigma;
-    float alpha;
+    T
+    sigma;
+    T alpha;
 };
 
 // This is the Ito version of the Stochastic LLG

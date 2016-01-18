@@ -28,8 +28,8 @@ using normal_f=boost::random::normal_distribution<float>;
 // Test construction of StocLLG
 TEST(StochasticLLG, ContructAndDim)
 {
-    StocLLG<float> llg( 1, 2, 3, 4, 5 );
-    EXPECT_EQ( 3, llg.getDim() );
+  StocLLG<float> llg( 1, 2, 3, 4, 5 );
+  EXPECT_EQ( 3, llg.getDim() );
 }
 
 // Test deterministic part of StocLLG
@@ -426,7 +426,7 @@ TEST( Euler, EulerOrnsteinUhlenbeck )
         << "Steps completed: " << i << std::endl;
     }
 
-  boostToFile( plot, "test.out" );
+  boostToFile<float>( plot, "test.out" );
 }
 
 
@@ -526,7 +526,7 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
       plot[0][i] = numericalSol;
       plot[1][i] = analyticSol;
     }
-  //boostToFile( plot, "test.out" );
+  //boostToFile<float>( plot, "test.out" );
 }
 
 
@@ -608,7 +608,7 @@ TEST( IntegrationTests, MilsteinLLG )
       plot[0][i] = nmSol[2];
       plot[1][i] = anSol[2];
     }
-  //boostToFile( plot, "test.out" );
+  //boostToFile<float>( plot, "test.out" );
 
 }
 
@@ -688,7 +688,7 @@ TEST( IntegrationTests, EulerLLG )
       plot[0][i] = nmSol[2];
       plot[1][i] = anSol[2];
     }
-  boostToFile( plot, "test.out" );
+  boostToFile<float>( plot, "test.out" );
 
 }
 

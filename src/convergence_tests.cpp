@@ -99,7 +99,7 @@ int main() {
     }
 
   // Save the convergence values
-  boostToFile( dt_values, "convergence.dt" );
-  boostToFile( e_strong_heu, "convergence.heun" );
-  boostToFile( e_strong_mil, "convergence.mils" );
+  boostToFile<float>( dt_values, "convergence.dt" );
+  boostToFile<float>( e_strong_heu, "convergence.heun" );
+  boostToFile<float>( e_strong_mil, "convergence.mils" );
 }
