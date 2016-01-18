@@ -11,7 +11,7 @@
 
 // Constructor
 SDE::SDE( const int d, const int m )
-    : ODE( d )
+    : ODE<float>( d )
     , wDim( m )
 {
     // empty

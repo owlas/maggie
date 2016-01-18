@@ -15,7 +15,7 @@
 #include<stdexcept>
 #include<functional>
 
-class SingleMNPMasterEquation : public ODE
+class SingleMNPMasterEquation : public ODE<float>
 {
 public:
   // constructor for the general case
@@ -38,7 +38,7 @@ public:
 
   // compute the difference in energy between the two states of the
   // system
-  float ediff( float t ); 
+  float ediff( float t );
 
   // compute the angle of the minima
   float state_rotation( float t ) const;

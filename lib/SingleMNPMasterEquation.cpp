@@ -15,7 +15,7 @@ SingleMNPMasterEquation( float anis,
 			 float alpha,
 			 float Ms,
 			 float gamma )
-  : ODE( 2 )
+    : ODE<float>( 2 )
   , k( anis )
   , T( temp )
   , r( radius )
@@ -82,7 +82,7 @@ float SingleMNPMasterEquation::ediff( float t )
     }
 }
 
-float SingleMNPMasterEquation::state_rotation( float t ) const 
+float SingleMNPMasterEquation::state_rotation( float t ) const
 {
   float h = fieldPtr->getField( t );
   if( h*sin( psi ) < 0.03 )

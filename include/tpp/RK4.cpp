@@ -8,9 +8,9 @@
 
 // Constructor
 template <typename T>
-RK4<T>::RK4( const ODE &le, const array<T>& init_state,
+RK4<T>::RK4( const ODE<T> &le, const array<T>& init_state,
              const T init_time, const T dt )
-    : Integrator<ODE, T>( le, init_state, init_time )
+    : Integrator<ODE<T>, T>( le, init_state, init_time )
     , h( dt )
     , dim( le.getDim() )
     , k1( boost::extents[dim] )

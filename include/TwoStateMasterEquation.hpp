@@ -11,7 +11,7 @@
 #include<ODE.hpp>
 #include<functional>
 
-class TwoStateMasterEquation : public ODE
+class TwoStateMasterEquation : public ODE<float>
 {
 public:
 

@@ -1,9 +1,9 @@
 // SDES.hpp -- header file containing implementations of various stochastic
 // differential equations as Langevin Equation objects.
-// 
+//
 // O.Laslett@soton.ac.uk <O.Laslett@soton.ac.uk>
-// 2015 
-// 
+// 2015
+//
 #ifndef SDES_H
 #define SDES_H
 
@@ -26,7 +26,7 @@ public:
   float getTheta() const;
   float getMu() const;
   float getSigma() const;
-  
+
 private:
   const float theta, mu, sigma;
 };
@@ -43,7 +43,7 @@ public:
 };
 
 // Simple deterministic ODE with constant drift
-class ODEConstantDrift : public ODE
+class ODEConstantDrift : public ODE<float>
 {
 public:
   ODEConstantDrift( const float );

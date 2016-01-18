@@ -14,7 +14,7 @@ using array_f = boost::multi_array<float,1>;
 using matrix_f = boost::multi_array<float,2>;
 using array3_f = boost::multi_array<float,3>;
 
-class SDE : public ODE
+class SDE : public ODE<float>
 {
 public:
     SDE( const int dim, const int wDim );

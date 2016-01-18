@@ -58,5 +58,5 @@ private:
     T initial_t;
 };
 
-#include "tpp/Integrator.tpp"
+#include "tpp/Integrator.cpp"
 #endif

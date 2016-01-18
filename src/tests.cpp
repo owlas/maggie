@@ -135,7 +135,7 @@ TEST(RK4, BasicCircle)
   state[1] = 0.0;
 
   // Basic differential equation
-  class ode : public ODE
+  class ode : public ODE<float>
   {
   public:
     ode() : ODE( 2 ) {}; // constructor

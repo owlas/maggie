@@ -9,9 +9,10 @@
 
 #include <algorithm>
 #include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
+template <typename T> using array = boost::multi_array<T,1>;
+template <typename T> using matrix = boost::multi_array<T,2>;
 
+template <typename T>
 class ODE
 {
 public:
@@ -20,9 +21,11 @@ public:
     int getDim() const; // get dimensions of equation
 
     // Return derivative from a given state vector
-    virtual void computeDrift( array_f& out, const array_f& in,
-                               const float t ) const = 0;
+    virtual void computeDrift( array<T>& out, const array<T>& in,
+                               const T t ) const = 0;
 private:
     const int dim;
 };
+
+#include <tpp/ODE.cpp>
 #endif

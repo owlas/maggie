@@ -9,12 +9,12 @@
 #include<Integrator.hpp>
 
 template <typename T>
-class RK4 : public Integrator<ODE, T>
+class RK4 : public Integrator<ODE<T>, T>
 {
 
 public:
     //Constructor
-    RK4( const ODE &le, const array<T>& init_state,
+    RK4( const ODE<T> &le, const array<T>& init_state,
          const T init_time, const T dt );
 
     // Step the integrator once
