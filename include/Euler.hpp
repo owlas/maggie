@@ -16,14 +16,15 @@ using boost::mt19937;
 using boost::normal_distribution;
 using boost::extents;
 #include<boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
+template <typename T> using array = boost::multi_array<T,1>;
+template <typename T> using matrix = boost::multi_array<T,2>;
 
-class Euler : public Integrator<SDE>
+template <typename T>
+class Euler : public Integrator<SDE, T>
 {
 public:
-    Euler( const SDE& sde, const array_f& init_state, const float time,
-           const float dt, mt19937& rng );
+    Euler( const SDE& sde, const array<T>& init_state, const T time,
+           const T dt, mt19937& rng );
 
     virtual void step();
 
@@ -33,14 +34,16 @@ public:
     void setWienerIncrements( const array_f );
 
 private:
-    const float h;
-    const float dim, wDim;
-    array_f dw;
-    array_f tmp1;
-    matrix_f tmp2;
-    array_f xpred;
-    normal_distribution<float> dist;
-    variate_generator<mt19937 &, normal_distribution<float> > gen;
+    const T h;
+    const T dim, wDim;
+    array<T> dw;
+    array<T> tmp1;
+    matrix<T> tmp2;
+    array<T> xpred;
+    normal_distribution<T> dist;
+    variate_generator<mt19937 &, normal_distribution<T> > gen;
     bool manualWiener{ false };
 };
+
+#include<tpp/Euler.cpp>
 #endif

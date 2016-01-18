@@ -1,9 +1,9 @@
 // convergence_tests.cpp
 // Produces convergence data for Heun and Milstein schemes
-// 
+//
 // Oliver W. Laslett
 // O.Laslett@soton.ac.uk
-// 
+//
 #include <maggie.hpp>
 #include <boost/multi_array.hpp>
 typedef boost::multi_array<float,1> array_f;
@@ -31,7 +31,7 @@ int main() {
   for( auto& x : e_strong_heu ) x=0.0;
   array_f e_strong_mil{ e_strong_heu };
   array_f dt_values{ e_strong_mil };
-  
+
   for( int i=0; i!=N_dt; i++ )
     {
       // compute the next time step
@@ -52,8 +52,8 @@ int main() {
       array_f init( boost::extents[1] ); init[0] = 1.0;
 
       // Set up the integrators
-      Heun inte_heu( sde, init, 0.0, dt, rng_heu );
-      Milstein inte_mil( sde, init, 0.0, dt, rng_mil, rng_mil2 );
+      Heun<float> inte_heu( sde, init, 0.0, dt, rng_heu );
+      Milstein<float> inte_mil( sde, init, 0.0, dt, rng_mil, rng_mil2 );
 
       // Store the errors
       matrix_f errors( boost::extents[2][N_samples] );
@@ -62,7 +62,7 @@ int main() {
 	{
 	  inte_heu.reset();
 	  inte_mil.reset();
-	  
+
 	  // Run the integrators for simulation length
 	  const int N_steps{ int( sim_length / dt ) };
 	  for( int n=0; n!=N_steps; n++ )
@@ -70,7 +70,7 @@ int main() {
 	      inte_heu.step();
 	      inte_mil.step();
 	    }
-	  
+
 	  // compute the analytic solution
 	  // see: Kloen "Numerical solution of SDEs"
 	  float W{ 0 };
@@ -83,7 +83,7 @@ int main() {
 	  errors[0][j] = std::abs( inte_heu.getState()[0] - analytic );
 	  errors[1][j] = std::abs( inte_mil.getState()[0] - analytic );
 
-	  // 
+	  //
 	}
 
       // Compute the expected absolute error

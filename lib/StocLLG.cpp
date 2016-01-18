@@ -13,7 +13,7 @@ using std::endl;
 // Constructor
 StocLLG::StocLLG( const float s, const float a,
 		  const float hx, const float hy, const float hz )
-  : SDE( 3,3 )
+    : SDE( 3,3 )
   , h( boost::extents[3] )
 {
   setSigma( s );
@@ -135,6 +135,6 @@ void StocLLGIto::computeDrift(array_f& out, const array_f& in,
 
     for ( array_f::index i=0; i!=d; ++i )
         for( array_f::index j=0; j!=m; ++j )
-            for( array_f::index k=0; j!=d; ++k )
+            for( array_f::index k=0; k!=d; ++k )
                 out[i] += 0.5 * b[k][j] * bDash[i][j][k];
 }

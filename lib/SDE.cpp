@@ -11,22 +11,22 @@
 
 // Constructor
 SDE::SDE( const int d, const int m )
-  : ODE( d )
-  , wDim( m )
+    : ODE( d )
+    , wDim( m )
 {
-  // empty
+    // empty
 }
 
 // Get the dimensions of the equation
 int SDE::getWDim() const
 {
-  return wDim;
+    return wDim;
 }
 
 // Langevin equation can be defined without specifying derivatives
 void SDE::computeDiffusionDerivatives( array3_f &out,
-						    const array_f&,
-						    const float ) const
+                                       const array_f&,
+                                       const float ) const
 {
-  std::fill( out.data(), out.data()+out.num_elements(), 0 );
+    std::fill( out.data(), out.data()+out.num_elements(), 0 );
 }

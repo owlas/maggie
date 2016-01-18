@@ -9,7 +9,9 @@
 
 #include<SDE.hpp>
 #include<boost/multi_array.hpp>
-typedef boost::multi_array<float,1> array_f;
+template<typename T>
+using array = boost::multi_array<T,1>;
+using bidx = boost::multi_array_types::index;
 #include<iostream>
 using std::cout;
 using std::endl;
@@ -17,44 +19,44 @@ using std::endl;
 #include<stdexcept>
 using std::invalid_argument;
 
-template<class T>
+template<class C, typename T>
 class Integrator
 {
  public:
 
-  Integrator( const T& equation, const array_f&,
-	      const float time=0 );
+    Integrator( const C& equation, const array<T>&,
+                const T time=0 );
 
-  // Get the current state
-  array_f getState() const;
-  // Set the integrator state
-  void setState( const array_f );
+    // Get the current state
+    array<T> getState() const;
+    // Set the integrator state
+    void setState( const array<T> );
 
-  // Get the current time
-  float getTime() const;
-  // Set the integrator time
-  void setTime( const float );
+    // Get the current time
+    T getTime() const;
+    // Set the integrator time
+    void setTime( const T );
 
-  // Get the pointer to the associated Langevin Equation
-  const T& getLE() const;
+    // Get the pointer to the associated Langevin Equation
+    const C& getLE() const;
 
-  // Compute an integration step
-  virtual void step() = 0;
+    // Compute an integration step
+    virtual void step() = 0;
 
-  // Reset the integrator to initial conditions
-  // or a new initial condition
-  void reset();
-  void reset( const array_f );
+    // Reset the integrator to initial conditions
+    // or a new initial condition
+    void reset();
+    void reset( const array<T> );
 
 protected:
-  array_f state;
+    array<T> state;
 
- private:  
-  const T* lEq;
-  array_f initial_state;
-  float t;
-  float initial_t;
+private:
+    const C* lEq;
+    array<T> initial_state;
+    T t;
+    T initial_t;
 };
-  
+
 #include "tpp/Integrator.tpp"
 #endif

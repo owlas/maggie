@@ -9,20 +9,20 @@
 
 #include <algorithm>
 #include <boost/multi_array.hpp>
-typedef boost::multi_array<float,1> array_f;
-typedef boost::multi_array<float,2> matrix_f;
+using array_f = boost::multi_array<float,1>;
+using matrix_f = boost::multi_array<float,2>;
 
 class ODE
 {
- public:
-  ODE( const int dim );
-  
-  int getDim() const; // get dimensions of equation
-  
-  // Return derivative from a given state vector
-  virtual void computeDrift( array_f& out, const array_f& in,
-			     const float t ) const = 0;
- private:
-  const int dim;
+public:
+    ODE( const int dim );
+
+    int getDim() const; // get dimensions of equation
+
+    // Return derivative from a given state vector
+    virtual void computeDrift( array_f& out, const array_f& in,
+                               const float t ) const = 0;
+private:
+    const int dim;
 };
 #endif

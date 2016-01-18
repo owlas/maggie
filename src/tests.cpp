@@ -52,6 +52,50 @@ TEST(StochasticLLG, Drift)
   EXPECT_EQ( 20, out[2] );
 }
 
+// Test the Ito version of the Stochastic LLG
+TEST(StochasticLLG, ItoDrift)
+{
+    // declare in and out arrays
+    array_f out( boost::extents[3] );
+    array_f in( boost::extents[3] );
+    in[0] = 2;
+    in[1] = 3;
+    in[2] = 4;
+
+    // Set up StocLLG and compute drift
+    StocLLGIto llg( 2, 3, 1, 2, 3 );
+    llg.computeDrift( out, in, 0 );
+
+    // Are the solutions correct?
+    EXPECT_EQ( -2130, out[0] );
+    EXPECT_EQ( -3148, out[1] );
+    EXPECT_EQ( -4172, out[2] );
+}
+TEST(StochasticLLG, ItoDiffusion)
+{
+    // declare in and out arrays
+    array_f in( boost::extents[3] );
+    matrix_f out( boost::extents[3][3] );
+    in[0] = 2;
+    in[1] = 3;
+    in[2] = 4;
+
+    // set up the StocLLG and compute diffusion
+    StocLLGIto llg( 2, 3, 1, 2, 3 );
+    llg.computeDiffusion( out, in, 0 );
+
+    // are the solutions correct?
+    EXPECT_EQ( 150, out[0][0] );
+    EXPECT_EQ( -28, out[0][1] );
+    EXPECT_EQ( -54, out[0][2] );
+    EXPECT_EQ( -44, out[1][0] );
+    EXPECT_EQ( 120, out[1][1] );
+    EXPECT_EQ( -68, out[1][2] );
+    EXPECT_EQ( -42, out[2][0] );
+    EXPECT_EQ( -76, out[2][1] );
+    EXPECT_EQ( 78, out[2][2] );
+}
+
 // Test the stochastic part of the StocLLG
 TEST(StochasticLLG, Diffusion)
 {
@@ -107,7 +151,7 @@ TEST(RK4, BasicCircle)
 
 
   // Create an instance of the RK4 integrator
-  RK4 inte( testOde, state, t, 0.000001 );
+  auto inte = RK4<float>( testOde, state, t, 0.000001 );
 
   // Run the integrator for 2000 steps
   for( int i=0; i<500; i++ )
@@ -267,7 +311,7 @@ TEST( Heun, HeunWiener )
 
   // Set up numerical integration
   array_f init( boost::extents[1] ); init[0]=0;
-  auto inte = Heun( testSDE, init, 0.0, dt, rng );
+  auto inte = Heun<float>( testSDE, init, 0.0, dt, rng );
 
   // Set the initial condition for the analytic solution
   float analyticSol = init[0];
@@ -304,7 +348,7 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
 
   // Create the integrator
   array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Heun( testSDE, init, 0.0, dt, rng );
+  auto inte = Heun<float>( testSDE, init, 0.0, dt, rng );
 
   // Track the solutions
   float numericalSol = init[0];
@@ -351,7 +395,7 @@ TEST( Euler, EulerOrnsteinUhlenbeck )
 
   // Create the integrator
   array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Euler( testSDE, init, 0.0, dt, rng );
+  auto inte = Euler<float>( testSDE, init, 0.0, dt, rng );
 
   // Track the solutions
   float numericalSol = init[0];
@@ -413,7 +457,7 @@ TEST( Milstein, MilWiener )
 
   // Set up numerical integration
   array_f init( boost::extents[1] ); init[0]=0;
-  auto inte = Milstein( testSDE, init, 0.0, dt, rng, rng_2 );
+  auto inte = Milstein<float>( testSDE, init, 0.0, dt, rng, rng_2 );
 
   // Set the initial condition for the analytic solution
   float analyticSol = init[0];
@@ -452,7 +496,7 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
 
   // Create the integrator
   array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Milstein( testSDE, init, 0.0, dt, rng, rng_2 );
+  auto inte = Milstein<float>( testSDE, init, 0.0, dt, rng, rng_2 );
 
   // Track the solutions
   float numericalSol = init[0];
@@ -514,7 +558,7 @@ TEST( IntegrationTests, MilsteinLLG )
   boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
   boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
 
-  auto inte = Milstein( llg, m0, 0.0, dtau, rng, rng_2 );
+  auto inte = Milstein<float>( llg, m0, 0.0, dtau, rng, rng_2 );
 
   // set to manual mode
   inte.setManualWienerMode( true );
@@ -565,6 +609,86 @@ TEST( IntegrationTests, MilsteinLLG )
       plot[1][i] = anSol[2];
     }
   //boostToFile( plot, "test.out" );
+
+}
+
+TEST( IntegrationTests, EulerLLG )
+{
+  // set up parameters, langevin equation and initial condition
+  const float K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
+  , KB{ 1.38064852e-23 }, T{ 300 }, alpha{ 0.1 }, MU0{ 1.25663706e-6 }
+  , Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }, gamma{ 1.7609e11 };
+
+  const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
+  const float sigma = float( s );
+
+  StocLLGIto llg( sigma, alpha, 0.0, 0.0, hz );
+
+  array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
+
+  // set up integrator
+  const float tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
+  , dt{ 1e-16 }, dtau{ dt*tfactor };
+
+  mt19937 rng( 1234 );
+  mt19937 rng_a( 1234 );
+  mt19937 rng_2( 777777 );
+  normal_f dist( 0, sqrt( dtau ) );
+  normal_f dist_a( 0, sqrt( dt ) );
+  boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
+  boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
+
+  auto inte = Euler<float>( llg, m0, 0.0, dtau, rng );
+
+  // set to manual mode
+  inte.setManualWienerMode( true );
+  array_f dw( boost::extents[3] );
+  for( auto& i : dw )
+    i=0.0;
+  float W{ 0.0 }; // Wiener process (sum over dw)
+  // solutions
+  array_f nmSol( boost::extents[3] );
+  array_f anSol( boost::extents[3] );
+
+  int N=100000;
+  // to plot
+  matrix_f plot( boost::extents[2][N] );
+  for( array_f::index i=0; i!=N; ++i )
+    {
+      // step but restrict wiener process to 1D in z-component
+      dw[2] = vg();
+      inte.setWienerIncrements( dw );
+      inte.step();
+      nmSol = inte.getState();
+      float t = inte.getTime()/tfactor;
+      W += vg_a();
+
+      // Analytic solution from Hannay
+      float kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
+      , H{ 400*M_PI }, V{ 4.0/3.0*M_PI*pow( 2.5e-7,3 ) }, T{ 300 }
+      , Ms{ 1400 }, sigma{ std::sqrt( 2*alpha*kb*T/( gamma*Ms*V ) ) };
+      anSol[0] =
+	1/std::cosh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha, 2 ) ) )
+	* std::cos( gamma*( H*t+sigma*W )/( 1+pow( alpha,2 ) ) );
+
+      anSol[1] =
+	1/std::cosh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) )
+	* std::sin( gamma*( H*t+sigma*W )/( 1+pow( alpha,2 ) ) );
+
+      anSol[2] =
+	std::tanh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) );
+
+      ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-1 )
+	<< "Steps completed: " << i << std::endl;
+      ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-1 )
+	<< "Steps completed: " << i << std::endl;
+      ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-1 )
+      << "Steps completed: " << i << std::endl;
+
+      plot[0][i] = nmSol[2];
+      plot[1][i] = anSol[2];
+    }
+  boostToFile( plot, "test.out" );
 
 }
 
@@ -630,7 +754,7 @@ TEST( TwoStateMasterEquation, ConservationOfProbability )
   init[0] = 0.5;
   init[1] = 0.5;
 
-  RK4 integrator( eq, init, 0, 1e-7 );
+  auto integrator = RK4<float>( eq, init, 0, 1e-7 );
 
   // step the integrator and check that the probability is conserved
   // throughout.

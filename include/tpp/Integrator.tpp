@@ -6,9 +6,9 @@
 //
 
 // Constructor
-template<class T>
-Integrator<T>::Integrator( const T& le, const array_f& init_state,
-			   const float time )
+template<class C, typename T>
+Integrator<C, T>::Integrator( const C& le, const array<T>& init_state,
+			   const T time )
   : state( boost::extents[le.getDim()] )
   , lEq( &le )
   , initial_state( boost::extents[le.getDim()] )
@@ -20,11 +20,11 @@ Integrator<T>::Integrator( const T& le, const array_f& init_state,
 }
 
 // Get state
-template<class T>
-array_f Integrator<T>::getState() const { return state; }
+template<class C, typename T>
+array<T> Integrator<C, T>::getState() const { return state; }
 // Set State
-template<class T>
-void Integrator<T>::setState( const array_f s )
+template<class C, typename T>
+void Integrator<C, T>::setState( const array<T> s )
 {
 if( int( s.shape()[0] ) != lEq->getDim() )
     {
@@ -38,27 +38,27 @@ if( int( s.shape()[0] ) != lEq->getDim() )
 }
 
 // get time
-template<class T>
-float Integrator<T>::getTime() const { return t; }
+template<class C, typename T>
+T Integrator<C, T>::getTime() const { return t; }
 // set time
-template<class T>
-void Integrator<T>::setTime( const float time ) { t = time; }
+template<class C, typename T>
+void Integrator<C, T>::setTime( const T time ) { t = time; }
 
 // get the pointer to the integrator
-template<class T>
-const T& Integrator<T>::getLE() const { return *lEq; }
+template<class C, typename T>
+const C& Integrator<C, T>::getLE() const { return *lEq; }
 
 // reset the integrator to the initial condition
-template<class T>
-void Integrator<T>::reset()
+template<class C, typename T>
+void Integrator<C, T>::reset()
 {
   state = initial_state;
   t = initial_t;
 }
 
 // reset the integrator with a new inital condition
-template<class T>
-void Integrator<T>::reset( const array_f new_init )
+template<class C, typename T>
+void Integrator<C, T>::reset( const array<T> new_init )
 {
   initial_state = new_init;
   reset();
@@ -66,5 +66,8 @@ void Integrator<T>::reset( const array_f new_init )
 
 
 // Explicitly instantiate template instances
-template class Integrator<ODE>;
-template class Integrator<SDE>;
+// Only these type combinations are visible to user
+template class Integrator<ODE, float>;
+template class Integrator<ODE, double>;
+template class Integrator<SDE, float>;
+template class Integrator<SDE, double>;
