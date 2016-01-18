@@ -52,3 +52,4 @@ void Euler<T>::setWienerIncrements( const array_f a ) { dw=a; }
 
 // The following types are visible
 template class Euler<float>;
+template class Euler<double>;

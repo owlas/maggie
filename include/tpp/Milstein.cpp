@@ -120,3 +120,4 @@ void Milstein<T>::setWienerIncrements( const array<T> a ) { dw=a; }
 
 // Explicit class template instantiation
 template class Milstein<float>;
+template class Milstein<double>;

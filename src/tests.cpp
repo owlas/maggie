@@ -28,8 +28,8 @@ using normal_f=boost::random::normal_distribution<float>;
 // Test construction of StocLLG
 TEST(StochasticLLG, ContructAndDim)
 {
-  StocLLG llg( 1, 2, 3, 4, 5 );
-  EXPECT_EQ( 3, llg.getDim() );
+    StocLLG<float> llg( 1, 2, 3, 4, 5 );
+    EXPECT_EQ( 3, llg.getDim() );
 }
 
 // Test deterministic part of StocLLG
@@ -43,7 +43,7 @@ TEST(StochasticLLG, Drift)
   in[2] = 4;
 
   // Set up StocLLG and compute drift
-  StocLLG llg( 2, 3, 1, 2, 3 );
+  StocLLG<float> llg( 2, 3, 1, 2, 3 );
   llg.computeDrift( out, in, 0 );
 
   // Are the solutions correct?
@@ -63,7 +63,7 @@ TEST(StochasticLLG, ItoDrift)
     in[2] = 4;
 
     // Set up StocLLG and compute drift
-    StocLLGIto llg( 2, 3, 1, 2, 3 );
+    StocLLGIto<float> llg( 2, 3, 1, 2, 3 );
     llg.computeDrift( out, in, 0 );
 
     // Are the solutions correct?
@@ -81,7 +81,7 @@ TEST(StochasticLLG, ItoDiffusion)
     in[2] = 4;
 
     // set up the StocLLG and compute diffusion
-    StocLLGIto llg( 2, 3, 1, 2, 3 );
+    StocLLGIto<float> llg( 2, 3, 1, 2, 3 );
     llg.computeDiffusion( out, in, 0 );
 
     // are the solutions correct?
@@ -107,7 +107,7 @@ TEST(StochasticLLG, Diffusion)
   in[2] = 4;
 
   // set up the StocLLG and compute diffusion
-  StocLLG llg( 2, 3, 1, 2, 3 );
+  StocLLG<float> llg( 2, 3, 1, 2, 3 );
   llg.computeDiffusion( out, in, 0 );
 
   // are the solutions correct?
@@ -542,7 +542,7 @@ TEST( IntegrationTests, MilsteinLLG )
   const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
   const float sigma = float( s );
 
-  StocLLG llg( sigma, alpha, 0.0, 0.0, hz );
+  StocLLG<float> llg( sigma, alpha, 0.0, 0.0, hz );
 
   array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
 
@@ -622,7 +622,7 @@ TEST( IntegrationTests, EulerLLG )
   const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
   const float sigma = float( s );
 
-  StocLLGIto llg( sigma, alpha, 0.0, 0.0, hz );
+  StocLLGIto<float> llg( sigma, alpha, 0.0, 0.0, hz );
 
   array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
 

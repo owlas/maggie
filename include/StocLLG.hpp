@@ -10,50 +10,54 @@
 #include <SDE.hpp>
 
 #include <boost/multi_array.hpp>
-using array_f =  boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
-using cube_f = boost::multi_array<float,3>;
+template <typename T> using array = boost::multi_array<T,1>;
+template <typename T> using matrix = boost::multi_array<T,2>;
+template <typename T> using array3 = boost::multi_array<T,3>;
+using bidx = boost::multi_array_types::index;
 
-
-class StocLLG : public SDE<float>
+template <typename T>
+class StocLLG : public SDE<T>
 {
  public:
-        StocLLG( const float s, const float a,
-		 const float hx, const float hy, const float hz );
+        StocLLG( const T s, const T a,
+		 const T hx, const T hy, const T hz );
 
   // returns the drift vector
-  virtual void computeDrift( array_f&, const array_f&, const float ) const;
+    virtual void computeDrift( array<T>&, const array<T>&, const T ) const;
   // returns the diffusion marix
-  virtual void computeDiffusion( matrix_f&, const array_f&,
-				 const float ) const;
+    virtual void computeDiffusion( matrix<T>&, const array<T>&,
+				 const T ) const;
   // returns a vector of derivative sums for Taylor
-  virtual void computeDiffusionDerivatives( cube_f &out, const array_f &in,
-					    const float ) const;
+    virtual void computeDiffusionDerivatives( array3<T> &out, const array<T> &in,
+					    const T ) const;
 
-  void setReducedHeff( const float, const float, const float );
-  array_f getReducedHeff() const;
+  void setReducedHeff( const T, const T, const T );
+    array<T> getReducedHeff() const;
 
-  void setSigma( const float );
-  float getSigma() const;
+  void setSigma( const T );
+  T getSigma() const;
 
-  void setAlpha( const float );
-  float getAlpha() const;
+  void setAlpha( const T );
+  T getAlpha() const;
 
  private:
-    array_f h;
+    array<T> h;
     float sigma;
     float alpha;
 };
 
 // This is the Ito version of the Stochastic LLG
-class StocLLGIto : public StocLLG
+template <typename T>
+class StocLLGIto : public StocLLG<T>
 {
 public:
-    StocLLGIto( const float s, const float a,
-                const float hx, const float hy, const float hz );
+    StocLLGIto( const T s, const T a,
+                const T hx, const T hy, const T hz );
 
     // returns the drift vector
-    void computeDrift( array_f&, const array_f&, const float ) const;
+    void computeDrift( array<T>&, const array<T>&, const T ) const;
 
 };
+
+#include <tpp/StocLLG.cpp>
 #endif

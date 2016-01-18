@@ -67,3 +67,4 @@ void Heun<T>::setWienerIncrements( const array<T> a ) { dw=a; }
 
 // Explicit template declaration
 template class Heun<float>;
+template class Heun<double>;
