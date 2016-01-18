@@ -10,11 +10,12 @@
 #include <algorithm>
 #include <ODE.hpp>
 #include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
-using array3_f = boost::multi_array<float,3>;
+template <typename T> using array = boost::multi_array<T,1>;
+template <typename T> using matrix = boost::multi_array<T,2>;
+template <typename T> using array3 = boost::multi_array<T,3>;
 
-class SDE : public ODE<float>
+template <typename T>
+class SDE : public ODE<T>
 {
 public:
     SDE( const int dim, const int wDim );
@@ -22,17 +23,18 @@ public:
     int getWDim() const; // get dimensions of equation
 
     // Return Langevin components from a given state vector
-    virtual void computeDiffusion( matrix_f& out, const array_f& in,
-                                   const float t ) const = 0;
+    virtual void computeDiffusion( matrix<T>& out, const array<T>& in,
+                                   const T t ) const = 0;
 
     // Langevin equations can specify derivative terms for the diffusion matrix
     // BB[i][j][k] = PD of B[i][j] w.r.t. state[k]
     //
-    virtual void computeDiffusionDerivatives( array3_f &out, const array_f &in,
-                                              const float t ) const;
+    virtual void computeDiffusionDerivatives( array3<T> &out, const array<T> &in,
+                                              const T t ) const;
 
 private:
     const int wDim;
 };
 
+#include <tpp/SDE.cpp>
 #endif

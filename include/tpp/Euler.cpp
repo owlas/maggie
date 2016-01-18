@@ -8,9 +8,9 @@
 
 // Constructor
 template <typename T>
-Euler<T>::Euler( const SDE& sde, const array<T>& init_state, const T time,
+Euler<T>::Euler( const SDE<T>& sde, const array<T>& init_state, const T time,
                  const T dt, mt19937& rng )
-    : Integrator<SDE, T>( sde, init_state, time )
+    : Integrator<SDE<T>, T>( sde, init_state, time )
     , h( dt )
     , dim( sde.getDim() )
     , wDim( sde.getWDim() )

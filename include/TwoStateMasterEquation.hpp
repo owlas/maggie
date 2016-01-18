@@ -10,6 +10,14 @@
 
 #include<ODE.hpp>
 #include<functional>
+#include<stdexcept>
+#include<iostream>
+using std::cout;
+using std::endl;
+using std::invalid_argument;
+
+#include <boost/multi_array.hpp>
+using array_f = boost::multi_array<float,1>;
 
 class TwoStateMasterEquation : public ODE<float>
 {

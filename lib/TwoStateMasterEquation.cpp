@@ -9,11 +9,6 @@
 //
 
 #include<TwoStateMasterEquation.hpp>
-#include<stdexcept>
-#include<iostream>
-using std::cout;
-using std::endl;
-using std::invalid_argument;
 
 // constructor
 TwoStateMasterEquation::TwoStateMasterEquation( const float rate1,

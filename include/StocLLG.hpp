@@ -15,7 +15,7 @@ using matrix_f = boost::multi_array<float,2>;
 using cube_f = boost::multi_array<float,3>;
 
 
-class StocLLG : public SDE
+class StocLLG : public SDE<float>
 {
  public:
         StocLLG( const float s, const float a,
@@ -27,7 +27,7 @@ class StocLLG : public SDE
   virtual void computeDiffusion( matrix_f&, const array_f&,
 				 const float ) const;
   // returns a vector of derivative sums for Taylor
-  virtual void computeDiffusionDerivatives( array3_f &out, const array_f &in,
+  virtual void computeDiffusionDerivatives( cube_f &out, const array_f &in,
 					    const float ) const;
 
   void setReducedHeff( const float, const float, const float );

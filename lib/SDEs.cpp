@@ -1,14 +1,14 @@
 // SDES.cpp -- implementation of stochastic differential equations as a
 // Langevin Equation object.
-// 
+//
 // Oliver Laslett <O.Laslett@soton.ac.uk>
 // 2015
-// 
+//
 
 #include <SDEs.hpp>
 
 OH::OH( const float t, const float m, const float s )
-  : SDE( 1,1 )
+  : SDE<float>( 1,1 )
   , theta( t )
   , mu( m )
   , sigma( s )
@@ -30,7 +30,7 @@ void OH::computeDiffusion( matrix_f& out, const array_f&, const float ) const
 }
 
 Wiener::Wiener()
-  : SDE( 1,1 )
+  : SDE<float>( 1,1 )
 {
   // empty
 }
@@ -60,7 +60,7 @@ void ODEConstantDrift::computeDrift( array_f& out, const array_f&,
 }
 
 SDE_AXpB::SDE_AXpB( const float drift, const float diff )
-  : SDE( 1,1 )
+  : SDE<float>( 1,1 )
   , a( drift )
   , b( diff )
 {}
@@ -78,7 +78,7 @@ void SDE_AXpB::computeDiffusion( matrix_f& out, const array_f&, const float )
 }
 
 SDE_AXpBX::SDE_AXpBX( const float drift, const float diff )
-  : SDE( 1,1 )
+  : SDE<float>( 1,1 )
   , a( drift )
   , b( diff )
 {}
@@ -97,7 +97,7 @@ void SDE_AXpBX::computeDiffusion( matrix_f& out, const array_f& in,
 
 MultiplicativeConstantNoise::MultiplicativeConstantNoise( const float drift,
 							  const float diffusion )
-  : SDE( 1,1 )
+  : SDE<float>( 1,1 )
   , a( drift )
   , b( diffusion )
 {
@@ -118,7 +118,7 @@ void MultiplicativeConstantNoise::computeDiffusion( matrix_f& out,
   out[0][0] = b*in[0];
 }
 
-void MultiplicativeConstantNoise::computeDiffusionDerivatives( array3_f& out,
+void MultiplicativeConstantNoise::computeDiffusionDerivatives( cube_f& out,
 							       const array_f&,
 							       const float )
   const

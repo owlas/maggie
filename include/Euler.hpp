@@ -20,10 +20,10 @@ template <typename T> using array = boost::multi_array<T,1>;
 template <typename T> using matrix = boost::multi_array<T,2>;
 
 template <typename T>
-class Euler : public Integrator<SDE, T>
+class Euler : public Integrator<SDE<T>, T>
 {
 public:
-    Euler( const SDE& sde, const array<T>& init_state, const T time,
+    Euler( const SDE<T>& sde, const array<T>& init_state, const T time,
            const T dt, mt19937& rng );
 
     virtual void step();

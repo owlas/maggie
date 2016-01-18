@@ -10,10 +10,10 @@
 
 // Constructor
 template <typename T>
-Milstein<T>::Milstein( const SDE &le, const array<T>& init_state,
+Milstein<T>::Milstein( const SDE<T> &le, const array<T>& init_state,
                        const T time, const T dt,
                        mt19937& rng_1, mt19937& rng_2 )
-: Integrator<SDE, T>( le, init_state, time )
+    : Integrator<SDE<T>, T>( le, init_state, time )
     , h( dt )
     , dim( le.getDim() )
     , wDim( le.getWDim() )

@@ -9,9 +9,9 @@
 
 // Constructor
 template <typename T>
-Heun<T>::Heun( const SDE &le, const array<T>& init_state,
+Heun<T>::Heun( const SDE<T> &le, const array<T>& init_state,
                const T time, const T dt, mt19937& rng )
-: Integrator<SDE,T>( le, init_state, time)
+    : Integrator<SDE<T>,T>( le, init_state, time)
     , h( dt )
     , dim( le.getDim() )
     , wDim( le.getWDim() )

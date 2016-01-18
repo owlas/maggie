@@ -19,12 +19,12 @@ template <typename T> using array = boost::multi_array<T,1>;
 template <typename T> using matrix = boost::multi_array<T,2>;
 
 template <typename T>
-class Heun : public Integrator<SDE, T>
+class Heun : public Integrator<SDE<T>, T>
 {
 
 public:
     // Constructor
-    Heun( const SDE &sde, const array<T>& init_state,
+    Heun( const SDE<T> &sde, const array<T>& init_state,
           const T time, const T dt, mt19937 &rng );
 
     // Step the integrator once

@@ -13,7 +13,7 @@ using std::endl;
 // Constructor
 StocLLG::StocLLG( const float s, const float a,
 		  const float hx, const float hy, const float hz )
-    : SDE( 3,3 )
+    : SDE<float>( 3,3 )
   , h( boost::extents[3] )
 {
   setSigma( s );
@@ -73,7 +73,7 @@ void StocLLG::computeDiffusion( matrix_f& out, const array_f& state,
 }
 
 // compute the Taylor derivative sums L
-void StocLLG::computeDiffusionDerivatives( array3_f &out,
+void StocLLG::computeDiffusionDerivatives( cube_f &out,
 					   const array_f &state,
 					   const float ) const
 {

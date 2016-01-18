@@ -68,6 +68,6 @@ void Integrator<C, T>::reset( const array<T> new_init )
 // Explicitly instantiate template instances
 // Only these type combinations are visible to user
 template class Integrator<ODE<float>, float>;
-template class Integrator<ODE<float>, double>;
-template class Integrator<SDE, float>;
-template class Integrator<SDE, double>;
+template class Integrator<ODE<double>, double>;
+template class Integrator<SDE<float>, float>;
+template class Integrator<SDE<double>, double>;

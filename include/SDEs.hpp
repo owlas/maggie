@@ -11,9 +11,10 @@
 #include <boost/multi_array.hpp>
 using array_f = boost::multi_array<float,1>;
 using matrix_f = boost::multi_array<float,2>;
+using cube_f = boost::multi_array<float,3>;
 
 // Ornstein-Uhlenbeck process
-class OH : public SDE
+class OH : public SDE<float>
 {
 public:
   // constructor
@@ -32,7 +33,7 @@ private:
 };
 
 // Wiener process
-class Wiener : public SDE
+class Wiener : public SDE<float>
 {
 public:
   Wiener();
@@ -57,7 +58,7 @@ private:
 
 // Scalar SDE with constant drift and additive noise
 // dx = ax * dt + b * dW
-class SDE_AXpB : public SDE
+class SDE_AXpB : public SDE<float>
 {
 public:
   SDE_AXpB( const float a, const float b );
@@ -72,7 +73,7 @@ private:
 
 // Scalar SDE with constant drift and multiplicative noise
 // dx = ax * dt + bx * dW
-class SDE_AXpBX : public SDE
+class SDE_AXpBX : public SDE<float>
 {
 public:
   SDE_AXpBX( const float a, const float b );
@@ -87,7 +88,7 @@ private:
 
 // Stochastic differential equation with constant multiplicative noise
 // dX = aX dt + bX dW
-class MultiplicativeConstantNoise : SDE
+class MultiplicativeConstantNoise : SDE<float>
 {
 public:
   MultiplicativeConstantNoise( const float a, const float b );
@@ -95,7 +96,7 @@ public:
 			     const float ) const;
   virtual void computeDiffusion( matrix_f& out, const array_f& in,
 				 const float ) const;
-  virtual void computeDiffusionDerivatives( array3_f& out, const array_f& in,
+  virtual void computeDiffusionDerivatives( cube_f& out, const array_f& in,
 					    const float ) const;
 
 private:

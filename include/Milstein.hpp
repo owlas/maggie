@@ -23,11 +23,11 @@ using std::sqrt; using std::pow;
 #include <algorithm>
 
 template <typename T>
-class Milstein : public Integrator<SDE, T>
+class Milstein : public Integrator<SDE<T>, T>
 {
 public:
     // Constructor
-    Milstein( const SDE &le, const array<T>& init_state,
+    Milstein( const SDE<T> &le, const array<T>& init_state,
               const T time, const T dt,
               mt19937 &rng_1, mt19937 &rng_2 );
 
