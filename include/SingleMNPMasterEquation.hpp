@@ -14,6 +14,8 @@
 #include<KramersTrig.hpp>
 #include<stdexcept>
 #include<functional>
+#include <boost/multi_array.hpp>
+using array_f = boost::multi_array<float,1>;
 
 class SingleMNPMasterEquation : public ODE<float>
 {
@@ -44,7 +46,7 @@ public:
   float state_rotation( float t ) const;
 
   // Compute the drift of the master equation
-  virtual void computeDrift( array_f& out, array_f& in, float t );
+  void computeDrift( array_f& out, const array_f& in, const float t ) const;
 
 private:
   float k;

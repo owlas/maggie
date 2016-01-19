@@ -38,8 +38,8 @@ SingleMNPMasterEquation( float anis,
                                0.1, 100 ) {}
 
 void SingleMNPMasterEquation::computeDrift( array_f& out,
-                                            array_f& in,
-                                            float t )
+                                            const array_f& in,
+                                            const float t ) const
 {
     float rate1, rate2;
     float h = fieldPtr->getField( t );
