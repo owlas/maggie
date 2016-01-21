@@ -779,45 +779,60 @@ TEST( IOTests, ReadAndWrite )
 // Test the results of the Kramers calculations
 TEST( Kramers, MaxLocation )
 {
-  float h=0.3, psi=0.7;
-  ASSERT_LE( std::abs( 1.862366031 -
-		       KramersTrig::theta_max( h, psi ) )
-	     , pow( h,4 ) );
+    double h=0.3, psi=0.7;
+    ASSERT_LE( std::abs( 1.862366031 -
+                         KramersTrig::theta_max( h, psi ) )
+               , pow( h,4 ) );
 }
 
 TEST( Kramers, MinLocationOne )
 {
-  float h=0.3, psi=0.7;
-  ASSERT_LE( std::abs( 0.157479602 -
-		       KramersTrig::theta_min1( h, psi ) )
-	     , pow( h,4 ) );
+    double h=0.3, psi=0.7;
+    ASSERT_LE( std::abs( 0.157479602 -
+                         KramersTrig::theta_min1( h, psi ) )
+               , pow( h,4 ) );
 }
 
 TEST( Kramers, MinLocationTwo )
 {
-  float h=0.3, psi=0.7;
-  ASSERT_LE( std::abs( 2.885440350 -
-		       KramersTrig::theta_min2( h, psi ) )
-	     , pow( h,4 ) );
+    double h=0.3, psi=0.7;
+    ASSERT_LE( std::abs( 2.885440350 -
+                         KramersTrig::theta_min2( h, psi ) )
+               , pow( h,4 ) );
 }
 
 // Check the energy barrier calculations in reduced energy
 // i.e. e=E/(2VK)
-TEST( Kramers, EBarOne )
+TEST( Kramers, GammaValues )
 {
-  float h=0.3, psi=0.7, s=3.0;
-  float betaV = KramersTrig::k_ebar_1( s, h, psi );
-  float res = betaV/s/2.0;
-  ASSERT_LE( std::abs( 0.584159039 - res )
-	     , pow( h,4 ) );
-}
-TEST( Kramers, EBarTwo )
-{
-  float h=0.3, psi=0.7, s=3.0;
-  float betaV = KramersTrig::k_ebar_2( s, h, psi );
-  float res = betaV/s/2.0;
-  ASSERT_LE( std::abs( 0.134437709 - res )
-	     , pow( h,4 ) );
+    double alpha{ 10.0 }, sigma{ 10.0 }, T{ 300 }, r{ 5e-9 }, psi{ M_PI/4.0 }
+    , Ms{ 3.5e5 }, gamma{ 1.76086e11 }, h{ 0.1 };
+    double V{ 4.0/3.0*M_PI*pow( r,3 ) };
+
+    // energy barrier
+    double dV1 = KramersTrig::k_ebar_1( sigma, h, psi );
+    ASSERT_DOUBLE_EQ( 10.100505, dV1 );
+
+    // angular component
+    double w0 = KramersTrig::k_angular_0( sigma, h, psi, gamma, Ms );
+    ASSERT_DOUBLE_EQ( 2.57474549172376e6, w0 );
+
+    // another angular component
+    double w1 = KramersTrig::k_angular_1( sigma, h, psi, gamma, Ms );
+    ASSERT_DOUBLE_EQ( 1.0753072772968885e7, w1 );
+    double w2 = KramersTrig::k_angular_2( sigma, h, psi, gamma, Ms );
+    ASSERT_DOUBLE_EQ( 9.31941058203112e6, w2 );
+
+    // saddle angular frequency
+    double W0 = KramersTrig::k_damped_angular_0( sigma, h, psi, gamma, Ms, alpha,
+                                                V, T );
+    ASSERT_DOUBLE_EQ( 7.2815865373583956e9, W0 );
+
+    // Escape rate
+    double ans1 = KramersTrig::ihd_rate_1(sigma, h, psi, gamma, Ms, alpha, V, T);
+    ASSERT_DOUBLE_EQ( 198724.23759829457, ans1 );
+    double ans2 = KramersTrig::ihd_rate_2(sigma, h, psi, gamma, Ms, alpha, V, T);
+    ASSERT_DOUBLE_EQ( 2.8932560768992421e6, ans2 );
 }
 
 

@@ -11,9 +11,9 @@
 #include<KramersTrig.hpp>
 
 // Taylor expansion for the first activation energy
-float KramersTrig::k_ebar_1( float s, float h, float psi )
+double KramersTrig::k_ebar_1( double s, double h, double psi )
 {
-  float res;
+  double res;
   res = 1;
   res += 2*h*( cos( psi ) - sin( psi ) );
   res += pow( h,2 );
@@ -27,9 +27,9 @@ float KramersTrig::k_ebar_1( float s, float h, float psi )
 }
 
 // Taylor expansion for the second activation energy
-float KramersTrig::k_ebar_2( float s, float h, float psi )
+double KramersTrig::k_ebar_2( double s, double h, double psi )
 {
-  float res;
+  double res;
   res = 1;
   res -= 2*h*( cos( psi ) + sin( psi ) );
   res += pow( h,2 );
@@ -43,54 +43,54 @@ float KramersTrig::k_ebar_2( float s, float h, float psi )
 }
 
 // Taylor expansion for the angular terms [zeroth]
-float KramersTrig::k_angular_0( float s, float h, float psi,
-                                float gamma, float Ms )
+double KramersTrig::k_angular_0( double s, double h, double psi,
+                                double gamma, double Ms )
 {
-  float res;
+  double res;
   res = 2;
   res -= h*sin( psi );
   res -= pow( h,2 )*( 3+cos( 2*psi ) )/8.0;
   res -= pow( h,3 )*( 19+17*cos( 2*psi ) )*sin( psi )/16.0;
   res -= pow( h,4 )*( 351+28*cos( 2*psi )-283*cos( 4*psi ) )/512.0;
-  res -= pow( h,5 )*( 2021+1332*cos( 2*psi )-663*cos( 4*psi ) )
-    *sin( psi )/1024.0;
-  res *= s*gamma*sqrt( h*sin( psi ) )/Ms;
+  /*res -= pow( h,5 )*( 2021+1332*cos( 2*psi )-663*cos( 4*psi ) )
+   *sin( psi )/1024.0;*/
+  res *= s*( gamma/Ms )*sqrt( h*sin( psi ) );
   return res;
 }
 
 // Taylor expansion for the angular terms [first]
-float KramersTrig::k_angular_1( float s, float h, float psi,
-                                float gamma, float Ms )
+double KramersTrig::k_angular_1( double s, double h, double psi,
+                                double gamma, double Ms )
 {
-  float res;
+  double res;
   res = 2;
   res += 2*h*cos( psi );
   res -= pow( h,2 )*pow( sin( psi ),2 );
   res += 3*pow( h,3 )*cos( psi )*pow( sin( psi ),2 );
-  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/16.0;
-  res *= s*gamma/Ms;
+  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/8.0;
+  res *= s*( gamma/Ms );
   return res;
 }
-                                      
+
 // Taylor expansion for the angular terms [second]
-float KramersTrig::k_angular_2( float s, float h, float psi,
-                                float gamma, float Ms )
+double KramersTrig::k_angular_2( double s, double h, double psi,
+                                double gamma, double Ms )
 {
-  float res;
+  double res;
   res = 2;
   res -= 2*h*cos( psi );
   res -= pow( h,2 )*pow( sin( psi ),2 );
   res -= 3*pow( h,3 )*cos( psi )*pow( sin( psi ),2 );
-  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/16.0;
+  res -= pow( h,4 )*( 21+19*cos( 2*psi ) )*pow( sin( psi ),2 )/8.0;
   res *= s*gamma/Ms;
   return res;
 }
 
 
 // Taylor expansion for the coefficient 1
-float KramersTrig::k_coef_1( float s, float h, float psi )
+double KramersTrig::k_coef_1( double s, double h, double psi )
 {
-  float res;
+  double res;
   res = 1;
   res += pow( h,2 )*pow( cos( psi ),2 )
     *( 0.5+h*sin( psi )+3*pow( h,2 )*( 5-3*cos( 2*psi ) )/16.0 );
@@ -99,9 +99,9 @@ float KramersTrig::k_coef_1( float s, float h, float psi )
 }
 
 // Taylor expansion for the coefficient 2
-float KramersTrig::k_coef_2( float s, float h, float psi )
+double KramersTrig::k_coef_2( double s, double h, double psi )
 {
-  float res;
+  double res;
   res = -1;
   res += h*sin( psi );
   res += pow( h,2 )*pow( cos( psi ),2 );
@@ -112,51 +112,54 @@ float KramersTrig::k_coef_2( float s, float h, float psi )
 }
 
 // Neel relaxation time constant
-float KramersTrig::k_taun( float gamma, float Ms, float alpha, float V,
-              float T )
+double KramersTrig::k_taun( double gamma, double Ms, double alpha, double V,
+              double T )
 {
-  float beta = V/( Constants::KB*T );
-  return beta*Ms*( 1+pow( alpha,2 ) )/( 2*gamma*alpha );
+    double beta = ( V/Constants::KB_d ) * ( 1/T );
+    double res = beta * ( Ms/gamma );
+    res *= ( 1+pow( alpha,2 ) )/( 2*alpha );
+  return res;
 }
-    
+
 // Damped saddle angular frequency
-float KramersTrig::k_damped_angular_0( float s, float h, float psi, float gamma,
-                                       float Ms, float alpha, float V, float T )
+double KramersTrig::k_damped_angular_0( double s, double h, double psi, double gamma,
+                                       double Ms, double alpha, double V, double T )
 {
-  float taun = KramersTrig::k_taun( gamma, Ms, alpha, V, T );
-  float c1 = KramersTrig::k_coef_1( s, h, psi );
-  float c2 = KramersTrig::k_coef_2( s, h, psi );
-  return 1/( 4*taun )
-    *( -c1-c2+sqrt( pow( c2-c1, 2 )
-                    -4*( 1/pow( alpha,2 ) )*c1*c2 ) );
+  double taun = KramersTrig::k_taun( gamma, Ms, alpha, V, T );
+  double c1 = KramersTrig::k_coef_1( s, h, psi );
+  double c2 = KramersTrig::k_coef_2( s, h, psi );
+  double res = -c1-c2+sqrt( pow( c2-c1, 2 ) -4*( 1/pow( alpha,2 ) )*c1*c2 );
+  res *= 0.25;
+  res /= taun;
+  return res;
 }
 
 // Kalmykov's expression for the IHD escape rate with oblique field
-float KramersTrig::ihd_rate_1( float s, float h, float psi, float gamma, float Ms,
-                               float alpha, float V, float T )
+double KramersTrig::ihd_rate_1( double s, double h, double psi, double gamma, double Ms,
+                               double alpha, double V, double T )
 {
-  float W0 = KramersTrig::k_damped_angular_0( s, h, psi, gamma, Ms, alpha, V, T );
-  float w1 = KramersTrig::k_angular_1( s, h, psi, gamma, Ms );
-  float w0 = KramersTrig::k_angular_0( s, h, psi, gamma, Ms );
-  float bDelV = KramersTrig::k_ebar_1( s, h, psi );
-  
+  double W0 = KramersTrig::k_damped_angular_0( s, h, psi, gamma, Ms, alpha, V, T );
+  double w1 = KramersTrig::k_angular_1( s, h, psi, gamma, Ms );
+  double w0 = KramersTrig::k_angular_0( s, h, psi, gamma, Ms );
+  double bDelV = KramersTrig::k_ebar_1( s, h, psi );
+
   return W0*w1/( 2*M_PI*w0 )*exp( -bDelV );
 }
 
 // Kalmykov's expression for the IHD escape rate with oblique field
-float KramersTrig::ihd_rate_2( float s, float h, float psi, float gamma, float Ms,
-                               float alpha, float V, float T )
+double KramersTrig::ihd_rate_2( double s, double h, double psi, double gamma, double Ms,
+                               double alpha, double V, double T )
 {
-  float W0 = KramersTrig::k_damped_angular_0( s, h, psi, gamma, Ms, alpha, V, T );
-  float w2 = KramersTrig::k_angular_2( s, h, psi, gamma, Ms );
-  float w0 = KramersTrig::k_angular_0( s, h, psi, gamma, Ms );
-  float bDelV = KramersTrig::k_ebar_2( s, h, psi );
-  
+  double W0 = KramersTrig::k_damped_angular_0( s, h, psi, gamma, Ms, alpha, V, T );
+  double w2 = KramersTrig::k_angular_2( s, h, psi, gamma, Ms );
+  double w0 = KramersTrig::k_angular_0( s, h, psi, gamma, Ms );
+  double bDelV = KramersTrig::k_ebar_2( s, h, psi );
+
   return W0*w2/( 2*M_PI*w0 )*exp( -bDelV );
 }
 
 // Kalmykov's expressions for the energy maxima and minima
-float KramersTrig::theta_max( float h, float psi )
+double KramersTrig::theta_max( double h, double psi )
 {
   return acos( -h*cos(psi)
 	       -pow( h,2 )*sin(psi)*cos(psi)
@@ -167,7 +170,7 @@ float KramersTrig::theta_max( float h, float psi )
 				     -29*cos(4*psi) ) ) );
 }
 
-float KramersTrig::theta_min1( float h, float psi )
+double KramersTrig::theta_min1( double h, double psi )
 {
   return acos( 1 - pow( h,2 )/2.0*pow( sin(psi),2 )
 	       *( 1-2*h*cos(psi)
@@ -177,7 +180,7 @@ float KramersTrig::theta_min1( float h, float psi )
 				      -19*cos(4*psi) ) ) );
 }
 
-float KramersTrig::theta_min2( float h, float psi )
+double KramersTrig::theta_min2( double h, double psi )
 {
   return acos( -1 + pow( h,2 )/2.0*pow( sin(psi),2 )
 	       *( 1+2*h*cos(psi)

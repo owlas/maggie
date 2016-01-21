@@ -17,27 +17,27 @@ using std::acos;
 
 namespace KramersTrig
 {
-  float k_ebar_1( float s, float h, float psi );
-  float k_ebar_2( float s, float h, float psi );
-  float k_angular_0( float s, float h, float psi,
-                     float gamma, float Ms );
-  float k_angular_1( float s, float h, float psi,
-                     float gamma, float Ms );
-  float k_angular_2( float s, float h, float psi,
-                     float gamma, float Ms );
-  float k_coef_1( float s, float h, float psi );
-  float k_coef_2( float s, float h, float psi );
-  float k_taun( float gamma, float Ms, float alpha, float V,
-                float T );
-  float k_damped_angular_0( float s, float h, float psi, float gamma,
-                            float Ms, float alpha, float V, float T );
-  float ihd_rate_1( float s, float h, float psi, float gamma, float Ms,
-                    float alpha, float V, float T );
-  float ihd_rate_2( float s, float h, float psi, float gamma, float Ms,
-                    float alpha, float V, float T );
-  float theta_max( float h, float psi );
-  float theta_min1( float h, float psi );
-  float theta_min2( float h, float psi );
+  double k_ebar_1( double s, double h, double psi );
+  double k_ebar_2( double s, double h, double psi );
+  double k_angular_0( double s, double h, double psi,
+                     double gamma, double Ms );
+  double k_angular_1( double s, double h, double psi,
+                     double gamma, double Ms );
+  double k_angular_2( double s, double h, double psi,
+                     double gamma, double Ms );
+  double k_coef_1( double s, double h, double psi );
+  double k_coef_2( double s, double h, double psi );
+  double k_taun( double gamma, double Ms, double alpha, double V,
+                double T );
+  double k_damped_angular_0( double s, double h, double psi, double gamma,
+                            double Ms, double alpha, double V, double T );
+  double ihd_rate_1( double s, double h, double psi, double gamma, double Ms,
+                    double alpha, double V, double T );
+  double ihd_rate_2( double s, double h, double psi, double gamma, double Ms,
+                    double alpha, double V, double T );
+  double theta_max( double h, double psi );
+  double theta_min1( double h, double psi );
+  double theta_min2( double h, double psi );
 }
 
 #endif
