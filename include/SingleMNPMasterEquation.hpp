@@ -16,6 +16,10 @@
 #include<functional>
 #include <boost/multi_array.hpp>
 using array_f = boost::multi_array<float,1>;
+#include <utility>
+using pair = std::pair<float, float>;
+#include <cmath>
+using std::abs;
 
 class SingleMNPMasterEquation : public ODE<float>
 {
@@ -43,7 +47,7 @@ public:
   float ediff( float t );
 
   // compute the angle of the minima
-  float state_rotation( float t ) const;
+  pair state_rotation( const float t ) const;
 
   // Compute the drift of the master equation
   void computeDrift( array_f& out, const array_f& in, const float t ) const;

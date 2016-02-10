@@ -161,31 +161,30 @@ double KramersTrig::ihd_rate_2( double s, double h, double psi, double gamma, do
 // Kalmykov's expressions for the energy maxima and minima
 double KramersTrig::theta_max( double h, double psi )
 {
-  return acos( -h*cos(psi)
-	       -pow( h,2 )*sin(psi)*cos(psi)
-	       *( 1+h*sin(psi)
-		  + pow( h,2 )/4.0*( 3-cos(2*psi) )
-		  + pow( h,3 )/2.0*sin(psi)*( 2+cos(2*psi) )
-		  + pow( h,4 )/64.0*(73-20*cos(2*psi)
-				     -29*cos(4*psi) ) ) );
+    return ( -h*cos(psi) -pow( h,2 )*sin(psi)*cos(psi)
+                 *( 1+h*sin(psi)
+                    + pow( h,2 )/4.0*( 3-cos(2*psi) )
+                    + pow( h,3 )/2.0*sin(psi)*( 2+cos(2*psi) )
+                    + pow( h,4 )/64.0*(73-20*cos(2*psi)
+                                       -29*cos(4*psi) ) ) );
 }
 
 double KramersTrig::theta_min1( double h, double psi )
 {
-  return acos( 1 - pow( h,2 )/2.0*pow( sin(psi),2 )
-	       *( 1-2*h*cos(psi)
-		  + pow( h,2 )/8.0*( 13+11*cos(2*psi) )
-		  - pow( h,3 )*( 3+cos(2*psi)*cos(psi) )
-		  + pow( h,4 )/64.0*( 184+156*cos(2*psi)
-				      -19*cos(4*psi) ) ) );
+    return ( 1 - pow( h,2 )/2.0*pow( sin(psi),2 )
+                 *( 1-2*h*cos(psi)
+                    + pow( h,2 )/8.0*( 13+11*cos(2*psi) )
+                    - pow( h,3 )*( 3+cos(2*psi)*cos(psi) )
+                    + pow( h,4 )/64.0*( 184+156*cos(2*psi)
+                                        -19*cos(4*psi) ) ) );
 }
 
 double KramersTrig::theta_min2( double h, double psi )
 {
-  return acos( -1 + pow( h,2 )/2.0*pow( sin(psi),2 )
-	       *( 1+2*h*cos(psi)
-		  + pow( h,2 )/8.0*( 13+11*cos(2*psi) )
-		  + pow( h,3 )*( 3+cos(2*psi) )*cos(psi)
-		  + pow( h,4 )/64.0*( 184+156*cos(2*psi)
-				      -19*cos(4*psi) ) ) );
+    return ( -1 + pow( h,2 )/2.0*pow( sin(psi),2 )
+                 *( 1+2*h*cos(psi)
+                    + pow( h,2 )/8.0*( 13+11*cos(2*psi) )
+                    + pow( h,3 )*( 3+cos(2*psi) )*cos(psi)
+                    + pow( h,4 )/64.0*( 184+156*cos(2*psi)
+                                        -19*cos(4*psi) ) ) );
 }
