@@ -23,6 +23,9 @@ using array_d = boost::multi_array<double, 1>;
 #include<stdexcept>
 using std::invalid_argument;
 
+#include<array>
+using d3 = std::array<double, 3>;
+
 class Particle
 {
 public:
@@ -55,6 +58,10 @@ public:
   // Compute the Neel-Arrhenius transition rates at a given temperature
   array_d neelTransitionRates( double temp, double barrier1,
                                double barrier2 )     const;
+
+    // Compute the effective field from the anisotropy
+    d3 computeAnisotropyField( const d3& ) const;
+
 
 
 private:

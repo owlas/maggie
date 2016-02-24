@@ -16,7 +16,10 @@
 #include<boost/multi_array.hpp>
 using array_d = boost::multi_array<double,1>;
 using matrix_d = boost::multi_array<double,2>;
-using array_d3 = boost::multi_array<double,3>;
+using array3_d = boost::multi_array<double,3>;
+
+#include <array>
+using d3 = std::array<double, 3>;
 
 
 class ParticleCluster
@@ -42,14 +45,14 @@ public:
     // getters
     unsigned int getNParticles() const;
     matrix_d getLocations() const;
-    array_d3 getDistances() const;
+    array3_d getDistances() const;
     Particle getParticle( const int n ) const;
 
 
 private:
-  unsigned int const N;
-  std::vector<Particle> particles;
-  matrix_d locs;
-  array_d3 dist;
+    unsigned int const N;
+    std::vector<Particle> particles;
+    matrix_d locs;
+    array3_d dist;
 };
 #endif
