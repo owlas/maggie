@@ -2,7 +2,7 @@
 # Make file for compiling the maggie executable
 #
 
-CC=g++
+CXX=g++
 INC_PATH=include
 OBJ_PATH=objects
 LIB_PATH=lib
@@ -21,15 +21,24 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
-default: runtests convergence_tests llg_solver_convergence llgsim
+default: initial runtests convergence_tests llg_solver_convergence llgsim
+
+dependencies:
+	sudo apt-get install libboost-all-dev
+	git submodule init
+	git submodule update
+
+initial:
+# Create objects folder and pull inih submodule
+	mkdir -p objects
 
 # gtest builds the gtest and gmock modules
 #
 gmock:
-	$(CC) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
+	$(CXX) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
 		-isystem $(GMOCK_DIR) -I$(GMOCK_DIR)/include \
 		-pthread -c $(GTEST_DIR)/src/gtest-all.cc
-	$(CC) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
+	$(CXX) 	-isystem $(GTEST_DIR) -I$(GTEST_DIR)/include \
 		-isystem $(GMOCK_DIR) -I$(GMOCK_DIR)/include \
 		-pthread -c $(GMOCK_DIR)/src/gmock-all.cc
 	ar -rv libgmock.a gtest-all.o gmock-all.o
@@ -37,21 +46,21 @@ gmock:
 # Create the tests executable - tests
 #
 runtests: src/tests.cpp libmaggie.so
-	$(CC) 	$(CPP_FLAGS) \
+	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/tests.cpp -L$(LIB_DIR) $(LIBS)
 
 # Create the convergence tests
 #
 convergence_tests: src/convergence_tests.cpp libmaggie.so
-	$(CC) 	$(CPP_FLAGS) \
+	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/convergence_tests.cpp -L$(LIB_DIR) $(LIBS)
 
 # Create the llg convergence tests
 #
 llg_solver_convergence: src/llg_solver_convergence.cpp libmaggie.so
-	$(CC) 	$(CPP_FLAGS) \
+	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/llg_solver_convergence.cpp -L$(LIB_DIR) $(LIBS)
 
@@ -59,21 +68,21 @@ llg_solver_convergence: src/llg_solver_convergence.cpp libmaggie.so
 # Create the examples
 #
 llgsim: src/llgsim.cpp libmaggie.so
-	$(CC) 	$(CPP_FLAGS) \
+	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/llgsim.cpp -L$(LIB_DIR) $(LIBS)
 
 # Shared library maggie.so used for objects
 #
 libmaggie.so: $(OBJ_FILES)
-	$(CC) -shared -o $@ $^
+	$(CXX) -shared -o $@ $^
 
 
 
 # Compile objects from source
 #
 $(OBJ_PATH)/%.o: $(LIB_PATH)/%.cpp
-	$(CC) 	$(CPP_FLAGS) \
+	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -c -fPIC \
 		-o $@ $<
 
@@ -82,6 +91,9 @@ $(OBJ_PATH)/%.o: $(LIB_PATH)/%.cpp
 clean:
 	rm -f objects/*
 	rm -f main
-
+	rm -f libmaggie.so
 gclean:
-	rm -f gtest-all.o, libgtest.a
+	rm -f gtest-all.o
+	rm -f libgtest.a
+	rm -f libgmock.a
+	rm -f gmock-all.o
