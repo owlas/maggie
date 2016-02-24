@@ -19,6 +19,9 @@ using std::sqrt; using std::exp;
 typedef boost::multi_array<float,1> array_f;
 typedef boost::multi_array<float,2> matrix_f;
 typedef boost::multi_array<float,3> cube_f;
+typedef boost::multi_array<double,1> array_d;
+typedef boost::multi_array<double,2> matrix_d;
+typedef boost::multi_array<double,3> cube_d;
 #include<boost/random.hpp>
 using mt19937=boost::random::mt19937;
 using normal_f=boost::random::normal_distribution<float>;
@@ -169,7 +172,7 @@ TEST(RK4, BasicCircle)
 // Test for the Particles
 TEST(Particle, SetSize)
 {
-  array_f uea( boost::extents[3] );
+  array_d uea( boost::extents[3] );
   uea[0] = 1;
   uea[1] = 0;
   uea[2] = 0;
@@ -180,7 +183,7 @@ TEST(Particle, SetSize)
 // Check that uea is a unit vector
 TEST(Particle, UnitVector)
 {
-  array_f uea( boost::extents[3] );
+  array_d uea( boost::extents[3] );
   // Not a unit vector
   uea[0] = 0.3;
   uea[1] = 0.5;
@@ -197,7 +200,7 @@ TEST(Particle, UnitVector)
 // Check computation of the energy barriers
 TEST(Particle, EnergyBarriers)
 {
-  array_f uea( boost::extents[3] );
+  array_d uea( boost::extents[3] );
   uea[0] = 0;
   uea[0] = 0;
   uea[0] = 1;
@@ -208,7 +211,7 @@ TEST(Particle, EnergyBarriers)
                 std::invalid_argument );
 
   // Check computation
-  array_f ans( boost::extents[2] );
+  array_d ans( boost::extents[2] );
   ans = p.alignedEnergyBarriers( 0.2 );
 
   ASSERT_FLOAT_EQ( 2.14466058e-22, ans[0] );
@@ -225,7 +228,7 @@ TEST(Particle, TransitionRates)
 TEST(ParticleCluster, Distances)
 {
   // create list of 3 identical particles
-  array_f uea( boost::extents[3] );
+  array_d uea( boost::extents[3] );
   uea[0] = 1.0;
   uea[1] = 0.0;
   uea[2] = 0.0;
@@ -233,7 +236,7 @@ TEST(ParticleCluster, Distances)
   std::vector<Particle> plist = {p1, p1, p1};
 
   // Set the particle locations
-  matrix_f locs( boost::extents[3][3] );
+  matrix_d locs( boost::extents[3][3] );
 
   // particle 1 at location (0,0,0)
   for( int i=0; i<3; i++ )
@@ -249,7 +252,7 @@ TEST(ParticleCluster, Distances)
 
   // Create the cluster and get the distances
   ParticleCluster const pclust( plist, locs );
-  cube_f dists( boost::extents[3][3][3] );
+  cube_d dists( boost::extents[3][3][3] );
   dists = pclust.getDistances();
 
   // assert the distances are correct
