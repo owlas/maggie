@@ -22,28 +22,29 @@ using array3_f = boost::multi_array<float,3>;
 class ParticleCluster
 {
 public:
-  // constructor
-  // Particle list could be a boost pointer array?
-  // List of N particles and matrix of locations (N x 3)
-  ParticleCluster( std::vector<Particle> list, matrix_f locations );
+    // constructor
+    // Particle list could be a boost pointer array?
+    // List of N particles and matrix of locations (N x 3)
+    ParticleCluster( const std::vector<Particle> list, const matrix_f locations );
 
-  // Set the particle list
-  void setParticles( std::vector<Particle> );
+    // Set the particle list
+    void setParticles( const std::vector<Particle> );
 
-  // Set the locations and compute distances
-  void setLocs( matrix_f );
+    // Set the locations and compute distances
+    void setLocs( const matrix_f );
 
-  // Compute the stability ratio of each particle
-  std::vector<float> computeStability( float temperature ) const;
+    // Compute the stability ratio of each particle
+    std::vector<float> computeStability( float temperature ) const;
 
-  // Compute the energy barrier for each particle
-  array_f computeBarriers( float happ ) const;
+    // Compute the energy barrier for each particle
+    array_f computeBarriers( float happ ) const;
 
-  // getters
-  unsigned int getNParticles() const;
-  matrix_f getLocations() const;
-  array3_f getDistances() const;
-  
+    // getters
+    unsigned int getNParticles() const;
+    matrix_f getLocations() const;
+    array3_f getDistances() const;
+    Particle getParticle( const int n ) const;
+
 
 private:
   unsigned int const N;
@@ -52,4 +53,3 @@ private:
   array3_f dist;
 };
 #endif
-  

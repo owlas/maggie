@@ -8,8 +8,8 @@
 #include<ParticleCluster.hpp>
 
 // constructor
-ParticleCluster::ParticleCluster( std::vector<Particle> list,
-                                  matrix_f locations )
+ParticleCluster::ParticleCluster( const std::vector<Particle> list,
+                                  const matrix_f locations )
   : N( int( list.size() ) )
   , locs( boost::extents[N][3] )
   , dist( boost::extents[N][N][3] )
@@ -19,14 +19,14 @@ ParticleCluster::ParticleCluster( std::vector<Particle> list,
 }
 
 // Set the particle list
-void ParticleCluster::setParticles( std::vector<Particle> p )
+void ParticleCluster::setParticles( const std::vector<Particle> p )
 {
   particles = p;
 }
 
 // set the location matrix and check dimensions
 // then compute the relative distances
-void ParticleCluster::setLocs( matrix_f l )
+void ParticleCluster::setLocs( const matrix_f l )
 {
   if( ( l.shape()[0] != N ) or ( l.shape()[1] != 3 ) )
     throw std::invalid_argument( "location matrix must be size (Nx3)"
@@ -40,9 +40,11 @@ void ParticleCluster::setLocs( matrix_f l )
 }
 
 // getters
-unsigned int ParticleCluster::getNParticles() const { return N; } 
+unsigned int ParticleCluster::getNParticles() const { return N; }
 matrix_f ParticleCluster::getLocations()  const { return locs; }
 array3_f ParticleCluster::getDistances() const { return dist; }
+Particle ParticleCluster::getParticle( const int n )
+    const { return particles[n]; }
 
 // Compute the stability ratio for each of the particles
 std::vector<float> ParticleCluster::computeStability( float T ) const
@@ -53,7 +55,7 @@ std::vector<float> ParticleCluster::computeStability( float T ) const
   for( unsigned int i=0; i<N; i++ )
     srs[i] = ( particles[i].getK() * particles[i].getV()
                / ( Constants::KB*T ) );
-  
+
   return srs;
 }
 
@@ -102,4 +104,3 @@ array_f ParticleCluster::computeBarriers( float happ ) const
   somereturn[0] = happ;
   return somereturn;
 }
-
