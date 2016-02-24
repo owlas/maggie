@@ -21,7 +21,7 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
-default: runtests convergence_tests llg_solver_convergence
+default: runtests convergence_tests llg_solver_convergence llgsim
 
 # gtest builds the gtest and gmock modules
 #
@@ -54,6 +54,14 @@ llg_solver_convergence: src/llg_solver_convergence.cpp libmaggie.so
 	$(CC) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/llg_solver_convergence.cpp -L$(LIB_DIR) $(LIBS)
+
+
+# Create the examples
+#
+llgsim: src/llgsim.cpp libmaggie.so
+	$(CC) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
+		-o $@ $(SRC_PATH)/llgsim.cpp -L$(LIB_DIR) $(LIBS)
 
 # Shared library maggie.so used for objects
 #

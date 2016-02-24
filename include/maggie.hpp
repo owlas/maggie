@@ -26,5 +26,6 @@
 #include<Heun.hpp>
 #include<Milstein.hpp>
 #include<Euler.hpp>
+#include<Simulation.hpp>
 
 #endif
