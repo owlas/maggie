@@ -1,6 +1,6 @@
 # Maggie
 
-A atomistic magnetic simulation package
+An atomistic magnetic simulation package
 
 ----------
 
