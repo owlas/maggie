@@ -19,8 +19,10 @@ template <typename T>
 class StocLLG : public SDE<T>
 {
  public:
-        StocLLG( const T s, const T a,
-		 const T hx, const T hy, const T hz );
+    // Constructor when the thermal intensity (s) and damping (a) is
+    // calculated in advance
+    StocLLG( const T s, const T a,
+             const T hx, const T hy, const T hz );
 
   // returns the drift vector
     virtual void computeDrift( array<T>&, const array<T>&, const T ) const;
