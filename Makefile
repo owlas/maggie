@@ -21,15 +21,17 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
-default: runtests convergence_tests llg_solver_convergence llgsim
+default: initial runtests convergence_tests llg_solver_convergence llgsim
 
+dependencies:
+	sudo apt-get install libboost-all-dev
+	git submodule init
+	git submodule update
 
 initial:
 # Create objects folder and pull inih submodule
 	mkdir -p objects
-	git submodule init
-	git submodule update
-	
+
 # gtest builds the gtest and gmock modules
 #
 gmock:
