@@ -8,13 +8,13 @@
 #include<Simulation.hpp>
 
 // ----- CONSTRUCTOR -----
-Simulation::Simulation( const ParticleCluster g, matrix_f init_state,
-                        float stepsize, unsigned int n, float temp,
-                        array_f field )
+Simulation::Simulation( const ParticleCluster g, matrix_d init_state,
+                        double stepsize, unsigned int n, double temp,
+                        array_d field )
   : geom( g )
+  , h( boost::extents[3] )
   , state( boost::extents[geom.getNParticles()][3] )
   , stability( geom.computeStability( temp ) )
-  , h( boost::extents[3] )
 {
   setTimeStep( stepsize );
   setSimLength( n );
@@ -28,11 +28,11 @@ Simulation::Simulation( const ParticleCluster g, matrix_f init_state,
 // ----- Setter methods -----
 void Simulation::setSimLength( unsigned int n ) { N=n; }
 
-void Simulation::setTimeStep( float h ) { dt=h; }
+void Simulation::setTimeStep( double h ) { dt=h; }
 
-void Simulation::setField( array_f field ) { h = field; }
+void Simulation::setField( array_d field ) { h = field; }
 
-void Simulation::setTemp( float t )
+void Simulation::setTemp( double t )
 {
   if( t < 0 )
     throw std::invalid_argument("Temperature T must be greater than"
@@ -40,7 +40,7 @@ void Simulation::setTemp( float t )
   T = t;
 }
 
-void Simulation::setState( matrix_f s )
+void Simulation::setState( matrix_d s )
 {
   size_t ndims=2, dim1=geom.getNParticles(), dim2=3;
   if( ( s.dimensionality != ndims ) or
@@ -55,15 +55,15 @@ void Simulation::setState( matrix_f s )
 
 
 // ----- Getter methods -----
-float Simulation::getTimeStep() const { return dt; }
+double Simulation::getTimeStep() const { return dt; }
 
 unsigned int Simulation::getSimLength() const { return N; }
 
-matrix_f Simulation::getState() const { return state; }
+matrix_d Simulation::getState() const { return state; }
 
-float Simulation::getTemp() const { return T; }
+double Simulation::getTemp() const { return T; }
 
-array_f Simulation::getField() const { return h; }
+array_d Simulation::getField() const { return h; }
 
 ParticleCluster Simulation::getGeometry() const
 {
@@ -72,13 +72,13 @@ ParticleCluster Simulation::getGeometry() const
 
 
 // ----- COMPUTE ARRHENIUS RATES -----
-// determines the energy barriers and then the transition rate matrix
+// determines the energy barriers and then the transition rate matrix_d
 // from the exponential Neel-Arrhenius law
-matrix_f Simulation::arrheniusMatrix() const
+matrix_d Simulation::arrheniusMatrix_D() const
 {
   throw "NOT IMPLEMENTED";
 }
-matrix_f Simulation::computeEnergyBarriers() const
+matrix_d Simulation::computeEnergyBarriers() const
 {
   throw "NOT IMPLMENTED";
 }
@@ -95,45 +95,45 @@ int Simulation::run()
     Particle p = geom.getParticle( 0 );
 
     // The thermal field intensity for reduced simulation
-    float therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
+    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
                                      / ( p.getK() * p.getV()
                                          * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
 
 
     // Compute the reduced time for the simulation
-    float Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
-    float t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
+    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
+    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
             / ( 1+pow( p.getAlpha(), 2 ) ) };
-    float dtau = dt * t_factor;
+    double dtau = dt * t_factor;
 
 
     // Set up an LLG equation for the particle
     // finite temperature with the reduced field
-    StocLLG<float> llg( therm_strength, p.getAlpha(),
+    StocLLG<double> llg( therm_strength, p.getAlpha(),
                         h[0]/Hk, h[1]/Hk, h[2]/Hk );
 
 
     // Get the initial condition of the particle
-    array_f init( boost::extents[3] );
-    for( array_f::index i=0; i!=3; ++i )
+    array_d init( boost::extents[3] );
+    for( array_d::index i=0; i!=3; ++i )
         init[i] = state[0][i];
 
 
     // Initialise the integrator and its RNG
     mt19937 rng( 301 );
-    auto inte = Heun<float>( llg, init, 0.0, dtau, rng );
+    auto inte = Heun<double>( llg, init, 0.0, dtau, rng );
 
 
     // store the solutions here
-    matrix_f sols( boost::extents[N][3] );
+    matrix_d sols( boost::extents[N][3] );
 
 
     // Step the integrator and store the result at each step
-    for( array_f::index n=0; n!=N; ++n )
+    for( array_d::index n=0; n!=N; ++n )
     {
         inte.step();
         // store the solutions
-        for( array_f::index i=0; i!=3; ++i )
+        for( array_d::index i=0; i!=3; ++i )
             sols[n][i] = inte.getState()[i];
     }
 

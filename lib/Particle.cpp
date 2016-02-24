@@ -9,8 +9,8 @@
 #include<Particle.hpp>
 
 // constructor
-Particle::Particle( float g, float a, float m, float diam, float anis,
-		    array_f anisAxis )
+Particle::Particle( double g, double a, double m, double diam, double anis,
+		    array_d anisAxis )
   : uea( boost::extents[3] )
   , gamma( g )
   , alpha( a )
@@ -22,18 +22,18 @@ Particle::Particle( float g, float a, float m, float diam, float anis,
 }
 
 // setters for particle properties
-void Particle::setGamma( float g ) { gamma=g; }
-void Particle::setMs( float m ) { ms=m; }
-void Particle::setAlpha( float a ) { alpha=a; }
-void Particle::setK( float anis ) { k = anis; }
+void Particle::setGamma( double g ) { gamma=g; }
+void Particle::setMs( double m ) { ms=m; }
+void Particle::setAlpha( double a ) { alpha=a; }
+void Particle::setK( double anis ) { k = anis; }
 
-void Particle::setSize( float diam )
+void Particle::setSize( double diam )
 {
   d = diam;
   v = ( 4.0/3 )*M_PI*pow( d/2.0, 3 );
 }
 
-void Particle::setUea( array_f anisAxis )
+void Particle::setUea( array_d anisAxis )
 {
   if( anisAxis.shape()[0] != 3 )
     throw invalid_argument( "Error: anisotropy axis must be of length"
@@ -47,20 +47,20 @@ void Particle::setUea( array_f anisAxis )
 }
 
 // getters for properties
-float Particle::getGamma() const { return gamma; }
-float Particle::getAlpha() const { return alpha; }
-float Particle::getMs() const { return ms; }
-float Particle::getD() const { return d; }
-float Particle::getK() const { return k; }
-array_f Particle::getUea() const { return uea; }
-float Particle::getV() const { return v; }
+double Particle::getGamma() const { return gamma; }
+double Particle::getAlpha() const { return alpha; }
+double Particle::getMs() const { return ms; }
+double Particle::getD() const { return d; }
+double Particle::getK() const { return k; }
+array_d Particle::getUea() const { return uea; }
+double Particle::getV() const { return v; }
 
 // Compute the energy barriers of the system in an aligned field.
 // happ is the reduced field intensity i.e. h/Hk
-array_f
-  Particle::alignedEnergyBarriers( float happ ) const
+array_d
+  Particle::alignedEnergyBarriers( double happ ) const
 {
-  array_f eBarriers( boost::extents[2] );
+  array_d eBarriers( boost::extents[2] );
   if( happ>1 )
     throw invalid_argument( "currently aligned energy barriers are "
                              "only calculated for H < H_k" );
@@ -73,13 +73,13 @@ array_f
 
 // Compute the Neel-Arrhenius transition rates from energy barrier
 // calculations in at a set temperature
-array_f
-  Particle::neelTransitionRates( float T, float b1, float b2 ) const
+array_d
+  Particle::neelTransitionRates( double T, double b1, double b2 ) const
 {
   // Assume tau_0
-  float tau0 = 1e-10;
+  double tau0 = 1e-10;
 
-  array_f rates( boost::extents[2] );
+  array_d rates( boost::extents[2] );
 
   rates[0] = 1/( tau0*exp( b1/( Constants::KB*T ) ) );
   rates[1] = 1/( tau0*exp( b2/( Constants::KB*T ) ) );

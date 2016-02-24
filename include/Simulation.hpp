@@ -17,8 +17,8 @@
 #include<stdexcept>
 #include<vector>
 #include<boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
+using array_d = boost::multi_array<double,1>;
+using matrix_d = boost::multi_array<double,2>;
 #include<boost/random.hpp>
 using boost::mt19937;
 
@@ -26,9 +26,9 @@ class Simulation
 {
 public:
   // constructor
-  Simulation( const ParticleCluster geom, const matrix_f init_state,
-              const float h, const unsigned int n, const float temp,
-              const array_f field );
+  Simulation( const ParticleCluster geom, const matrix_d init_state,
+              const double h, const unsigned int n, const double temp,
+              const array_d field );
 
   // Do simulation
   int run();
@@ -37,33 +37,33 @@ public:
   int save();
 
   // approximate energy barriers for single particle flips
-  matrix_f computeEnergyBarriers() const;
+  matrix_d computeEnergyBarriers() const;
 
-  // compute the transition matrix
-  matrix_f arrheniusMatrix() const;
+  // compute the transition matrix_d
+  matrix_d arrheniusMatrix_D() const;
 
   // setters
   void setSimLength( const unsigned int );
-  void setTimeStep( const float );
-  void setState( const matrix_f );
-  void setTemp( const float );
-  void setField( const array_f );
+  void setTimeStep( const double );
+  void setState( const matrix_d );
+  void setTemp( const double );
+  void setField( const array_d );
 
   // getters
   ParticleCluster getGeometry() const;
-  float getTimeStep() const;
+  double getTimeStep() const;
   unsigned int getSimLength() const;
-  matrix_f getState() const;
-  float getTemp() const;
-  array_f getField() const;
+  matrix_d getState() const;
+  double getTemp() const;
+  array_d getField() const;
 
 private:
   const ParticleCluster geom;
-  float dt;
+  double dt;
   unsigned int N;
-  float T;
-  array_f h;
-  matrix_f state;
-  std::vector<float> stability;
+  double T;
+  array_d  h;
+  matrix_d state;
+  std::vector<double> stability;
 };
 #endif
