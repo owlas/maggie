@@ -8,25 +8,38 @@
 #include <maggie.hpp>
 #include <vector>
 using plist=std::vector<Particle>;
+
 #include <boost/multi_array.hpp>
-using array_f=boost::multi_array<float, 1>;
-using matrix_f=boost::multi_array<float, 2>;
+using array_d=boost::multi_array<double, 1>;
+using matrix_d=boost::multi_array<double, 2>;
 using boost::extents;
 using bidx=boost::multi_array_types::index;
 
+#include <inih/INIReader.h>
+#include <iostream>
+using std::cout; using std::endl;
 int main()
 {
+    // Read the ini file to get the particle properties
+    // by default, read llgsim.ini
+    INIReader reader( "llgsim.ini");
+    if(reader.ParseError() < 0 )
+    {
+        cout << "Cannot load llgsim.ini" << endl;
+        return 1;
+    }
+
     // The first thing to do is to set up the particle cluster
     // in this case we just have one particle, so lets define that:
-    float gyromagnetic_constant{ Constants::GYROMAG };
-    float damping{ 0.1 };
-    float Ms{ 1400e3 };
-    float diameter{ 5e-9 };
-    float anisotropy_const{ 1 };
-    array_f anisotropy_axis( extents[3] );
-    anisotropy_axis[0] = 0.0;
-    anisotropy_axis[1] = 0.0;
-    anisotropy_axis[2] = 1.0;
+    double gyromagnetic_constant{ Constants::GYROMAG };
+    double damping{ reader.GetReal( "particle", "alpha", -1 ) }; // 0.01
+    double Ms{ reader.GetReal( "particle", "ms", -1 ) }; // 1400e3
+    double diameter{ reader.GetReal( "particle", "diameter", -1 ) }; // 5e-9
+    double anisotropy_const{ reader.GetReal( "particle", "anisotropy", -1 ) };
+    array_d anisotropy_axis( extents[3] );
+    anisotropy_axis[0] = reader.GetReal( "particle", "anis_x", -1 );
+    anisotropy_axis[1] = reader.GetReal( "particle", "anis_y", -1 );
+    anisotropy_axis[2] = reader.GetReal( "particle", "anis_z", -1 );
     auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
                        anisotropy_const, anisotropy_axis );
 
@@ -36,7 +49,7 @@ int main()
     plist ps;
     ps.push_back( p );
 
-    matrix_f locs( extents[1][3] );
+    matrix_d locs( extents[1][3] );
     for( auto &i : locs[0] )
         i = 0.0;
 
@@ -47,18 +60,18 @@ int main()
     // set up the environment
 
     // first the initial state of the magnetisation
-    matrix_f init( extents[1][3] );
+    matrix_d init( extents[1][3] );
     init[0][0] = 1.0;
     init[0][1] = 0.0;
     init[0][2] = 0.0;
 
     // now the time step and simulation length
-    float dt{ 1e-14 };
+    double dt{ 1e-14 };
     int time_steps{ 100000 };
 
     // Finally we choose the temperature and external field
-    float temp{ 30 };
-    array_f field( extents[3] );
+    double temp{ 30 };
+    array_d field( extents[3] );
     field[0] = 0.0; field[1] = 0.0; field[2] = 100e3;
 
     auto mysim = Simulation( cluster, init, dt, time_steps, temp, field );
