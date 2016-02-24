@@ -23,6 +23,13 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 #
 default: runtests convergence_tests llg_solver_convergence llgsim
 
+
+initial:
+# Create objects folder and pull inih submodule
+	mkdir -p objects
+	git submodule init
+	git submodule update
+	
 # gtest builds the gtest and gmock modules
 #
 gmock:
