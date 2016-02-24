@@ -33,16 +33,16 @@ void ParticleCluster::setLocs( const matrix_d l )
                                  " where particle list is length N." );
   locs = l;
 
-  for( array_d3::index i=0; i<N; i++ )
-    for( array_d3::index j=0; j<N; j++ )
-      for( array_d3::index k=0; k<3; k++ )
+  for( array3_d::index i=0; i<N; i++ )
+    for( array3_d::index j=0; j<N; j++ )
+      for( array3_d::index k=0; k<3; k++ )
         dist[i][j][k] = std::abs( locs[i][k] - locs[j][k] );
 }
 
 // getters
 unsigned int ParticleCluster::getNParticles() const { return N; }
 matrix_d ParticleCluster::getLocations()  const { return locs; }
-array_d3 ParticleCluster::getDistances() const { return dist; }
+array3_d ParticleCluster::getDistances() const { return dist; }
 Particle ParticleCluster::getParticle( const int n )
     const { return particles[n]; }
 
@@ -73,7 +73,7 @@ array_d ParticleCluster::computeBarriers( double happ ) const
 
   // Possible system states
   int nStates = std::pow( N,2 );
-  array_d3 possibleStates( boost::extents[nStates][N][3] );
+  array3_d possibleStates( boost::extents[nStates][N][3] );
 
   // Find the metastable states
   for( int n=0; n<nStates; n++ )
