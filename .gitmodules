@@ -1,0 +1,3 @@
+[submodule "include/inih"]
+	path = include/inih
+	url = git@github.com:owlas/inih.git
