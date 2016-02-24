@@ -91,6 +91,9 @@ $(OBJ_PATH)/%.o: $(LIB_PATH)/%.cpp
 clean:
 	rm -f objects/*
 	rm -f main
-
+	rm -f libmaggie.so
 gclean:
-	rm -f gtest-all.o, libgtest.a
+	rm -f gtest-all.o
+	rm -f libgtest.a
+	rm -f libgmock.a
+	rm -f gmock-all.o
