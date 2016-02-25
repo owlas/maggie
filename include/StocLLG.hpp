@@ -42,6 +42,9 @@ class StocLLG : public SDE<T>
   void setAlpha( const T );
   T getAlpha() const;
 
+    // get a modifiable reference to the field
+    array<T>& getReducedFieldRef();
+
  private:
     array<T> h;
     T

@@ -46,6 +46,10 @@ void StocLLG<T>::setAlpha( const T s ) { alpha = s; }
 template <typename T>
 T StocLLG<T>::getAlpha() const { return alpha; }
 
+// get a modifiable reference to the reduced field
+template <typename T>
+array<T>& StocLLG<T>::getReducedFieldRef() { return h; }
+
 // compute the drift term of the stochastic LLG equation
 template <typename T>
 void StocLLG<T>::computeDrift( array<T>& out, const array<T>& state,
