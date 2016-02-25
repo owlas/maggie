@@ -129,13 +129,13 @@ TEST(StochasticLLG, Diffusion)
 TEST(RK4, BasicCircle)
 {
   // declare array for initial state
-  array_f state( boost::extents[2] );
+  array_f init( boost::extents[2] );
 
   float t=0; // initial time
 
   // fill the array state
-  state[0] = 1.0;
-  state[1] = 0.0;
+  init[0] = 1.0;
+  init[1] = 0.0;
 
   // Basic differential equation
   class ode : public ODE<float>
@@ -154,14 +154,14 @@ TEST(RK4, BasicCircle)
 
 
   // Create an instance of the RK4 integrator
-  auto inte = RK4<float>( testOde, state, t, 0.000001 );
+  auto inte = RK4<float>( testOde, init, t, 0.000001 );
 
   // Run the integrator for 2000 steps
   for( int i=0; i<500; i++ )
     inte.step();
 
   // Get the state and time
-  state = inte.getState();
+  const array_f& state = inte.getState();
   t = inte.getTime();
 
   // Check the solution
@@ -570,7 +570,7 @@ TEST( IntegrationTests, MilsteinLLG )
     i=0.0;
   float W{ 0.0 }; // Wiener process (sum over dw)
   // solutions
-  array_f nmSol( boost::extents[3] );
+  const array_f& nmSol = inte.getState();
   array_f anSol( boost::extents[3] );
 
   int N=100000;
@@ -582,7 +582,6 @@ TEST( IntegrationTests, MilsteinLLG )
       dw[2] = vg();
       inte.setWienerIncrements( dw );
       inte.step();
-      nmSol = inte.getState();
       float t = inte.getTime()/tfactor;
       W += vg_a();
 
@@ -650,7 +649,7 @@ TEST( IntegrationTests, EulerLLG )
     i=0.0;
   float W{ 0.0 }; // Wiener process (sum over dw)
   // solutions
-  array_f nmSol( boost::extents[3] );
+  const array_f& nmSol = inte.getState();
   array_f anSol( boost::extents[3] );
 
   int N=100000;
@@ -662,7 +661,6 @@ TEST( IntegrationTests, EulerLLG )
       dw[2] = vg();
       inte.setWienerIncrements( dw );
       inte.step();
-      nmSol = inte.getState();
       float t = inte.getTime()/tfactor;
       W += vg_a();
 
@@ -761,13 +759,11 @@ TEST( TwoStateMasterEquation, ConservationOfProbability )
 
   // step the integrator and check that the probability is conserved
   // throughout.
-  array_f state( boost::extents[2] );
+  const array_f& state = integrator.getState();
 
-  state = integrator.getState();
   for( int i=0; i<200; i++ )
     {
       integrator.step();
-      state = integrator.getState();
       ASSERT_LE( std::abs( 1.0-state[0]-state[1] ), 1e-5 );
     }
 }

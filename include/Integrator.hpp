@@ -28,9 +28,9 @@ class Integrator
                 const T time=0 );
 
     // Get the current state
-    array<T> getState() const;
+    const array<T>& getState() const;
     // Set the integrator state
-    void setState( const array<T> );
+    void setState( const array<T>& );
 
     // Get the current time
     T getTime() const;

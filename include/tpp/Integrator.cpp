@@ -21,10 +21,10 @@ Integrator<C, T>::Integrator( const C& le, const array<T>& init_state,
 
 // Get state
 template<class C, typename T>
-array<T> Integrator<C, T>::getState() const { return state; }
+const array<T>& Integrator<C, T>::getState() const { return state; }
 // Set State
 template<class C, typename T>
-void Integrator<C, T>::setState( const array<T> s )
+void Integrator<C, T>::setState( const array<T>& s )
 {
 if( int( s.shape()[0] ) != lEq->getDim() )
     {
