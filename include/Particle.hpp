@@ -23,9 +23,6 @@ using array_d = boost::multi_array<double, 1>;
 #include<stdexcept>
 using std::invalid_argument;
 
-#include<array>
-using d3 = std::array<double, 3>;
-
 class Particle
 {
 public:
@@ -60,7 +57,7 @@ public:
                                double barrier2 )     const;
 
     // Compute the effective field from the anisotropy
-    d3 computeAnisotropyField( const d3& ) const;
+    void computeAnisotropyField( array_d&, const array_d& ) const;
 
 
 
