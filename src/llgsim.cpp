@@ -60,10 +60,11 @@ int main()
     // set up the environment
 
     // first the initial state of the magnetisation
-    matrix_d init( extents[1][3] );
-    init[0][0] = 1.0;
-    init[0][1] = 0.0;
-    init[0][2] = 0.0;
+    array_d init( extents[3] );
+    init[0] = 1.0;
+    init[1] = 0.0;
+    init[2] = 0.0;
+    std::vector<array_d> states = { init };
 
     // now the time step and simulation length
     double dt{ 1e-14 };
@@ -74,7 +75,7 @@ int main()
     array_d field( extents[3] );
     field[0] = 0.0; field[1] = 0.0; field[2] = 100e3;
 
-    auto mysim = Simulation( cluster, init, dt, time_steps, temp, field );
+    auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
 
 
     // The run command runs an LLG simulation of the particle for the

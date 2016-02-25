@@ -15,10 +15,12 @@
 #include <StocLLG.hpp>
 #include <Utility.hpp>
 #include<stdexcept>
-#include<vector>
 #include<boost/multi_array.hpp>
 using array_d = boost::multi_array<double,1>;
-using matrix_d = boost::multi_array<double,2>;
+
+#include<vector>
+using ad_vec = std::vector<array_d>;
+
 #include<boost/random.hpp>
 using boost::mt19937;
 
@@ -26,7 +28,7 @@ class Simulation
 {
 public:
   // constructor
-  Simulation( const ParticleCluster geom, const matrix_d init_state,
+  Simulation( const ParticleCluster geom, const ad_vec init_state,
               const double h, const unsigned int n, const double temp,
               const array_d field );
 
@@ -45,7 +47,7 @@ public:
   // setters
   void setSimLength( const unsigned int );
   void setTimeStep( const double );
-  void setState( const matrix_d );
+  void setState( const ad_vec );
   void setTemp( const double );
   void setField( const array_d );
 
@@ -53,7 +55,7 @@ public:
   ParticleCluster getGeometry() const;
   double getTimeStep() const;
   unsigned int getSimLength() const;
-  matrix_d getState() const;
+  const ad_vec& getState() const;
   double getTemp() const;
   array_d getField() const;
 
@@ -63,7 +65,7 @@ private:
   unsigned int N;
   double T;
   array_d  h;
-  matrix_d state;
+  ad_vec state;
   std::vector<double> stability;
 };
 #endif

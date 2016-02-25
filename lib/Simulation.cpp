@@ -8,12 +8,11 @@
 #include<Simulation.hpp>
 
 // ----- CONSTRUCTOR -----
-Simulation::Simulation( const ParticleCluster g, matrix_d init_state,
-                        double stepsize, unsigned int n, double temp,
-                        array_d field )
+Simulation::Simulation( const ParticleCluster g, const ad_vec init_state,
+                        const double stepsize, const unsigned int n,
+                        const double temp, const array_d field )
   : geom( g )
   , h( boost::extents[3] )
-  , state( boost::extents[geom.getNParticles()][3] )
   , stability( geom.computeStability( temp ) )
 {
   setTimeStep( stepsize );
@@ -26,13 +25,13 @@ Simulation::Simulation( const ParticleCluster g, matrix_d init_state,
 
 
 // ----- Setter methods -----
-void Simulation::setSimLength( unsigned int n ) { N=n; }
+void Simulation::setSimLength( const unsigned int n ) { N=n; }
 
-void Simulation::setTimeStep( double h ) { dt=h; }
+void Simulation::setTimeStep( const double h ) { dt=h; }
 
-void Simulation::setField( array_d field ) { h = field; }
+void Simulation::setField( const array_d field ) { h = field; }
 
-void Simulation::setTemp( double t )
+void Simulation::setTemp( const double t )
 {
   if( t < 0 )
     throw std::invalid_argument("Temperature T must be greater than"
@@ -40,12 +39,11 @@ void Simulation::setTemp( double t )
   T = t;
 }
 
-void Simulation::setState( matrix_d s )
+void Simulation::setState( const ad_vec s )
 {
-  size_t ndims=2, dim1=geom.getNParticles(), dim2=3;
-  if( ( s.dimensionality != ndims ) or
-      ( s.shape()[0] != dim1 ) or
-      ( s.shape()[1] != dim2 ) )
+  size_t dim1=geom.getNParticles(), dim2=3;
+  if( ( s.size() != dim1 ) or
+      ( s[0].shape()[0] != dim2 ) )
     throw std::invalid_argument( "State of the system must be (Nx2)"
                                  " - where N is the number of "
                                  "particles" );
@@ -59,7 +57,7 @@ double Simulation::getTimeStep() const { return dt; }
 
 unsigned int Simulation::getSimLength() const { return N; }
 
-matrix_d Simulation::getState() const { return state; }
+const ad_vec& Simulation::getState() const { return state; }
 
 double Simulation::getTemp() const { return T; }
 
