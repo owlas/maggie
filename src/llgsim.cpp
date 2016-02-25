@@ -73,7 +73,9 @@ int main()
     // Finally we choose the temperature and external field
     double temp{ 30 };
     array_d field( extents[3] );
-    field[0] = 0.0; field[1] = 0.0; field[2] = 100e3;
+    field[0] = reader.GetReal("particle", "Happ_x", -1 );
+    field[1] = reader.GetReal("particle", "Happ_y", -1 );
+    field[2] = reader.GetReal("particle", "Happ_z", -1 );
 
     auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
 
