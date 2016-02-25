@@ -17,6 +17,8 @@
 #include<stdexcept>
 #include<boost/multi_array.hpp>
 using array_d = boost::multi_array<double,1>;
+using boost::extents;
+using bidx = boost::multi_array_types::index;
 
 #include<vector>
 using ad_vec = std::vector<array_d>;

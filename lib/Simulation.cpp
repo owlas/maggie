@@ -105,10 +105,15 @@ int Simulation::run()
     double dtau = dt * t_factor;
 
 
+    // compute the reduced external field
+    array_d happ( extents[3] );
+    for( bidx i=0; i!=3; ++i )
+        happ[i] = h[i]/Hk;
+
     // Set up an LLG equation for the particle
     // finite temperature with the reduced field
     StocLLG<double> llg( therm_strength, p.getAlpha(),
-                        h[0]/Hk, h[1]/Hk, h[2]/Hk );
+                        happ[0], happ[1], happ[2] );
 
 
     // Get the initial condition of the particle
@@ -125,14 +130,28 @@ int Simulation::run()
     // store the solutions here
     matrix_d sols( boost::extents[N][3] );
 
+    // reference to the current state and the field
+    const array_d& currentState = inte.getState();
+    array_d& currentField = llg.getReducedFieldRef();
+
 
     // Step the integrator and store the result at each step
     for( array_d::index n=0; n!=N; ++n )
     {
+        // first compute the field due to the anisotropy
+        // and put that in the field vector
+        p.computeAnisotropyField( currentField, currentState );
+
+        // then add the reduced external field
+        for( bidx j=0; j!=3; ++j )
+            currentField[j] += happ[j];
+
+        // step the integrator
         inte.step();
+
         // store the solutions
         for( array_d::index i=0; i!=3; ++i )
-            sols[n][i] = inte.getState()[i];
+            sols[n][i] = currentState[i];
     }
 
 
