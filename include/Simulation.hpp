@@ -34,8 +34,11 @@ public:
               const double h, const unsigned int n, const double temp,
               const array_d field );
 
-  // Do simulation
-  int run();
+  // Do simulation for a single system and save the mag data
+    int runFull();
+
+    // Do a simulation of an ensemble of particles
+    int runEnsemble( unsigned int );
 
   // save results to hard drive
   int save();

@@ -61,9 +61,9 @@ int main()
 
     // first the initial state of the magnetisation
     array_d init( extents[3] );
-    init[0] = 1.0;
+    init[0] = 0.0;
     init[1] = 0.0;
-    init[2] = 0.0;
+    init[2] = 1.0;
     std::vector<array_d> states = { init };
 
     // now the time step and simulation length
@@ -81,9 +81,14 @@ int main()
 
 
     // The run command runs an LLG simulation of the particle for the
-    // specified number of time steps and saves the magnetisation data
-    // to the hard disk
-    mysim.run();
+    // specified number of time steps and save the time domain signal
+    // of the magnetisation to the hard disk
+    mysim.runFull();
+
+
+    // Run an ensemble of the system and save the final state of the each
+    // member of the ensemble
+    mysim.runEnsemble( 100 );
 
 
     // and that is that! open up pandas and take a look
