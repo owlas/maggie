@@ -48,7 +48,7 @@ void Euler<T>::step()
 template <typename T>
 void Euler<T>::setManualWienerMode( const bool s ) { manualWiener=s; }
 template <typename T>
-void Euler<T>::setWienerIncrements( const array_f a ) { dw=a; }
+void Euler<T>::setWienerIncrements( const array<T> a ) { dw=a; }
 
 // The following types are visible
 template class Euler<float>;

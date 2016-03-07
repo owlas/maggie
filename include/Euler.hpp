@@ -31,7 +31,7 @@ public:
     // Manual wiener process mode
     // allow user to control internal wiener increments themselves
     void setManualWienerMode( const bool );
-    void setWienerIncrements( const array_f );
+    void setWienerIncrements( const array<T> );
 
 private:
     const T h;
