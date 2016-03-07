@@ -12,45 +12,50 @@
 #include<stdexcept>
 #include<cmath>
 #include<boost/multi_array.hpp>
-using array_f=boost::multi_array<float,1>;
+template <typename T> using array = boost::multi_array<T,1>;
 
-namespace Quad 
+namespace Quad
 {
 
+    template <typename T>
   class Quadrature
   {
   public:
     // constructor
     // specifiy a function to integrate
-    Quadrature( std::function<float( float )> func, const float start,
-                const float end );
+    Quadrature( std::function<T( T )> func, const T start,
+                const T end );
 
     // second constructor
     // specify a vector of values to integrate
-    Quadrature( array_f vec );
+      Quadrature( array<T> vec );
 
     // Returns the value of the integral at the nth stage of
-    // refinement. 
-    float next();
+    // refinement.
+    T next();
 
     // Returns n
     int getN() const;
 
     // Integrates with increasing refinement until a limit is reached
-    float qTrap( const float eps=1e-7 );
+    T qTrap( const T eps=1e-7 );
   private:
-    std::function<float( float )> f; // function to integrate
-    const float a; // upper limit
-    const float b; // lower limit
-    float s; // current integral value
+    std::function<T ( T )> f; // function to integrate
+    const T a; // upper limit
+    const T b; // lower limit
+    T s; // current integral value
     int n; // current integral step
   };
 
   // A single quadrature algorithm for discrete data
   // integrates from x = start to x = end at intervals of h
   // and vec = y( x ) for start, start+h, start+2h, ...
-  float trapVec( array_f vec, const float h );
-  float trapVec( array_f yvec, array_f xvec );
-}
-#endif
+    template <typename T>
+    T trapVec( array<T> vec, const T h );
 
+    template <typename T>
+    T trapVec( array<T> yvec, array<T> xvec );
+}
+
+#include<tpp/Quadrature.cpp>
+#endif

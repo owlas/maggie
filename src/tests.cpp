@@ -701,8 +701,8 @@ TEST( Quadrature, LinearFunction )
 {
   // integrate between 0 and 7 with default tolerance
   // on a simple linear function
-  Quad::Quadrature q( []( float x ){ return 2*x+3; }, 0.0, 7.0 );
-  float res = q.qTrap();
+    Quad::Quadrature<float> q( []( float x ){ return 2*x+3; }, 0.0, 7.0 );
+    float res = q.qTrap();
 
   // check that the solution is correct
   ASSERT_FLOAT_EQ( 70.0, res );
@@ -713,7 +713,7 @@ TEST( Quadrature, OddFunctionOver0 )
 {
   // integrate a linear function odd function
   // from -2 to 2 to  get 0 area
-  Quad::Quadrature q( []( float x){ return 1.2*x; }, -2.0, 2.0 );
+    Quad::Quadrature<float> q( []( float x){ return 1.2*x; }, -2.0, 2.0 );
   float res = q.qTrap();
 
   ASSERT_FLOAT_EQ( 0.0, res );
@@ -729,7 +729,7 @@ TEST( Quadrature, LinearFunctionFromVector )
   for( int i=0; i<N; i++ ) vec[i] = 2*i*h+3;
 
   // get the result
-  float res = Quad::trapVec( vec, h );
+  float res = Quad::trapVec<float>( vec, h );
 
   ASSERT_FLOAT_EQ( 70.0, res );
 }

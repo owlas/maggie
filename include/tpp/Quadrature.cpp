@@ -9,9 +9,10 @@
 
 namespace Quad
 {
-  Quadrature::Quadrature( std::function<float( float )> func,
-                          const float start,
-                          const float end )
+    template <typename T>
+    Quadrature<T>::Quadrature( std::function<T( T )> func,
+                               const T start,
+                               const T end )
     : f( func )
     , a( start )
     , b( end )
@@ -20,11 +21,13 @@ namespace Quad
     n = 0;
   }
 
-  int Quadrature::getN() const { return n; }
+    template <typename T>
+    int Quadrature<T>::getN() const { return n; }
 
-  float Quadrature::next()
+    template <typename T>
+    T Quadrature<T>::next()
   {
-    float x, tnm, sum, del;
+    T x, tnm, sum, del;
     int it,j;
 
     // increment the current step
@@ -46,10 +49,11 @@ namespace Quad
       }
   }
 
-  float Quadrature::qTrap( const float eps )
+    template <typename T>
+    T Quadrature<T>::qTrap( const T eps )
   {
     const int MAXSTEPS=20;
-    float olds = 0;
+    T olds = 0;
 
     for( int i=0; i<MAXSTEPS; i++ )
       {
@@ -60,7 +64,7 @@ namespace Quad
           if( std::abs( s-olds ) < eps*std::abs( olds )
               or ( s==0 and olds==0 ) )
             return s; // then return the result
-      
+
         // otherwise store the old result
         olds = s;
         // if we got this far, there is no convergence before the
@@ -70,10 +74,11 @@ namespace Quad
            " in the quadrature rule" );
     return s;
   }
-  
-  float trapVec( array_f vec, const float h )
+
+    template <typename T>
+    T trapVec( array<T> vec, const T h )
   {
-    float sum, s;
+    T sum, s;
     int i;
     const int len = vec.shape()[0];
 
@@ -83,7 +88,7 @@ namespace Quad
                                    " minimum length 3" );
     // add the end points
     s = h/2.0*( vec[0] + vec[len-1] );
-    
+
     // sum the points
     for( sum=0.0, i=0; i<len-1; i++ )
       sum += h*vec[i+1];
@@ -92,9 +97,10 @@ namespace Quad
     return s;
   }
 
-  float trapVec( array_f yvec, array_f xvec )
+    template <typename T>
+    T trapVec( array<T> yvec, array<T> xvec )
   {
-    float sum;
+    T sum;
     unsigned int i;
     const unsigned int len = yvec.shape()[0];
     if( xvec.shape()[0] != len )
@@ -105,7 +111,7 @@ namespace Quad
     if( len<2 )
       throw std::invalid_argument( "Vector for integration must be of"
                                    " minimum length 3" );
-    
+
     // sum the points
     for( sum=0.0, i=1; i<len; i++ )
       sum += ( xvec[i]-xvec[i-1] )*( yvec[i]+yvec[i-1] );
@@ -113,4 +119,7 @@ namespace Quad
     sum/=2.0;
     return sum;
   }
+
+    template class Quadrature<float>;
+    template class Quadrature<double>;
 }
