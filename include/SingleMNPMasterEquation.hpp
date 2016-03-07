@@ -15,52 +15,52 @@
 #include<stdexcept>
 #include<functional>
 #include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
+using array_d = boost::multi_array<double,1>;
 #include <utility>
-using pair = std::pair<float, float>;
+using dpair = std::pair<double, double>;
 #include <cmath>
 using std::abs;
 
-class SingleMNPMasterEquation : public ODE<float>
+class SingleMNPMasterEquation : public ODE<double>
 {
 public:
   // constructor for the general case
-  SingleMNPMasterEquation( float anis,
-			   float temp,
+  SingleMNPMasterEquation( double anis,
+			   double temp,
 			   const Field &field,
-			   float fieldangle,
-			   float radius,
-			   float alpha,
-			   float Ms,
-			   float gamma=Constants::GYROMAG );
+			   double fieldangle,
+			   double radius,
+			   double alpha,
+			   double Ms,
+			   double gamma=Constants::GYROMAG );
 
   // delegated constructor for aligned case
-  SingleMNPMasterEquation( float anis,
-			   float temp,
+  SingleMNPMasterEquation( double anis,
+			   double temp,
 			   const Field &field,
-			   float radius );
+			   double radius );
 
 
 
   // compute the difference in energy between the two states of the
   // system
-  float ediff( float t );
+  double ediff( double t );
 
   // compute the angle of the minima
-  pair state_rotation( const float t ) const;
+  dpair state_rotation( const double t ) const;
 
   // Compute the drift of the master equation
-  void computeDrift( array_f& out, const array_f& in, const float t ) const;
+  void computeDrift( array_d& out, const array_d& in, const double t ) const;
 
 private:
-  float k;
-  float T;
-  float r;
-  float psi;
-  float a;
-  float M;
-  float gam;
-  float v;
+  double k;
+  double T;
+  double r;
+  double psi;
+  double a;
+  double M;
+  double gam;
+  double v;
   const Field *fieldPtr;
 };
 
