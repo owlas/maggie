@@ -26,6 +26,11 @@ using ad_vec = std::vector<array_d>;
 #include<boost/random.hpp>
 using boost::mt19937;
 
+#include<cmath>
+using std::sin; using std::pow;
+using std::sqrt; using std::exp;
+using std::acos;
+
 class Simulation
 {
 public:
@@ -48,6 +53,9 @@ public:
 
   // compute the transition matrix_d
   matrix_d arrheniusMatrix_D() const;
+
+    // computes a random state from the equilibrium distribution
+    array_d equilibriumState();
 
   // setters
   void setSimLength( const unsigned int );
@@ -72,5 +80,6 @@ private:
   array_d  h;
   ad_vec state;
   std::vector<double> stability;
+    mt19937 equilibrium_rng;
 };
 #endif

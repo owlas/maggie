@@ -20,8 +20,9 @@ Simulation::Simulation( const ParticleCluster g, const ad_vec init_state,
   setState( init_state );
   setTemp( temp );
   setField( field );
-}
+  equilibrium_rng.seed(1001);
 
+}
 
 
 // ----- Setter methods -----
@@ -123,8 +124,8 @@ int Simulation::runFull()
 
 
     // Initialise the integrator and its RNG
-    mt19937 rng( 301 );
-    auto inte = Heun<double>( llg, init, 0.0, dtau, rng );
+    mt19937 rng2( 301 );
+    auto inte = Heun<double>( llg, init, 0.0, dtau, rng2 );
 
 
     // store the solutions here
@@ -246,4 +247,57 @@ int Simulation::runEnsemble( unsigned int Nruns )
     boostToFile( sols, "ensemble.mag" );
 
   return 1; // everything was fine
+}
+
+// returns a random state from the equilibrium distribution
+array_d Simulation::equilibriumState()
+{
+
+    // Currently only runs a single particle
+    if( geom.getNParticles() != 1 )
+        throw "Simulation only runs for a single particle.";
+
+    // Get the particle info
+    Particle p = geom.getParticle( 0 );
+
+    // define the pdf
+    auto pdf = [&p, this]( double theta )
+        {
+            return sin( theta) * exp( -p.getK()*p.getV()*pow( sin( theta ), 2 )
+                                      / ( Constants::KB * T ) );
+        };
+
+    // find the max
+    array_d angles( extents[10000] );
+    for( bidx i=0; i!=10000; ++i )
+        angles[i] = i * M_PI / 10000;
+    double max = 0.0;
+    for( auto &t : angles )
+        if( pdf( t ) > max)
+            max = pdf( t );
+
+    // use uniform distribution as the candidate density
+    // with M 10% higher that the max of target dist
+    static boost::random::uniform_real_distribution<> gen_candidate( 0,M_PI );
+    static boost::random::uniform_real_distribution<> gen_check( 0,1 );
+    double M = 1.1 * max;
+
+
+    // Rejection rate algorithm
+    double candidate = 0;
+    while( 1 )
+    {
+        candidate = gen_candidate( equilibrium_rng );
+        double acceptance = pdf( candidate ) / M;
+        double check = gen_check( equilibrium_rng );
+        if( acceptance > check )
+            break;
+    }
+
+    array_d init_state( extents[3] );
+    init_state[0] = 0;
+    init_state[1] = 0;
+    init_state[2] = cos( candidate );
+
+    return init_state;
 }
