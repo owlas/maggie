@@ -46,4 +46,16 @@ int boostToFile( matrix<T> m, std::string name )
     fid.close();
     return 1;
 }
+
+
+// Prints a progress bar
+void progress_bar( std::string taskname, double progress )
+{
+    int length = 20;
+    cout << taskname << "  |";
+    int complete = int( 20 * progress );
+    for( int i=0; i!=length; ++i )
+        i <= complete ? cout << "=" : cout << ".";
+    cout << "|\r" << std::flush;
+}
 #endif
