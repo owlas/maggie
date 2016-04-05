@@ -73,6 +73,13 @@ llgsim: src/llgsim.cpp libmaggie.so
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/llgsim.cpp -L$(LIB_DIR) $(LIBS)
 
+# Create the examples
+#
+transfer: initial src/transfer.cpp libmaggie.so
+	$(CXX) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
+		-o $@ $(SRC_PATH)/transfer.cpp -L$(LIB_DIR) $(LIBS)
+
 # Shared library maggie.so used for objects
 #
 libmaggie.so: $(OBJ_FILES)
