@@ -374,7 +374,7 @@ array_d Simulation::equilibriumState()
     // find the max
     array_d angles( extents[10000] );
     for( bidx i=0; i!=10000; ++i )
-        angles[i] = i * M_PI / 10000;
+        angles[i] = i * M_PI_2 / 10000;
     double max = 0.0;
     for( auto &t : angles )
         if( pdf( t ) > max)
