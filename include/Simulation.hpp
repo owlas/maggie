@@ -31,6 +31,8 @@ using std::sin; using std::pow;
 using std::sqrt; using std::exp;
 using std::acos;
 
+#include<omp.h>
+
 class Simulation
 {
 public:
@@ -44,6 +46,9 @@ public:
 
     // Do a simulation of an ensemble of particles
     int runEnsemble( unsigned int );
+
+    // Do a simulation of a single particle until it switches
+    int runFPT( const int N_ensemble, const bool alignup = false );
 
   // save results to hard drive
   int save();

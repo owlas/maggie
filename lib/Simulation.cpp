@@ -249,6 +249,110 @@ int Simulation::runEnsemble( unsigned int Nruns )
   return 1; // everything was fine
 }
 
+// Computes the first passage time for a single particle in the absence of an
+// external field
+int Simulation::runFPT( const int N_ensemble, const bool alignup )
+{
+    // Currently only runs a single particle
+    if( geom.getNParticles() != 1 )
+        throw "Simulation only runs for a single particle.";
+
+    // Get the particle info
+    Particle p = geom.getParticle( 0 );
+
+    // The thermal field intensity for reduced simulation
+    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
+                                     / ( p.getK() * p.getV()
+                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
+
+
+    // Compute the reduced time for the simulation
+    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
+    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
+            / ( 1+pow( p.getAlpha(), 2 ) ) };
+    double dtau = dt * t_factor;
+
+
+    // compute the reduced external field
+    array_d happ( extents[3] );
+    for( bidx i=0; i!=3; ++i )
+        happ[i] = h[i]/Hk;
+
+    // each simulation in the ensemble has its own RNG
+    // generate seeds here
+    mt19937 seed_rng( 8888 );
+    std::vector<int> seeds;
+    seeds.reserve( N_ensemble );
+    boost::uniform_int<> int_dist;
+    for( auto &i : seeds )
+        i = int_dist( seed_rng );
+
+    // store the fpt for each run
+    array_d fpt( extents[N_ensemble] );
+
+    // run for every simulation in the ensemble
+    #pragma omp parallel for
+    for( bidx i=0; i<N_ensemble; ++i )
+    {
+        // Set up an LLG equation for the particle
+        // finite temperature with the reduced field
+        StocLLG<double> llg( therm_strength, p.getAlpha(),
+                             happ[0], happ[1], happ[2] );
+
+
+        // The initial condition of the particle is determined by the flag
+        // if align up is true, then particle is initially such that mz=1
+        array_d init( boost::extents[3] );
+        if( alignup )
+        {
+            init[0] = 0; init[1] = 0; init[2] = 1;
+        }    // if it is false then the initial condition is drawn from the
+        // equilibrium initial condition
+        else
+            init = equilibriumState();
+
+
+        // Initialise the integrator and its RNG
+        mt19937 heun_rng( seeds[i] );
+        auto inte = Heun<double>( llg, init, 0.0, dtau, heun_rng );
+
+
+        // reference to the current state and the field
+        const array_d& currentState = inte.getState();
+        array_d& currentField = llg.getReducedFieldRef();
+
+        // Step the integrator until switch occurs
+        // then store the time
+        while( 1 )
+        {
+            // first compute the field due to the anisotropy
+            // and put that in the field vector
+            p.computeAnisotropyField( currentField, currentState );
+
+            // then add the reduced external field
+            for( bidx j=0; j!=3; ++j )
+                currentField[j] += happ[j];
+
+            // step the integrator
+            inte.step();
+
+            // check the end condition
+            if( currentState[2] < 0 )
+                break;
+        }
+
+        // store the time
+        fpt[i] = inte.getTime();
+
+    }
+
+    // Write the results to the hardrive
+    boostToFile( fpt, "llg.fpt" );
+
+  return 1; // everything was fine
+}
+
+
 // returns a random state from the equilibrium distribution
 array_d Simulation::equilibriumState()
 {
