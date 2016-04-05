@@ -9,6 +9,8 @@
 #define UTIL_H
 
 #include<iostream>
+using std::cout; using std::endl;
+using std::flush;
 #include<fstream>
 #include<boost/multi_array.hpp>
 using bidx = boost::multi_array_types::index;
@@ -49,13 +51,5 @@ int boostToFile( matrix<T> m, std::string name )
 
 
 // Prints a progress bar
-void progress_bar( std::string taskname, double progress )
-{
-    int length = 20;
-    cout << taskname << "  |";
-    int complete = int( 20 * progress );
-    for( int i=0; i!=length; ++i )
-        i <= complete ? cout << "=" : cout << ".";
-    cout << "|\r" << std::flush;
-}
+void progress_bar( std::string, double );
 #endif
