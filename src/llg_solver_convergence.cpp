@@ -35,6 +35,8 @@ int main() {
 
   // Set up the LLG
   const StocLLG<double> sde( sigma, alpha, 0.0, 0.0, hz );
+  // and an ito version
+  const StocLLGIto<double> sde_ito( sigma, alpha, 0.0, 0.0, hz );
 
   // Initial condition for the system
   array_d init( boost::extents[3] );
@@ -56,7 +58,8 @@ int main() {
   array_d ww( boost::extents[3] );
 
   // store the mz values for each run and time step
-  matrix_d sols( boost::extents[N_samples][N_dt] );
+  matrix_d sols_heun( boost::extents[N_samples][N_dt] );
+  matrix_d sols_eule( boost::extents[N_samples][N_dt] );
 
 
   // Now run the solver for Nsamples different wiener paths
@@ -89,10 +92,12 @@ int main() {
           const double dt{ ref_dt * N_mul };
           const double dtau{ dt*tfactor };
 
-          // construct numerical solver
+          // construct numerical solvers
           // and set the wiener increments manually
-          auto inte = Heun<double>( sde, init, 0.0, dtau, rng );
-          inte.setManualWienerMode( true );
+          auto heun = Heun<double>( sde, init, 0.0, dtau, rng );
+          heun.setManualWienerMode( true );
+          auto euler = Euler<double>( sde_ito, init, 0.0, dtau, rng );
+          euler.setManualWienerMode( true );
 
           // step the integrator
           for( int n=0; n!=steps-1; n++ )
@@ -105,18 +110,22 @@ int main() {
               ww[2] = w[2][nnext] - w[2][nthis];
 
               // set the increments and step
-              inte.setWienerIncrements( ww );
-              inte.step();
+              heun.setWienerIncrements( ww );
+              euler.setWienerIncrements( ww );
+              heun.step();
+              euler.step();
           }
 
           // store the final mz state
-          sols[i][j] = inte.getState()[0];
+          sols_heun[i][j] = heun.getState()[0];
+          sols_eule[i][j] = euler.getState()[0];
 
       } // end for each time step
 
     } // end for each sample
 
   // save the data
-  boostToFile(sols, "llg_heun.mz" );
+  boostToFile(sols_heun, "llg_heun.mz" );
+  boostToFile(sols_eule, "llg_euler.mz" );
 
 } // end main
