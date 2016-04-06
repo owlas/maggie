@@ -9,20 +9,22 @@
 using array_d = boost::multi_array<double,1>;
 using matrix_d =  boost::multi_array<double,2>;
 typedef boost::multi_array_types::index bIndex;
+using range = boost::multi_array_types::index_range;
 #include <boost/random.hpp>
 using mt19937=boost::random::mt19937;
-using normal_f=boost::random::normal_distribution<double>;
+using normal_d=boost::random::normal_distribution<double>;
 #include <cmath>
 #include <iostream>
 using std::cout; using std::endl;
+#include <string>
 
 int main() {
 
   cout << "Running convergence tests for integrators" << endl;
 
   // Run two numerical solvers for
-  int N_dt{ 5 }; // different time steps and
-  int N_samples{ 100 }; // different runs
+  int N_dt{ 6 }; // different time steps and
+  int N_samples{ 1000 }; // different runs
 
   // Simulation parameters
   const double K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
@@ -41,104 +43,80 @@ int main() {
   // Simulation length
   const double sim_length{ 2e-10 };
 
-  // Store the strong convergence errors
-  array_d e_strong_heu( boost::extents[N_dt] );
-  for( auto& x : e_strong_heu ) x=0.0;
-  array_d e_strong_mil{ e_strong_heu };
-  array_d dt_values{ e_strong_mil };
+  // most accurate simulation step
+  const double ref_dt{ 1e-14 };
+  const int ref_steps{ int( sim_length / ref_dt ) };
 
-  // Compute a very accurate solution with the Euler scheme
-  cout << "computing accurate solution" << endl;
-  mt19937 rng_e( 99 );
-  double euler_dt{ 1e-19 };
-  double euler_dtau{ euler_dt * tfactor};
-  int euler_steps{ int( sim_length / euler_dt ) };
-  Euler<double> inte_euler( sde, init, 0.0, euler_dtau, rng_e );
+  // define the rng
+  mt19937 rng( 99 );
+  normal_d dist( 0,sqrt( ref_dt ) );
+  boost::variate_generator<mt19937, normal_d> vg( rng, dist );
 
-  // store the solutions here
-  matrix_d sols( boost::extents[3][N_samples] );
+  // use this to store 3d wiener vectors
+  array_d ww( boost::extents[3] );
 
-  for( int i=0; i!=N_samples; ++i )
-  {
-      inte_euler.reset();
-      for( int n=0; n!=euler_steps; ++n )
-          inte_euler.step();
-
-      if( !( i%( N_samples/10 ) ) )
-          cout << ".";
+  // store the mz values for each run and time step
+  matrix_d sols( boost::extents[N_samples][N_dt] );
 
 
-      for( array_d::index k=0; k!=3; ++k )
-          sols[k][i] = inte_euler.getState()[k];
-  }
-  cout << endl;
-
-  // Now run the other integrators for various time steps
-  for( int i=0; i!=N_dt; i++ )
+  // Now run the solver for Nsamples different wiener paths
+  for( int i=0; i!=N_samples; i++ )
     {
-      // compute the time interval and reduced time interval
-      const double dt{ double( pow(10,-12.8)*pow( 10, -0.3*i ) ) };
-      const double dtau{ dt*tfactor };
 
-      cout << "dt = " << dt << endl;
+        // compute a wiener path
+        matrix_d w( boost::extents[3][ref_steps] );
+        for( bIndex n=0; n!=3; ++n )
+            w[n][0] = 0.0;
+        for( bIndex n=1; n!=ref_steps; ++n )
+        {
+            w[0][n] = w[0][n-1] + vg();
+            w[1][n] = w[1][n-1] + vg();
+            w[2][n] = w[2][n-1] + vg();
+        }
 
-      // Create random number generators
-      mt19937 rng( 99 );
-      mt19937 rng_mil( 188888 ); // needed for milstein
-      mt19937 rng_h( 99 );
+        // some debugging
+        cout << "sample " << i << " of " << N_samples << endl;
 
-      // Set up the integrators
-      Heun<double> inte_heu( sde, init, 0.0, dtau, rng );
-      Milstein<double> inte_mil( sde, init, 0.0, dtau, rng, rng_mil );
-
-      // Store the errors
-      double err_heu{ 0.0 }, err_mil{ 0.0 };
-
-      // Run each integrator multiple times
-      for( int j=0; j!=N_samples; j++ )
+      // Run an integrator with different step sizes
+      for( int j=0; j!=N_dt; j++ )
       {
-          inte_heu.reset();
-          inte_mil.reset();
 
-          // Run the integrators for simulation length and compute
-          // the Wiener process manually
-          int N_steps{ int( sim_length / dt ) };
-          for( int n=0; n!=N_steps; n++ )
+          // Factor of step size multiplier
+          int N_mul = pow( 2, j );
+
+          // compute a solution with the Heun scheme
+          const int steps{ ref_steps / N_mul };
+          const double dt{ ref_dt * N_mul };
+          const double dtau{ dt*tfactor };
+
+          // construct numerical solver
+          // and set the wiener increments manually
+          auto inte = Heun<double>( sde, init, 0.0, dtau, rng );
+          inte.setManualWienerMode( true );
+
+          // step the integrator
+          for( int n=0; n!=steps-1; n++ )
           {
+              // compute the wiener step
+              int nthis = n*N_mul;
+              int nnext = nthis + N_mul;
+              ww[0] = w[0][nnext] - w[0][nthis];
+              ww[1] = w[1][nnext] - w[1][nthis];
+              ww[2] = w[2][nnext] - w[2][nthis];
 
-              // step the integrators
-              inte_heu.step();
-              inte_mil.step();
+              // set the increments and step
+              inte.setWienerIncrements( ww );
+              inte.step();
           }
 
-          // Compute a very accurate solution using the Euler scheme
-          for( int n=0; n!=euler_steps; ++n )
-              inte_euler.step();
+          // store the final mz state
+          sols[i][j] = inte.getState()[0];
 
-          // Add the errors
-          for ( bIndex k=0; k!=3; ++k )
-          {
-              err_heu += std::abs( inte_heu.getState()[k] -
-                                   sols[k][i]);
-              err_mil += std::abs( inte_mil.getState()[k] -
-                                   sols[k][i] );
-          }
-          // DEBUG
-          cout << "heun: " << inte_heu.getState()[2] << endl;
+      } // end for each time step
 
-      } // end for multiple samples
+    } // end for each sample
 
-      // Compute the expected absolute error
-      e_strong_heu[i] += err_heu/N_samples;
-      e_strong_mil[i] += err_mil/N_samples;
+  // save the data
+  boostToFile(sols, "llg_heun.mz" );
 
-      // store time step
-      dt_values[i] = dt;
-
-    } // end for each dt
-
-  // Save the convergence values
-  boostToFile<double>( dt_values, "convergence.dt" );
-  boostToFile<double>( e_strong_heu, "convergence.heun" );
-  boostToFile<double>( e_strong_mil, "convergence.mils" );
-}
+} // end main
