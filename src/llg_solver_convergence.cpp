@@ -17,6 +17,7 @@ using normal_d=boost::random::normal_distribution<double>;
 #include <iostream>
 using std::cout; using std::endl;
 #include <string>
+#include<omp.h>
 
 int main() {
 
@@ -50,21 +51,32 @@ int main() {
   const int ref_steps{ int( sim_length / ref_dt ) };
 
   // define the rng
-  mt19937 rng( 99 );
-  normal_d dist( 0,sqrt( ref_dt ) );
-  boost::variate_generator<mt19937, normal_d> vg( rng, dist );
-
-  // use this to store 3d wiener vectors
-  array_d ww( boost::extents[3] );
+  // each simulation in the ensemble has its own RNG
+  // generate seeds here
+  mt19937 seed_rng( 8888 );
+  std::vector<int> seeds;
+  seeds.reserve( N_samples );
+  boost::uniform_int<> int_dist;
+  for( auto &i : seeds )
+      i = int_dist( seed_rng );
 
   // store the mz values for each run and time step
   matrix_d sols_heun( boost::extents[N_samples][N_dt] );
   matrix_d sols_eule( boost::extents[N_samples][N_dt] );
+  matrix_d sols_mils( boost::extents[N_samples][N_dt] );
 
 
   // Now run the solver for Nsamples different wiener paths
-  for( int i=0; i!=N_samples; i++ )
+#pragma omp parallel for schedule(dynamic, 5)
+  for( int i=0; i<=N_samples; i++ )
     {
+        // set the rng
+        mt19937 rng( seeds[i] );
+        normal_d dist( 0,sqrt( ref_dt ) );
+        boost::variate_generator<mt19937, normal_d> vg( rng, dist );
+
+        // use this to store 3d wiener vectors
+        array_d ww( boost::extents[3] );
 
         // compute a wiener path
         matrix_d w( boost::extents[3][ref_steps] );
@@ -99,6 +111,10 @@ int main() {
           auto euler = Euler<double>( sde_ito, init, 0.0, dtau, rng );
           euler.setManualWienerMode( true );
 
+          // milstein requires another rng for double ints
+          mt19937 rng_m( 9 );
+          auto milstein = Milstein<double>( sde, init, 0.0, dtau, rng, rng_m );
+
           // step the integrator
           for( int n=0; n!=steps-1; n++ )
           {
@@ -114,11 +130,14 @@ int main() {
               euler.setWienerIncrements( ww );
               heun.step();
               euler.step();
+              milstein.setWienerIncrements( ww );
+              milstein.step();
           }
 
           // store the final mz state
           sols_heun[i][j] = heun.getState()[0];
           sols_eule[i][j] = euler.getState()[0];
+          sols_mils[i][j] = milstein.getState()[0];
 
       } // end for each time step
 
@@ -127,5 +146,6 @@ int main() {
   // save the data
   boostToFile(sols_heun, "llg_heun.mz" );
   boostToFile(sols_eule, "llg_euler.mz" );
+  boostToFile(sols_mils, "llg_milstein.mz" );
 
 } // end main
