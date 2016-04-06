@@ -51,13 +51,6 @@ runtests: src/tests.cpp libmaggie.so
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/tests.cpp -L$(LIB_DIR) $(LIBS)
 
-# Create the convergence tests
-#
-convergence_tests: src/convergence_tests.cpp libmaggie.so
-	$(CXX) 	$(CPP_FLAGS) \
-		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
-		-o $@ $(SRC_PATH)/convergence_tests.cpp -L$(LIB_DIR) $(LIBS)
-
 # Create the llg convergence tests
 #
 llg_solver_convergence: src/llg_solver_convergence.cpp libmaggie.so
@@ -73,7 +66,7 @@ llgsim: src/llgsim.cpp libmaggie.so
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/llgsim.cpp -L$(LIB_DIR) $(LIBS)
 
-# Create the examples
+# Create data for transfer report
 #
 transfer: initial src/transfer.cpp libmaggie.so
 	$(CXX) 	$(CPP_FLAGS) \
