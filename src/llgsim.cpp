@@ -18,6 +18,7 @@ using bidx=boost::multi_array_types::index;
 #include <inih/INIReader.h>
 #include <iostream>
 using std::cout; using std::endl;
+using std::flush;
 int main()
 {
     // Read the ini file to get the particle properties
@@ -68,14 +69,17 @@ int main()
 
     // now the time step and simulation length
     double dt{ 1e-14 };
-    int time_steps{ 100000 };
+    int time_steps{ 20000 };
 
     // Finally we choose the temperature and external field
-    double temp{ 30 };
+    double temp{ 300 }; // 300
     array_d field( extents[3] );
     field[0] = reader.GetReal("particle", "Happ_x", -1 );
     field[1] = reader.GetReal("particle", "Happ_y", -1 );
     field[2] = reader.GetReal("particle", "Happ_z", -1 );
+
+    // print stability
+    cout << "stability ratio: " << anisotropy_const * p.getV() / ( Constants::KB * temp ) << endl;
 
     auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
 
@@ -83,13 +87,16 @@ int main()
     // The run command runs an LLG simulation of the particle for the
     // specified number of time steps and save the time domain signal
     // of the magnetisation to the hard disk
+    cout << "Computing example trajectory... " << flush;
     mysim.runFull();
+    cout << "done" << endl;
 
 
     // Run an ensemble of the system and save the final state of the each
     // member of the ensemble
-    mysim.runEnsemble( 100 );
-
+    cout << "Computing equilibrium distribution... " << flush;
+    mysim.runEnsemble( 10000 );
+    cout << "done" << endl;
 
     // and that is that! open up pandas and take a look
     return 1;
