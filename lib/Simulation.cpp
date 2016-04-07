@@ -135,6 +135,9 @@ int Simulation::runFull()
     const array_d& currentState = inte.getState();
     array_d& currentField = llg.getReducedFieldRef();
 
+    // temporary state vector
+    array_d state_temp( boost::extents[3] );
+
 
     // Step the integrator and store the result at each step
     for( array_d::index n=0; n!=N; ++n )
@@ -149,6 +152,14 @@ int Simulation::runFull()
 
         // step the integrator
         inte.step();
+
+        // renormalise the solution
+        double norm = sqrt( currentState[0]*currentState[0]
+                            + currentState[1]*currentState[1]
+                            + currentState[2]*currentState[2] );
+        for( bidx k=0; k!=3; ++k )
+            state_temp[k] = currentState[k] / norm;
+        inte.setState( state_temp );
 
         // store the solutions
         for( array_d::index i=0; i!=3; ++i )
