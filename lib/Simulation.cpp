@@ -387,20 +387,20 @@ array_d Simulation::equilibriumState()
     if( geom.getNParticles() != 1 )
         throw "Simulation only runs for a single particle.";
 
-    // Get the particle info
+    // Get the particle info and compute the stability
     Particle p = geom.getParticle( 0 );
+    double sr = p.getK() * p.getV() / ( Constants::KB * T );
 
     // define the pdf
-    auto pdf = [&p, this]( double theta )
+    auto pdf = [sr]( double theta )
         {
-            return sin( theta) * exp( -p.getK()*p.getV()*pow( sin( theta ), 2 )
-                                      / ( Constants::KB * T ) );
+            return sin( theta ) * exp( -sr * pow( sin( theta ), 2 ) );
         };
 
     // find the max
-    array_d angles( extents[10000] );
-    for( bidx i=0; i!=10000; ++i )
-        angles[i] = i * M_PI_2 / 10000;
+    array_d angles( extents[1000] );
+    for( bidx i=0; i!=1000; ++i )
+        angles[i] = i * M_PI_2 / 1000;
     double max = 0.0;
     for( auto &t : angles )
         if( pdf( t ) > max)
