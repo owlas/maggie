@@ -332,6 +332,8 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
         const array_d& currentState = inte.getState();
         array_d& currentField = llg.getReducedFieldRef();
 
+        array_d state_temp( boost::extents[3] );
+
         // Step the integrator until switch occurs
         // then store the time
         while( 1 )
@@ -347,18 +349,31 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
             // step the integrator
             inte.step();
 
+            // renormalise the solution
+            double norm = sqrt( currentState[0]*currentState[0]
+                                + currentState[1]*currentState[1]
+                                + currentState[2]*currentState[2] );
+            for( bidx k=0; k!=3; ++k )
+                state_temp[k] = currentState[k] / norm;
+            inte.setState( state_temp );
+
             // check the end condition
             if( currentState[2] < 0 )
                 break;
         }
 
         // store the time
-        fpt[i] = inte.getTime();
+        fpt[i] = inte.getTime() / t_factor;
+        cout << i << endl;
 
     }
 
     // Write the results to the hardrive
-    boostToFile( fpt, "llg.fpt" );
+    std::ostringstream fname;
+    fname << "llg" << sr << ".fpt";
+    boostToFile( fpt, fname.str() );
+
+    #pragma omp barrier
 
   return 1; // everything was fine
 }
