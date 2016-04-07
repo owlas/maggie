@@ -302,7 +302,7 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
     array_d fpt( extents[N_ensemble] );
 
     // run for every simulation in the ensemble
-    #pragma omp parallel for
+#pragma omp parallel for schedule(dynamic, 1)
     for( bidx i=0; i<N_ensemble; ++i )
     {
         // Set up an LLG equation for the particle
