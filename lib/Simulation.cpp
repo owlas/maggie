@@ -276,6 +276,8 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
                                      / ( p.getK() * p.getV()
                                          * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
 
+    // compute the stability
+    double sr{ p.getK() * p.getV() / ( Constants::KB * T ) };
 
     // Compute the reduced time for the simulation
     double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };

@@ -33,6 +33,8 @@ using std::acos;
 
 #include<omp.h>
 
+#include<sstream>
+
 class Simulation
 {
 public:
