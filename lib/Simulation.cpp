@@ -431,3 +431,90 @@ array_d Simulation::equilibriumState()
 
     return init_state;
 }
+
+// Computes the time that switches occur for a single particle
+int Simulation::runResidence( const unsigned int N_switches )
+{
+    // Currently only runs a single particle
+    if( geom.getNParticles() != 1 )
+        throw "Simulation only runs for a single particle.";
+
+    // Get the particle info
+    Particle p = geom.getParticle( 0 );
+
+    // The thermal field intensity for reduced simulation
+    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
+                                     / ( p.getK() * p.getV()
+                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
+
+
+    // Compute the reduced time for the simulation
+    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
+    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
+            / ( 1+pow( p.getAlpha(), 2 ) ) };
+    double dtau = dt * t_factor;
+
+
+    // compute the reduced external field
+    array_d happ( extents[3] );
+    for( bidx i=0; i!=3; ++i )
+        happ[i] = h[i]/Hk;
+
+    // store the time of each switch
+    array_d switch_times( extents[N_switches] );
+
+
+    // Set up an LLG equation for the particle
+    // finite temperature with the reduced field
+    StocLLG<double> llg( therm_strength, p.getAlpha(),
+                         happ[0], happ[1], happ[2] );
+
+
+    // Particle is prepared in the up state
+    array_d init( boost::extents[3] );
+    init[0] = 0; init[1] = 0; init[2] = 1;
+    int up = 1;
+
+
+    // Initialise the integrator and its RNG
+    mt19937 heun_rng( 1001 );
+    auto inte = Heun<double>( llg, init, 0.0, dtau, heun_rng );
+
+
+    // reference to the current state and the field
+    const array_d& currentState = inte.getState();
+    array_d& currentField = llg.getReducedFieldRef();
+
+    // Number of switches
+    unsigned int n = 0;
+
+    // Step the integrator until switch occurs
+    // then store the time
+    while( n!=N_switches )
+    {
+        // first compute the field due to the anisotropy
+        // and put that in the field vector
+        p.computeAnisotropyField( currentField, currentState );
+
+        // then add the reduced external field
+        for( bidx j=0; j!=3; ++j )
+            currentField[j] += happ[j];
+
+        // step the integrator
+        inte.step();
+
+        // check the end condition
+        if( currentState[2]*up < 0 )
+        {
+            up *= -1;
+            switch_times[n] = inte.getTime();
+            n++;
+            cout << n << endl;
+        }
+    }
+
+    // Write the results to the hardrive
+    boostToFile( switch_times, "llg.switches" );
+
+    return 1; // everything was fine
+}

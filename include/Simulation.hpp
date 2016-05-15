@@ -10,6 +10,7 @@
 #ifndef SIM_H
 #define SIM_H
 
+#include<maggie.hpp>
 #include<ParticleCluster.hpp>
 #include <Heun.hpp>
 #include <StocLLG.hpp>
@@ -63,6 +64,9 @@ public:
 
     // computes a random state from the equilibrium distribution
     array_d equilibriumState();
+
+    // compute the switch times
+    int runResidence( const unsigned int N_switches );
 
   // setters
   void setSimLength( const unsigned int );
