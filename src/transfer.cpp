@@ -18,6 +18,7 @@ using bidx=boost::multi_array_types::index;
 #include <inih/INIReader.h>
 #include <iostream>
 using std::cout; using std::endl;
+using std::flush;
 int main()
 {
     // Read the ini file to get the particle properties
@@ -67,11 +68,11 @@ int main()
     std::vector<array_d> states = { init };
 
     // now the time step and simulation length
-    double dt{ 1e-14 };
-    int time_steps{ 20000 };
+    double dt{ 1e-12 };
+    int time_steps{ 50000000 };
 
     // Finally we choose the temperature and external field
-    double temp{ 300 }; // 300
+    double temp{ 200 }; // 300
     array_d field( extents[3] );
     field[0] = reader.GetReal("particle", "Happ_x", -1 );
     field[1] = reader.GetReal("particle", "Happ_y", -1 );
@@ -82,8 +83,13 @@ int main()
 
     auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
 
+    // run a simulation using a high energy barrier
+    cout << "Running example trajectory..." << flush;
+    mysim.runFull();
+    cout << "done" << endl;
 
     // check the distribution of the initial condition generator
+    cout << "checking angular distribution..." << flush;
     array_d angles( extents[10000] );
     for( int i=0; i!=10000; ++i )
     {
@@ -92,9 +98,18 @@ int main()
         angles[i] = acos(state[2]);
     }
     boostToFile(angles, "angles");
+    cout << " ..done" << endl;
+
+    // run a residence time calculation
+    cout << "running residence time simulation..." << flush;
+    mysim.runResidence( 500 );
+    cout << " ..done" << endl;
 
     // Run the fpt calculation
+    cout << "running first passage time simulation..." << flush;
     mysim.runFPT( 2000 );
+    cout << " ..done" << endl;
+
 
     return 1;
 }
