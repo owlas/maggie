@@ -295,10 +295,10 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
     // generate seeds here
     mt19937 seed_rng( 8888 );
     std::vector<int> seeds;
-    seeds.reserve( N_ensemble );
-    boost::uniform_int<> int_dist;
-    for( auto &i : seeds )
-        i = int_dist( seed_rng );
+    boost::uniform_int<> int_dist(0, 2e7);
+    for( int i=0; i!=N_ensemble; ++i )
+        seeds.push_back( int_dist( seed_rng ) );
+
 
     // store the fpt for each run
     array_d fpt( extents[N_ensemble] );
