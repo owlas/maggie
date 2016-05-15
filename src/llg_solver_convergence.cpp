@@ -67,8 +67,8 @@ int main() {
 
 
   // Now run the solver for Nsamples different wiener paths
-#pragma omp parallel for schedule(dynamic, 5)
-  for( int i=0; i<=N_samples; i++ )
+#pragma omp parallel for schedule(dynamic, 1)
+  for( int i=0; i<N_samples; i++ )
     {
         // set the rng
         mt19937 rng( seeds[i] );
