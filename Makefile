@@ -21,7 +21,7 @@ OBJ_FILES=$(addprefix $(OBJ_PATH)/,$(notdir $(SOURCES:.cpp=.o)))
 
 # Default invokes the primary target
 #
-default: initial runtests convergence_tests llg_solver_convergence llgsim
+default: initial runtests llgsim
 
 # Get the dependencies and pull the submodules
 dependencies:
@@ -72,6 +72,13 @@ transfer: initial src/transfer.cpp libmaggie.so
 	$(CXX) 	$(CPP_FLAGS) \
 		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
 		-o $@ $(SRC_PATH)/transfer.cpp -L$(LIB_DIR) $(LIBS)
+
+# Create fpt calcs
+#
+phasedia: initial src/phasediagram.cpp libmaggie.so
+	$(CXX) 	$(CPP_FLAGS) \
+		-I$(INC_PATH) -I$(GTEST_DIR)/include -I$(GMOCK_DIR)/include \
+		-o $@ $(SRC_PATH)/phasediagram.cpp -L$(LIB_DIR) $(LIBS)
 
 # Shared library maggie.so used for objects
 #
