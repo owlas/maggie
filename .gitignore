@@ -4,8 +4,17 @@
 *.a
 *.pyc
 
+# Emacs files #
+TAGS
+
+# Jupyter notebook data #
+*.ipynb_checkpoints/
+
+# OSX files #
+.DS_Store
+
 # executables #
 runtests
 
-# Backup files
+# Backup files #
 *~
