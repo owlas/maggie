@@ -360,7 +360,7 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
             inte.setState( state_temp );
 
             // check the end condition
-            if( currentState[2] < 0 )
+            if( currentState[2] < -0.5 )
                 break;
         }
 
@@ -374,8 +374,6 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
     std::ostringstream fname;
     fname << "llg" << sr << ".fpt";
     boostToFile( fpt, fname.str() );
-
-    #pragma omp barrier
 
   return 1; // everything was fine
 }
@@ -402,7 +400,7 @@ array_d Simulation::equilibriumState()
     // find the max
     array_d angles( extents[1000] );
     for( bidx i=0; i!=1000; ++i )
-        angles[i] = i * M_PI_2 / 1000;
+        angles[i] = i * M_PI_4 / 1000;
     double max = 0.0;
     for( auto &t : angles )
         if( pdf( t ) > max)
@@ -410,7 +408,7 @@ array_d Simulation::equilibriumState()
 
     // use uniform distribution as the candidate density
     // with M 10% higher that the max of target dist
-    static boost::random::uniform_real_distribution<> gen_candidate( 0,M_PI );
+    static boost::random::uniform_real_distribution<> gen_candidate( 0,M_PI_4 );
     static boost::random::uniform_real_distribution<> gen_check( 0,1 );
     double M = 1.1 * max;
 
