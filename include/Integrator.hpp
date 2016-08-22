@@ -37,7 +37,7 @@ class Integrator
     // Set the integrator time
     void setTime( const T );
 
-    // Get the pointer to the associated Langevin Equation
+    // Get the reference to the associated Langevin Equation
     const C& getLE() const;
 
     // Compute an integration step
