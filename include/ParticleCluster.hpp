@@ -9,7 +9,8 @@
 #ifndef PCLUSTER_H
 #define PCLUSTER_H
 
-#include<Particle.hpp>
+#include "Particle.hpp"
+
 #include<stdexcept>
 #include<cmath>
 #include<vector>
@@ -45,14 +46,27 @@ public:
     // getters
     unsigned int getNParticles() const;
     matrix_d getLocations() const;
+
     array3_d getDistances() const;
+    const array3_d& getDistancesRef() const;
+    const array3_d& getReducedDistancesRef() const;
+
     Particle getParticle( const int n ) const;
+
+    std::vector<double> getReducedAnisConstants() const;
+    std::vector<double> getReducedVolumes() const;
+
+    double getAverageAnisConstant() const;
+    double getAverageVolume() const;
 
 
 private:
     unsigned int const N;
     std::vector<Particle> particles;
+    std::vector<double> reduced_v, reduced_k;
     matrix_d locs;
-    array3_d dist;
+    array3_d dist, reduced_dist;
+    double k_av, v_av;
 };
+
 #endif

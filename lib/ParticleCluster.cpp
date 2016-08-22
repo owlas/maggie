@@ -5,7 +5,7 @@
 // Oliver W. Laslett (2015)
 // O.Laslett@soton.ac.uk
 //
-#include<ParticleCluster.hpp>
+#include "../include/ParticleCluster.hpp"
 
 // constructor
 ParticleCluster::ParticleCluster( const std::vector<Particle> list,
@@ -13,9 +13,35 @@ ParticleCluster::ParticleCluster( const std::vector<Particle> list,
   : N( int( list.size() ) )
   , locs( boost::extents[N][3] )
   , dist( boost::extents[N][N][3] )
+  , reduced_dist( boost::extents[N][N][3] )
 {
   setParticles( list );
   setLocs( locations );
+
+  // Compute the average K value
+  k_av = 0;
+  for( unsigned int i=0; i!=N; ++i )
+      k_av += particles[i].getK();
+  k_av /= N;
+
+  // Compute the average volume
+  v_av = 0;
+  for( unsigned int i=0; i!=N; ++i )
+      v_av += particles[i].getV();
+  v_av /= N;
+
+  // Compute the reduced K and V values for each particle
+  for( unsigned int i=0; i!=N; ++i)
+  {
+      reduced_k.push_back( particles[i].getK() / k_av );
+      reduced_v.push_back( particles[i].getV() / v_av );
+  }
+
+  // Normalise the distances by the average volume
+  for( unsigned int i=0; i!=N; ++i )
+      for( unsigned int j=0; j!=N; ++j )
+          for( unsigned int k=0; k!=N; ++k )
+              reduced_dist[i][j][k] = dist[i][j][k] / v_av;
 }
 
 // Set the particle list
@@ -43,8 +69,23 @@ void ParticleCluster::setLocs( const matrix_d l )
 unsigned int ParticleCluster::getNParticles() const { return N; }
 matrix_d ParticleCluster::getLocations()  const { return locs; }
 array3_d ParticleCluster::getDistances() const { return dist; }
+const array3_d& ParticleCluster::getDistancesRef() const {
+    return dist;
+}
+const array3_d& ParticleCluster::getReducedDistancesRef() const {
+    return reduced_dist;
+}
 Particle ParticleCluster::getParticle( const int n )
     const { return particles[n]; }
+std::vector<double> ParticleCluster::getReducedAnisConstants() const {
+    return reduced_k;
+}
+std::vector<double> ParticleCluster::getReducedVolumes() const {
+    return reduced_v;
+}
+
+double ParticleCluster::getAverageAnisConstant() const { return k_av; };
+double ParticleCluster::getAverageVolume() const { return v_av; };
 
 // Compute the stability ratio for each of the particles
 std::vector<double> ParticleCluster::computeStability( double T ) const

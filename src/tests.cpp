@@ -292,6 +292,38 @@ TEST(ParticleCluster, Distances)
   EXPECT_EQ( 0, dists[2][2][0] );
   EXPECT_EQ( 0, dists[2][2][1] );
   EXPECT_EQ( 0, dists[2][2][2] );
+
+
+  // check reduced field
+  auto dists_red= pclust.getReducedDistancesRef();
+
+  // p3 - p1
+  EXPECT_EQ( 0, dists_red[0][2][0] );
+  EXPECT_EQ( 0.02984155182973038, dists_red[0][2][1] );
+  EXPECT_EQ( 0.02984155182973038, dists_red[0][2][2] );
+}
+
+// Test the average parameters computed by the ParticleCluster
+TEST( ParticleCluster, AverageParameters )
+{
+    array_d uea( boost::extents[3] );
+    uea[0] = 0.0; uea[1] = 0.0; uea[2] = 1.0;
+
+    std::vector<Particle> vec;
+    vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
+    vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
+
+    matrix_d locations( boost::extents[2][3]);
+    std::fill( locations.data(), locations.data() + locations.num_elements(), 0);
+
+    ParticleCluster cluster(vec, locations);
+
+    ASSERT_FLOAT_EQ( 3.5, cluster.getAverageAnisConstant());
+    ASSERT_FLOAT_EQ( 23.823744289722598, cluster.getAverageVolume());
+    ASSERT_FLOAT_EQ( 1.4285714285714286, cluster.getReducedAnisConstants()[0] );
+    ASSERT_FLOAT_EQ( 0.5714285714285714, cluster.getReducedAnisConstants()[1] );
+    ASSERT_FLOAT_EQ( 1.4065934065934065, cluster.getReducedVolumes()[0] );
+    ASSERT_FLOAT_EQ( 0.5934065934065934, cluster.getReducedVolumes()[1] );
 }
 
 // Test the stochastic integrator on a simple Wiener process
