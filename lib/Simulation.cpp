@@ -189,7 +189,11 @@ int Simulation::runFull()
 
     // Write the results to the hardrive
     for( unsigned int i=0; i!=Nparticles; ++i )
-       boostToFile( sols[i], "llg.mag" ); // TODO format filename
+    {
+        std::ostringstream fname;
+        fname << "llg" << i << ".mag";
+        boostToFile( sols[i], fname.str() );
+    }
 
   return 1; // everything was fine
 }

@@ -16,7 +16,7 @@ using bidx=boost::multi_array_types::index;
 
 #include "../include/types.hpp"
 
-#include <inih/INIReader.h>
+#include "../include/inih/INIReader.h"
 #include <iostream>
 using std::cout; using std::endl;
 using std::flush;
@@ -25,35 +25,44 @@ int main()
     // Read the ini file to get the particle properties
     // by default, read llgsim.ini
     INIReader reader( "llgsim.ini");
+
+    // A particle cluster needs a list of particles and locations
+    // Initialise those vectors here.
+    Particle::vector ps;
+    std::vector<maggie::position> locs;
+
     if(reader.ParseError() < 0 )
     {
         cout << "Cannot load llgsim.ini" << endl;
         return 1;
     }
 
-    // The first thing to do is to set up the particle cluster
-    // in this case we just have one particle, so lets define that:
-    maggie::magnetogyric gyromagnetic_constant{ Constants::GYROMAG };
-    maggie::damping damping{ reader.GetReal( "particle", "alpha", -1 ) }; // 0.01
-    maggie::magnetisation Ms{ reader.GetReal( "particle", "ms", -1 ) }; // 1400e3
-    maggie::diameter diameter{ reader.GetReal( "particle", "diameter", -1 ) }; // 5e-9
-    maggie::anisotropy anisotropy_const{ reader.GetReal( "particle", "anisotropy", -1 ) };
-    maggie::axis anisotropy{
-        reader.GetReal( "particle", "anis_x", -1 ),
-        reader.GetReal( "particle", "anis_y", -1 ),
-        reader.GetReal( "particle", "anis_z", -1 )
-    };
-    auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
-                       anisotropy_const, anisotropy );
+    // For each section of the ini file specifies a single particle
+    for( auto &section_name : reader.GetSections() )
+    {
+        maggie::magnetogyric gyromagnetic_constant{ Constants::GYROMAG };
+        maggie::damping damping{ reader.GetReal( section_name, "alpha", -1 ) }; // 0.01
+        maggie::magnetisation Ms{ reader.GetReal( section_name, "ms", -1 ) }; // 1400e3
+        maggie::diameter diameter{ reader.GetReal( section_name, "diameter", -1 ) }; // 5e-9
+        maggie::anisotropy anisotropy_const{ reader.GetReal( section_name, "anisotropy", -1 ) };
+        maggie::axis anisotropy{
+                reader.GetReal( section_name, "anis_x", -1 ),
+                reader.GetReal( section_name, "anis_y", -1 ),
+                reader.GetReal( section_name, "anis_z", -1 )
+                };
+        auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
+                           anisotropy_const, anisotropy );
+        maggie::position loc{
+                reader.GetReal( section_name, "loc_x", -1 ),
+                reader.GetReal( section_name, "loc_y", -1 ),
+                reader.GetReal( section_name, "loc_z", -1 )
+                };
+        ps.push_back( p );
+        locs.push_back( loc );
+    }
 
 
-    // The particle cluster then needs a list of particles and their
-    // respective locations. In this case its easy.
-    Particle::vector ps;
-    ps.push_back( p );
-
-    std::vector<maggie::position> locs;
-    locs.push_back( maggie::position{ 0, 0, 0 } );
+    // Create the cluster
     auto cluster = ParticleCluster( ps, locs );
 
 
@@ -61,8 +70,9 @@ int main()
     // set up the environment
 
     // first the initial state of the magnetisation
-    maggie::moment init{ 0, 0, 1 };
-    std::vector<maggie::moment> states = { init };
+    std::vector<maggie::moment> states;
+    for ( unsigned int i=0; i!=cluster.getNParticles(); ++i )
+        states.push_back( maggie::moment{ 0, 0, 1 } );
 
     // now the time step and simulation length
     double dt{ 1e-14 };
@@ -77,7 +87,8 @@ int main()
     };
 
     // print stability
-    cout << "stability ratio: " << anisotropy_const * p.getV() / ( Constants::KB * temp ) << endl;
+    for( unsigned int p=0; p!=cluster.getNParticles(); ++p )
+        cout << "stability ratio: " << ps[p].getK() * ps[p].getV() / ( Constants::KB * temp ) << endl;
 
     auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
 
