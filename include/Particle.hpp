@@ -15,10 +15,12 @@ using std::pow;
 using std::fabs;
 using std::exp;
 
-#include "Constants.hpp"
+#include "types.hpp"
 
 #include<boost/multi_array.hpp>
-using array_d = boost::multi_array<double, 1>;
+using array_d = boost::multi_array<double,1>;
+
+#include "Constants.hpp"
 
 #include<stdexcept>
 using std::invalid_argument;
@@ -27,25 +29,28 @@ class Particle
 {
 public:
     // constructor
-    Particle( double gamma, double alpha, double Ms, double D, double K,
-              array_d uea );
+    Particle( maggie::magnetogyric gamma, maggie::damping alpha, double Ms,
+              maggie::diameter D, maggie::anisotropy K, maggie::axis uea );
+
+    // aliases
+    using vector = std::vector<Particle>;
 
     // getters for particle properties
-    double getGamma() const;
-    double getAlpha() const;
+    maggie::magnetogyric getGamma() const;
+    maggie::damping getAlpha() const;
     double getMs() const;
-    double getD() const;
-    double getK() const;
-    array_d getUea() const;
-    double getV() const;
+    maggie::diameter getD() const;
+    maggie::anisotropy getK() const;
+    maggie::axis getUea() const;
+    maggie::volume getV() const;
 
     // setters for particle properties
-    void setGamma( double );
-    void setAlpha( double );
+    void setGamma( maggie::magnetogyric );
+    void setAlpha( maggie::damping );
     void setMs( double );
-    void setSize( double );
-    void setK( double );
-    void setUea( array_d );
+    void setSize( maggie::diameter );
+    void setK( maggie::anisotropy );
+    void setUea( maggie::axis );
 
     // Compute the energy barriers for the case of an applied field
     // parallel to the uniaxial anisotropy axis and with an intensity of
@@ -53,21 +58,21 @@ public:
     array_d alignedEnergyBarriers( double happ ) const;
 
     // Compute the Neel-Arrhenius transition rates at a given temperature
-    array_d neelTransitionRates( double temp, double barrier1,
+    array_d neelTransitionRates( maggie::temperature temp, double barrier1o,
                                  double barrier2 )     const;
 
     // Compute the effective field from the anisotropy
-    void computeAnisotropyField( array_d&, const array_d& ) const;
+    void computeAnisotropyField( maggie::field&, const maggie::moment& ) const;
 
 
 
 private:
-    array_d uea;
-    double gamma;
-    double alpha;
+    maggie::axis uea;
+    maggie::magnetogyric gamma;
+    maggie::damping alpha;
     double ms;
-    double d;
-    double k;
-    double v;
+    maggie::diameter d;
+    maggie::anisotropy k;
+    maggie::volume v;
 };
 #endif

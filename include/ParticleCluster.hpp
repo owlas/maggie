@@ -22,6 +22,7 @@ using array3_d = boost::multi_array<double,3>;
 #include <array>
 using d3 = std::array<double, 3>;
 
+#include "types.hpp"
 
 class ParticleCluster
 {
@@ -29,23 +30,24 @@ public:
     // constructor
     // Particle list could be a boost pointer array_d?
     // List of N particles and matrix_d of locations (N x 3)
-    ParticleCluster( const std::vector<Particle> list, const matrix_d locations );
+    ParticleCluster( const Particle::vector list,
+                     const std::vector<maggie::position> locations );
 
     // Set the particle list
-    void setParticles( const std::vector<Particle> );
+    void setParticles( const Particle::vector );
 
     // Set the locations and compute distances
-    void setLocs( const matrix_d );
+    void setLocs( const std::vector<maggie::position> );
 
     // Compute the stability ratio of each particle
-    std::vector<double> computeStability( double temperature ) const;
+    std::vector<double> computeStability( maggie::temperature temperature ) const;
 
     // Compute the energy barrier for each particle
     array_d computeBarriers( double happ ) const;
 
     // getters
     unsigned int getNParticles() const;
-    matrix_d getLocations() const;
+    std::vector<maggie::position> getLocations() const;
 
     array3_d getDistances() const;
     const array3_d& getDistancesRef() const;
@@ -53,20 +55,22 @@ public:
 
     Particle getParticle( const int n ) const;
 
-    std::vector<double> getReducedAnisConstants() const;
-    std::vector<double> getReducedVolumes() const;
+    std::vector<maggie::anisotropy> getReducedAnisConstants() const;
+    std::vector<maggie::volume> getReducedVolumes() const;
 
-    double getAverageAnisConstant() const;
-    double getAverageVolume() const;
+    maggie::anisotropy getAverageAnisConstant() const;
+    maggie::volume getAverageVolume() const;
 
 
 private:
     unsigned int const N;
-    std::vector<Particle> particles;
-    std::vector<double> reduced_v, reduced_k;
-    matrix_d locs;
+    Particle::vector particles;
+    std::vector<maggie::volume> reduced_v;
+    std::vector<maggie::anisotropy> reduced_k;
+    std::vector<maggie::position> locs;
     array3_d dist, reduced_dist;
-    double k_av, v_av;
+    maggie::anisotropy k_av;
+    maggie::volume v_av;
 };
 
 #endif

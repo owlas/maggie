@@ -17,30 +17,30 @@ using std::endl;
 using std::invalid_argument;
 
 #include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
+using array2 = std::array<double,2>;
 
-class TwoStateMasterEquation : public ODE<float>
+class TwoStateMasterEquation : public ODE<2>
 {
 public:
 
   // constructor for fixed rates
-  TwoStateMasterEquation( const float rate1, const float rate2 );
+  TwoStateMasterEquation( const double rate1, const double rate2 );
 
   // constructor for variable rates
-  TwoStateMasterEquation( const std::function<float( float )> rateFunc1,
-                          const std::function<float( float )> rateFunc2 );
+  TwoStateMasterEquation( const std::function<double( double )> rateFunc1,
+                          const std::function<double( double)> rateFunc2 );
 
-  // Compute the drift vecctor for the current state
-  virtual void computeDrift( array_f& out, const array_f& in, const float t )
-    const;
+  // Compute the drift vector for the current state
+    void computeDrift( ODE<2>::array& out, const ODE<2>::array& in, const double t )
+      const;
 
   // get rate one and two at a set time
-  float getRate1( const float t=0) const;
-  float getRate2( const float t=0) const;
+  double getRate1( const double t=0) const;
+  double getRate2( const double t=0) const;
 
 private:
-  const std::function<float( float )> w1;
-  const std::function<float( float )> w2;
+  const std::function<double( double )> w1;
+  const std::function<double( double )> w2;
 };
 
 #endif

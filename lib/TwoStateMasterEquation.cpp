@@ -11,36 +11,37 @@
 #include<TwoStateMasterEquation.hpp>
 
 // constructor
-TwoStateMasterEquation::TwoStateMasterEquation( const float rate1,
-						const float rate2 )
-  : ODE( 2 )
-  , w1( [ rate1 ]( float ){ return rate1; } )
-  , w2( [ rate2 ]( float ){ return rate2; } )
+TwoStateMasterEquation::TwoStateMasterEquation( const double rate1,
+						const double rate2 )
+    : ODE<2>()
+    , w1( [ rate1 ]( double ){ return rate1; } )
+    , w2( [ rate2 ]( double ){ return rate2; } )
 {
-  // empty
+    // empty
 }
 
 TwoStateMasterEquation::TwoStateMasterEquation
-( const std::function<float( float )> rateFunc1,
-  const std::function<float( float )> rateFunc2 )
-  : ODE( 2 )
-  , w1( rateFunc1 )
-  , w2( rateFunc2 )
+( const std::function<double( double )> rateFunc1,
+  const std::function<double( double )> rateFunc2 )
+    : ODE<2>()
+    , w1( rateFunc1 )
+    , w2( rateFunc2 )
 {
   // empty
 }
 
 
 // get the rates at a certain time
-float TwoStateMasterEquation::getRate1( const float t ) const
+double TwoStateMasterEquation::getRate1( const double t ) const
 { return w1( t ); }
 
-float TwoStateMasterEquation::getRate2( const float t ) const
+double TwoStateMasterEquation::getRate2( const double t ) const
 { return w2( t ); }
 
 // Compute the two-state master equation
-void TwoStateMasterEquation::computeDrift( array_f& out, const array_f& in,
-                                           const float t ) const
+void TwoStateMasterEquation::computeDrift( ODE<2>::array& out,
+                                           const ODE<2>::array& in,
+                                           const double t ) const
 {
   out[0] = -( w1( t )+w2( t ) )*in[0] + w2( t );
   out[1] = -( w2( t )+w2( t ) )*in[1] + w1( t );

@@ -8,98 +8,96 @@
 #define SDES_H
 
 #include <SDE.hpp>
-#include <boost/multi_array.hpp>
-using array_f = boost::multi_array<float,1>;
-using matrix_f = boost::multi_array<float,2>;
-using cube_f = boost::multi_array<float,3>;
 
 // Ornstein-Uhlenbeck process
-class OH : public SDE<float>
+class OH : public SDE<1,1>
 {
 public:
-  // constructor
-  OH( const float theta, const float mu, const float sigma );
-  virtual void computeDrift( array_f& out, const array_f& in,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f& in,
-				 const float ) const;
+    // constructor
+    OH( const double theta, const double mu, const double sigma );
+    void computeDrift( OH::array& out, const OH::array& in,
+                       const double ) const;
+    void computeDiffusion( OH::matrix& out, const OH::array& in,
+                           const double ) const;
 
-  float getTheta() const;
-  float getMu() const;
-  float getSigma() const;
+    double getTheta() const;
+    double getMu() const;
+    double getSigma() const;
 
 private:
-  const float theta, mu, sigma;
+    const double theta, mu, sigma;
 };
 
 // Wiener process
-class Wiener : public SDE<float>
+class Wiener : public SDE<1,1>
 {
 public:
-  Wiener();
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
+    Wiener();
+    void computeDrift( Wiener::array& out, const Wiener::array&,
+                       const double ) const;
+    void computeDiffusion( Wiener::matrix& out, const Wiener::array&,
+                           const double ) const;
 };
 
 // Simple deterministic ODE with constant drift
-class ODEConstantDrift : public ODE<float>
+class ODEConstantDrift : public ODE<1>
 {
 public:
-  ODEConstantDrift( const float );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
+    ODEConstantDrift( const double );
+    void computeDrift( ODEConstantDrift::array& out,
+                       const ODEConstantDrift::array&,
+                       const double ) const;
 
 private:
-  const float a;
+  const double a;
 };
 
 
 // Scalar SDE with constant drift and additive noise
 // dx = ax * dt + b * dW
-class SDE_AXpB : public SDE<float>
+class SDE_AXpB : public SDE<1,1>
 {
 public:
-  SDE_AXpB( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
+    SDE_AXpB( const double a, const double b );
+    void computeDrift( SDE<1,1>::array& out, const SDE<1,1>::array&,
+                       const double ) const;
+    void computeDiffusion( SDE<1,1>::matrix& out, const SDE<1,1>::array&,
+                           const double ) const;
 
 private:
-  const float a, b;
+    const double a, b;
 };
 
 // Scalar SDE with constant drift and multiplicative noise
 // dx = ax * dt + bx * dW
-class SDE_AXpBX : public SDE<float>
+class SDE_AXpBX : public SDE<1,1>
 {
 public:
-  SDE_AXpBX( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f&,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f&,
-				 const float ) const;
+  SDE_AXpBX( const double a, const double b );
+  void computeDrift( SDE<1,1>::array& out, const SDE<1,1>::array&,
+                     const double ) const;
+  void computeDiffusion( SDE<1,1>::matrix& out, const SDE<1,1>::array&,
+                         const double ) const;
 
 private:
-  const float a, b;
+    const double a, b;
 };
 
 // Stochastic differential equation with constant multiplicative noise
 // dX = aX dt + bX dW
-class MultiplicativeConstantNoise : SDE<float>
+class MultiplicativeConstantNoise : SDE<1,1>
 {
 public:
-  MultiplicativeConstantNoise( const float a, const float b );
-  virtual void computeDrift( array_f& out, const array_f& in,
-			     const float ) const;
-  virtual void computeDiffusion( matrix_f& out, const array_f& in,
-				 const float ) const;
-  virtual void computeDiffusionDerivatives( cube_f& out, const array_f& in,
-					    const float ) const;
+    MultiplicativeConstantNoise( const double a, const double b );
+    void computeDrift( SDE<1,1>::array& out, const SDE<1,1>::array& in,
+                       const double ) const;
+    void computeDiffusion( SDE<1,1>::matrix& out, const SDE<1,1>::array& in,
+                           const double ) const;
+    void computeDiffusionDerivatives( SDE<1,1>::array3& out,
+                                      const SDE<1,1>::array& in,
+                                      const double ) const;
 
 private:
-  const float a, b;
+    const double a, b;
 };
 #endif

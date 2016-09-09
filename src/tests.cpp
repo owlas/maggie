@@ -16,37 +16,35 @@ using std::sqrt; using std::exp;
 #include<gtest/gtest.h>
 #include<gmock/gmock.h>
 #include<boost/multi_array.hpp>
-typedef boost::multi_array<float,1> array_f;
-typedef boost::multi_array<float,2> matrix_f;
-typedef boost::multi_array<float,3> cube_f;
 typedef boost::multi_array<double,1> array_d;
 typedef boost::multi_array<double,2> matrix_d;
 typedef boost::multi_array<double,3> cube_d;
 #include<boost/random.hpp>
 using mt19937=boost::random::mt19937;
-using normal_f=boost::random::normal_distribution<float>;
+using normal_d=boost::random::normal_distribution<double>;
 
 #include<vector>
+#include "../include/types.hpp"
 
 // Test construction of StocLLG
 TEST(StochasticLLG, ContructAndDim)
 {
-  StocLLG<float> llg( 1, 2, 3, 4, 5 );
-  EXPECT_EQ( 3, llg.getDim() );
+    maggie::field h{ 3, 4, 5 };
+    StocLLG llg( 1, 2, h);
+    int dim = StocLLG::dim;
+    EXPECT_EQ( 3, dim );
 }
 
 // Test deterministic part of StocLLG
 TEST(StochasticLLG, Drift)
 {
   // declare in and out arrays
-  array_f out( boost::extents[3] );
-  array_f in( boost::extents[3] );
-  in[0] = 2;
-  in[1] = 3;
-  in[2] = 4;
+    maggie::moment out;
+    maggie::moment in{ 2, 3, 4 };
 
   // Set up StocLLG and compute drift
-  StocLLG<float> llg( 2, 3, 1, 2, 3 );
+  maggie::field h{ 1, 2, 3 };
+  StocLLG llg( 2, 3, h );
   llg.computeDrift( out, in, 0 );
 
   // Are the solutions correct?
@@ -59,14 +57,12 @@ TEST(StochasticLLG, Drift)
 TEST(StochasticLLG, ItoDrift)
 {
     // declare in and out arrays
-    array_f out( boost::extents[3] );
-    array_f in( boost::extents[3] );
-    in[0] = 2;
-    in[1] = 3;
-    in[2] = 4;
+    maggie::moment out;
+    maggie::moment in{ 2, 3, 4 };
 
     // Set up StocLLG and compute drift
-    StocLLGIto<float> llg( 2, 3, 1, 2, 3 );
+    maggie::field h{ 1, 2, 3 };
+    StocLLGIto llg( 2, 3, h );
     llg.computeDrift( out, in, 0 );
 
     // Are the solutions correct?
@@ -77,15 +73,13 @@ TEST(StochasticLLG, ItoDrift)
 TEST(StochasticLLG, ItoDiffusion)
 {
     // declare in and out arrays
-    array_f in( boost::extents[3] );
-    matrix_f out( boost::extents[3][3] );
-    in[0] = 2;
-    in[1] = 3;
-    in[2] = 4;
+    maggie::moment in{ 2, 3, 4 };
+    StocLLG::matrix out;
 
     // set up the StocLLG and compute diffusion
-    StocLLGIto<float> llg( 2, 3, 1, 2, 3 );
-    llg.computeDiffusion( out, in, 0 );
+    maggie::field h{ 1, 2, 3 };
+    StocLLGIto llg( 2, 3, h );
+    llg.computeDiffusion( out, in, 0.0 );
 
     // are the solutions correct?
     EXPECT_EQ( 150, out[0][0] );
@@ -102,49 +96,45 @@ TEST(StochasticLLG, ItoDiffusion)
 // Test the stochastic part of the StocLLG
 TEST(StochasticLLG, Diffusion)
 {
-  // declare in and out arrays
-  array_f in( boost::extents[3] );
-  matrix_f out( boost::extents[3][3] );
-  in[0] = 2;
-  in[1] = 3;
-  in[2] = 4;
+    // declare in and out arrays
+    maggie::moment in{ 2, 3, 4 };
+    StocLLG::matrix out;
 
-  // set up the StocLLG and compute diffusion
-  StocLLG<float> llg( 2, 3, 1, 2, 3 );
-  llg.computeDiffusion( out, in, 0 );
+    // set up the StocLLG and compute diffusion
+    maggie::field h{ 1, 2, 3 };
+    StocLLG llg( 2, 3, h );
+    llg.computeDiffusion( out, in, 0 );
 
-  // are the solutions correct?
-  EXPECT_EQ( 150, out[0][0] );
-  EXPECT_EQ( -28, out[0][1] );
-  EXPECT_EQ( -54, out[0][2] );
-  EXPECT_EQ( -44, out[1][0] );
-  EXPECT_EQ( 120, out[1][1] );
-  EXPECT_EQ( -68, out[1][2] );
-  EXPECT_EQ( -42, out[2][0] );
-  EXPECT_EQ( -76, out[2][1] );
-  EXPECT_EQ( 78, out[2][2] );
+    // are the solutions correct?
+    EXPECT_EQ( 150, out[0][0] );
+    EXPECT_EQ( -28, out[0][1] );
+    EXPECT_EQ ( -54, out[0][2] );
+    EXPECT_EQ ( -44, out[1][0] );
+    EXPECT_EQ ( 120, out[1][1] );
+    EXPECT_EQ ( -68, out[1][2] );
+    EXPECT_EQ ( -42, out[2][0] );
+    EXPECT_EQ ( -76, out[2][1] );
+    EXPECT_EQ ( 78, out[2][2] );
 }
+
+
 
 // Test the RK4 algorithm
 TEST(RK4, BasicCircle)
 {
   // declare array for initial state
-  array_f init( boost::extents[2] );
+    ODE<2>::array init{ 1, 0 };
 
   float t=0; // initial time
 
-  // fill the array state
-  init[0] = 1.0;
-  init[1] = 0.0;
-
   // Basic differential equation
-  class ode : public ODE<float>
+  class ode : public ODE<2>
   {
   public:
-    ode() : ODE( 2 ) {}; // constructor
+      ode() : ODE<2>() {}; // constructor
 
     // Differential equation
-    virtual void computeDrift( array_f& out, const array_f& in, const float )
+      virtual void computeDrift( ode::array& out, const ode::array& in, const double )
       const
     {
       out[0] = in[1];
@@ -154,14 +144,14 @@ TEST(RK4, BasicCircle)
 
 
   // Create an instance of the RK4 integrator
-  auto inte = RK4<float>( testOde, init, t, 0.000001 );
+  auto inte = RK4<ode>( testOde, init, t, 0.000001 );
 
   // Run the integrator for 2000 steps
   for( int i=0; i<500; i++ )
     inte.step();
 
   // Get the state and time
-  const array_f& state = inte.getState();
+  const ode::array& state = inte.getState();
   t = inte.getTime();
 
   // Check the solution
@@ -172,39 +162,16 @@ TEST(RK4, BasicCircle)
 // Test for the Particles
 TEST(Particle, SetSize)
 {
-  array_d uea( boost::extents[3] );
-  uea[0] = 1;
-  uea[1] = 0;
-  uea[2] = 0;
-  Particle p( 1, 2, 3, 4, 5, uea );
-  ASSERT_FLOAT_EQ( 33.51032, p.getV() );
-}
-
-// Check that uea is a unit vector
-TEST(Particle, UnitVector)
-{
-  array_d uea( boost::extents[3] );
-  // Not a unit vector
-  uea[0] = 0.3;
-  uea[1] = 0.5;
-  uea[2] = 0.7;
-  ASSERT_THROW( Particle p( 1, 2, 3, 4, 5, uea ),
-		std::invalid_argument );
-  // is a unit vector
-  uea[0] = 0.5773503;
-  uea[1] = 0.5773503;
-  uea[2] = 0.5773503;
-  ASSERT_NO_THROW( Particle p( 1, 2, 3, 4, 5, uea ) );
+    maggie::axis uea{ 1, 0, 0 };
+    Particle p( 1, 2, 3, 4, 5, uea );
+    ASSERT_FLOAT_EQ( 33.51032, p.getV() );
 }
 
 // Check computation of the energy barriers
 TEST(Particle, EnergyBarriers)
 {
-  array_d uea( boost::extents[3] );
-  uea[0] = 0;
-  uea[0] = 0;
-  uea[0] = 1;
-  Particle p( Constants::GYROMAG, 0.1, 3.5e5, 4e-9, 1e4, uea );
+    maggie::axis uea{ 0, 0, 1 };
+    Particle p( Constants::GYROMAG, 0.1, 3.5e5, 4e-9, 1e4, uea );
 
   // Cannot have reduced fields > 1 (i.e. H>H_k)
   ASSERT_THROW( p.alignedEnergyBarriers( 1.5 ),
@@ -228,27 +195,19 @@ TEST(Particle, TransitionRates)
 TEST(ParticleCluster, Distances)
 {
   // create list of 3 identical particles
-  array_d uea( boost::extents[3] );
-  uea[0] = 1.0;
-  uea[1] = 0.0;
-  uea[2] = 0.0;
-  Particle p1( 1,2,3,4,5,uea );
-  std::vector<Particle> plist = {p1, p1, p1};
+    maggie::axis uea{ 1, 0, 0 };
+    Particle p1( 1,2,3,4,5,uea );
+    std::vector<Particle> plist = {p1, p1, p1};
 
   // Set the particle locations
-  matrix_d locs( boost::extents[3][3] );
+    std::vector<maggie::position> locs;
 
   // particle 1 at location (0,0,0)
-  for( int i=0; i<3; i++ )
-    locs[0][i] = 0;
+    locs.push_back( maggie::position{ 0, 0, 0 } );
   // particle 2 at location (1,0,0)
-  locs[1][0] = 1;
-  locs[1][1] = 0;
-  locs[1][2] = 0;
+    locs.push_back( maggie::position{ 1, 0, 0 } );
   // particle 3 at location (0,1,1)
-  locs[2][0] = 0;
-  locs[2][1] = 1;
-  locs[2][2] = 1;
+    locs.push_back( maggie::position{ 0, 1, 1 } );
 
   // Create the cluster and get the distances
   ParticleCluster const pclust( plist, locs );
@@ -306,15 +265,15 @@ TEST(ParticleCluster, Distances)
 // Test the average parameters computed by the ParticleCluster
 TEST( ParticleCluster, AverageParameters )
 {
-    array_d uea( boost::extents[3] );
-    uea[0] = 0.0; uea[1] = 0.0; uea[2] = 1.0;
+    maggie::axis uea{ 0, 0, 1 };
 
     std::vector<Particle> vec;
     vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
     vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
 
-    matrix_d locations( boost::extents[2][3]);
-    std::fill( locations.data(), locations.data() + locations.num_elements(), 0);
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 0, 0 } );
 
     ParticleCluster cluster(vec, locations);
 
@@ -340,22 +299,22 @@ TEST( Heun, HeunWiener )
   mt19937 rng_an(1234);
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, sqrt( dt ) );
-  boost::random::variate_generator<mt19937, normal_f>
+  normal_d dist(0, sqrt( dt ) );
+  boost::random::variate_generator<mt19937, normal_d>
     vg( rng_an, dist );
 
   // Set up numerical integration
-  array_f init( boost::extents[1] ); init[0]=0;
-  auto inte = Heun<float>( testSDE, init, 0.0, dt, rng );
+  std::array<double,1> init{ 0 };
+  auto inte = Heun<Wiener>( testSDE, init, 0.0, dt, rng );
 
   // Set the initial condition for the analytic solution
-  float analyticSol = init[0];
+  double analyticSol = init[0];
 
   // Integrate for 5000 steps and compare against analytical
-  for( array_f::index i=0; i!=5000; i++ )
+  for( int i=0; i!=5000; i++ )
   {
     inte.step();
-    float numericalSol = inte.getState()[0];
+    double numericalSol = inte.getState()[0];
     analyticSol += vg();
 
     ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
@@ -367,7 +326,7 @@ TEST( Heun, HeunWiener )
 TEST( Heun, HeunOrnsteinUhlenbeck )
 {
   // Time step
-  float dt = 1e-5;
+  double dt = 1e-5;
 
   // Class for the Ornstein-Uhlenbeck process
   OH testSDE( 10.0, -1.0, 0.8 );
@@ -377,21 +336,21 @@ TEST( Heun, HeunOrnsteinUhlenbeck )
   mt19937 rng_an(555);
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, 1 );
-  boost::random::variate_generator<mt19937, normal_f>
+  normal_d dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_d>
     vg( rng_an, dist );
 
   // Create the integrator
-  array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Heun<float>( testSDE, init, 0.0, dt, rng );
+  std::array<double,1> init{ -3 };
+  auto inte = Heun<OH>( testSDE, init, 0.0, dt, rng );
 
   // Track the solutions
-  float numericalSol = init[0];
-  float analyticSol = init[0];
+  double numericalSol = init[0];
+  double analyticSol = init[0];
 
-  float theta = testSDE.getTheta();
-  float mu = testSDE.getMu();
-  float sigma = testSDE.getSigma();
+  double theta = testSDE.getTheta();
+  double mu = testSDE.getMu();
+  double sigma = testSDE.getSigma();
 
   for( int i=0; i<3000; i++ )
     {
@@ -424,24 +383,24 @@ TEST( Euler, EulerOrnsteinUhlenbeck )
   mt19937 rng_an(555);
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, 1 );
-  boost::random::variate_generator<mt19937, normal_f>
+  normal_d dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_d>
     vg( rng_an, dist );
 
   // Create the integrator
-  array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Euler<float>( testSDE, init, 0.0, dt, rng );
+  std::array<double,1> init{ -3 };
+  auto inte = Euler<OH>( testSDE, init, 0.0, dt, rng );
 
   // Track the solutions
-  float numericalSol = init[0];
-  float analyticSol = init[0];
+  double numericalSol = init[0];
+  double analyticSol = init[0];
 
-  float theta = testSDE.getTheta();
-  float mu = testSDE.getMu();
-  float sigma = testSDE.getSigma();
+  double theta = testSDE.getTheta();
+  double mu = testSDE.getMu();
+  double sigma = testSDE.getSigma();
 
   int N=3000;
-  matrix_f plot( boost::extents[2][N]);
+  matrix_d plot( boost::extents[2][N]);
   for( int i=0; i<N; i++ )
     {
       // Numerical solution
@@ -461,7 +420,7 @@ TEST( Euler, EulerOrnsteinUhlenbeck )
         << "Steps completed: " << i << std::endl;
     }
 
-  boostToFile<float>( plot, "test.out" );
+  boostToFile<double>( plot, "test.out" );
 }
 
 
@@ -475,7 +434,7 @@ TEST( StocLLG, HeunIntegrationSolution )
 TEST( Milstein, MilWiener )
 {
   // Time step
-  const float dt = 1e-5;
+  const double dt = 1e-5;
 
   // Langevin equation representing a Wiener process
   Wiener testSDE;
@@ -486,22 +445,22 @@ TEST( Milstein, MilWiener )
   mt19937 rng_2( 28907 );
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, sqrt( dt ) );
-  boost::random::variate_generator<mt19937, normal_f>
+  normal_d dist(0, sqrt( dt ) );
+  boost::random::variate_generator<mt19937, normal_d>
     vg( rng_an, dist );
 
   // Set up numerical integration
-  array_f init( boost::extents[1] ); init[0]=0;
-  auto inte = Milstein<float>( testSDE, init, 0.0, dt, rng, rng_2 );
+  std::array<double,1> init{ 0 };
+  auto inte = Milstein<Wiener>( testSDE, init, 0.0, dt, rng, rng_2 );
 
   // Set the initial condition for the analytic solution
-  float analyticSol = init[0];
+  double analyticSol = init[0];
 
   // Integrate for 5000 steps and compare against analytical
-  for( array_f::index i=0; i!=10000; i++ )
+  for( int i=0; i!=10000; i++ )
   {
     inte.step();
-    float numericalSol = inte.getState()[0];
+    double numericalSol = inte.getState()[0];
     analyticSol += vg();
 
     ASSERT_LE( std::abs( analyticSol - numericalSol ), 1e-5 )
@@ -514,7 +473,7 @@ TEST( Milstein, MilWiener )
 TEST( Milstein, MilOrnsteinUhlenbeck )
 {
   // Time step
-  float dt = 1e-5;
+  double dt = 1e-5;
 
   // Class for the Ornstein-Uhlenbeck process
   OH testSDE( 10.0, -1.0, 0.8 );
@@ -525,24 +484,24 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
   mt19937 rng_2( 79874 );
 
   // Create a variate generator for the analytic solution
-  normal_f dist(0, 1 );
-  boost::random::variate_generator<mt19937, normal_f>
+  normal_d dist(0, 1 );
+  boost::random::variate_generator<mt19937, normal_d>
     vg( rng_an, dist );
 
   // Create the integrator
-  array_f init( boost::extents[1] ); init[0]=-3;
-  auto inte = Milstein<float>( testSDE, init, 0.0, dt, rng, rng_2 );
+  std::array<double,1> init{ -3 };
+  auto inte = Milstein<OH>( testSDE, init, 0.0, dt, rng, rng_2 );
 
   // Track the solutions
-  float numericalSol = init[0];
-  float analyticSol = init[0];
+  double numericalSol = init[0];
+  double analyticSol = init[0];
 
-  float theta = testSDE.getTheta();
-  float mu = testSDE.getMu();
-  float sigma = testSDE.getSigma();
+  double theta = testSDE.getTheta();
+  double mu = testSDE.getMu();
+  double sigma = testSDE.getSigma();
 
   int N=3000;
-  matrix_f plot( boost::extents[2][N] );
+  matrix_d plot( boost::extents[2][N] );
   for( int i=0; i<N; i++ )
     {
       // Numerical solution
@@ -570,55 +529,55 @@ TEST( Milstein, MilOrnsteinUhlenbeck )
 TEST( IntegrationTests, MilsteinLLG )
 {
   // set up parameters, langevin equation and initial condition
-  const float K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
+  const double K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
   , KB{ 1.38064852e-23 }, T{ 300 }, alpha{ 0.1 }, MU0{ 1.25663706e-6 }
   , Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }, gamma{ 1.7609e11 };
 
   const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
-  const float sigma = float( s );
+  const double sigma = double( s );
 
-  StocLLG<float> llg( sigma, alpha, 0.0, 0.0, hz );
+  maggie::field h{ 0, 0, hz };
 
-  array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
+  StocLLG llg( sigma, alpha, h );
+
+  maggie::moment m0{ 1, 0, 0 };
 
   // set up integrator
-  const float tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
+  const double tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
   , dt{ 1e-14 }, dtau{ dt*tfactor };
 
   mt19937 rng( 1234 );
   mt19937 rng_a( 1234 );
   mt19937 rng_2( 777777 );
-  normal_f dist( 0, sqrt( dtau ) );
-  normal_f dist_a( 0, sqrt( dt ) );
-  boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
-  boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
+  normal_d dist( 0, sqrt( dtau ) );
+  normal_d dist_a( 0, sqrt( dt ) );
+  boost::variate_generator< mt19937&, normal_d > vg( rng, dist );
+  boost::variate_generator< mt19937&, normal_d > vg_a( rng_a, dist_a );
 
-  auto inte = Milstein<float>( llg, m0, 0.0, dtau, rng, rng_2 );
+  auto inte = Milstein<StocLLG>( llg, m0, 0.0, dtau, rng, rng_2 );
 
   // set to manual mode
   inte.setManualWienerMode( true );
-  array_f dw( boost::extents[3] );
-  for( auto& i : dw )
-    i=0.0;
-  float W{ 0.0 }; // Wiener process (sum over dw)
+  maggie::moment dw{ 0, 0, 0};
+  double W{ 0.0 }; // Wiener process (sum over dw)
   // solutions
-  const array_f& nmSol = inte.getState();
-  array_f anSol( boost::extents[3] );
+  const maggie::moment& nmSol = inte.getState();
+  maggie::moment anSol;
 
   int N=100000;
   // to plot
-  matrix_f plot( boost::extents[2][N] );
-  for( array_f::index i=0; i!=N; ++i )
+  matrix_d plot( boost::extents[2][N] );
+  for( int i=0; i!=N; ++i )
     {
       // step but restrict wiener process to 1D in z-component
       dw[2] = vg();
       inte.setWienerIncrements( dw );
       inte.step();
-      float t = inte.getTime()/tfactor;
+      double t = inte.getTime()/tfactor;
       W += vg_a();
 
       // Analytic solution from Hannay
-      float kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
+      double kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
       , H{ 400*M_PI }, V{ 4.0/3.0*M_PI*pow( 2.5e-7,3 ) }, T{ 300 }
       , Ms{ 1400 }, sigma{ std::sqrt( 2*alpha*kb*T/( gamma*Ms*V ) ) };
       anSol[0] =
@@ -649,55 +608,55 @@ TEST( IntegrationTests, MilsteinLLG )
 TEST( IntegrationTests, EulerLLG )
 {
   // set up parameters, langevin equation and initial condition
-  const float K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
+  const double K{ 1 }, D{ 5e-9 }, V{ 4.0/3.0*M_PI*pow( D/2, 3 ) }
   , KB{ 1.38064852e-23 }, T{ 300 }, alpha{ 0.1 }, MU0{ 1.25663706e-6 }
   , Ms{ 1400e3 }, Hk{ 2*K/( MU0*Ms ) }, hz{ 100e3/Hk }, gamma{ 1.7609e11 };
 
   const double s{ std::sqrt( alpha*KB*T/( K*V*( 1+pow( alpha,2 ) ) ) ) };
-  const float sigma = float( s );
+  const double sigma = double( s );
 
-  StocLLGIto<float> llg( sigma, alpha, 0.0, 0.0, hz );
+  const maggie::field h{ 0, 0, hz };
 
-  array_f m0( boost::extents[3] ); m0[0]=1.0; m0[1]=0.0; m0[2]=0.0;
+  StocLLGIto llg( sigma, alpha, h );
+
+  maggie::moment m0{ 1, 0, 0 };
 
   // set up integrator
-  const float tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
+  const double tfactor{ gamma*MU0*Hk/( 1+pow( alpha,2 ) ) }
   , dt{ 1e-16 }, dtau{ dt*tfactor };
 
   mt19937 rng( 1234 );
   mt19937 rng_a( 1234 );
   mt19937 rng_2( 777777 );
-  normal_f dist( 0, sqrt( dtau ) );
-  normal_f dist_a( 0, sqrt( dt ) );
-  boost::variate_generator< mt19937&, normal_f > vg( rng, dist );
-  boost::variate_generator< mt19937&, normal_f > vg_a( rng_a, dist_a );
+  normal_d dist( 0, sqrt( dtau ) );
+  normal_d dist_a( 0, sqrt( dt ) );
+  boost::variate_generator< mt19937&, normal_d > vg( rng, dist );
+  boost::variate_generator< mt19937&, normal_d > vg_a( rng_a, dist_a );
 
-  auto inte = Euler<float>( llg, m0, 0.0, dtau, rng );
+  auto inte = Euler<StocLLG>( llg, m0, 0.0, dtau, rng );
 
   // set to manual mode
   inte.setManualWienerMode( true );
-  array_f dw( boost::extents[3] );
-  for( auto& i : dw )
-    i=0.0;
-  float W{ 0.0 }; // Wiener process (sum over dw)
+  maggie::moment dw{ 0, 0, 0 };
+  double W{ 0.0 }; // Wiener process (sum over dw)
   // solutions
-  const array_f& nmSol = inte.getState();
-  array_f anSol( boost::extents[3] );
+  const maggie::moment& nmSol = inte.getState();
+  maggie::moment anSol;
 
   int N=100000;
   // to plot
-  matrix_f plot( boost::extents[2][N] );
-  for( array_f::index i=0; i!=N; ++i )
+  matrix_d plot( boost::extents[2][N] );
+  for( int i=0; i!=N; ++i )
     {
       // step but restrict wiener process to 1D in z-component
       dw[2] = vg();
       inte.setWienerIncrements( dw );
       inte.step();
-      float t = inte.getTime()/tfactor;
+      double t = inte.getTime()/tfactor;
       W += vg_a();
 
       // Analytic solution from Hannay
-      float kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
+      double kb{ 1.38064852e-16 }, gamma{ 1.7609e7 }, alpha{ 0.1 }
       , H{ 400*M_PI }, V{ 4.0/3.0*M_PI*pow( 2.5e-7,3 ) }, T{ 300 }
       , Ms{ 1400 }, sigma{ std::sqrt( 2*alpha*kb*T/( gamma*Ms*V ) ) };
       anSol[0] =
@@ -710,18 +669,18 @@ TEST( IntegrationTests, EulerLLG )
 
       anSol[2] =
 	std::tanh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) );
-
+ 
       ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-1 )
-	<< "Steps completed: " << i << std::endl;
+        << "Steps completed: " << i << std::endl;
       ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-1 )
-	<< "Steps completed: " << i << std::endl;
+        << "Steps completed: " << i << std::endl;
       ASSERT_LE( std::abs( anSol[2] - nmSol[2] ), 1e-1 )
       << "Steps completed: " << i << std::endl;
 
       plot[0][i] = nmSol[2];
       plot[1][i] = anSol[2];
     }
-  boostToFile<float>( plot, "test.out" );
+  boostToFile<double>( plot, "test.out" );
 
 }
 
@@ -756,12 +715,12 @@ TEST( Quadrature, LinearFunctionFromVector )
 {
   // generate a vector of data
   const int N=10000;
-  const float h = 7.0/N;
-  array_f vec( boost::extents[N] );
+  const double h = 7.0/N;
+  array_d vec( boost::extents[N] );
   for( int i=0; i<N; i++ ) vec[i] = 2*i*h+3;
 
   // get the result
-  float res = Quad::trapVec<float>( vec, h );
+  double res = Quad::trapVec<double>( vec, h );
 
   ASSERT_FLOAT_EQ( 70.0, res );
 }
@@ -771,27 +730,25 @@ TEST( Quadrature, LinearFunctionFromVector )
 // Is the sum of the probabilities always unity?
 TEST( TwoStateMasterEquation, ConservationOfProbability )
 {
-  using func1DFloat=std::function<float( float ) >;
+  using func1D = std::function<double( double )>;
 
   cout.precision(10);
 
   // two simple functions for the transition rates
-  func1DFloat w1 = []( float t ){ return t*0.01 + 0.3; };
-  func1DFloat w2 = []( float t ){ return std::pow( t,2 )*0.1 + 0.5; };
+  func1D w1 = []( double t ){ return t*0.01 + 0.3; };
+  func1D w2 = []( double t ){ return std::pow( t,2 )*0.1 + 0.5; };
 
-  // create the two state master eqution
+  // create the two state master equation
   TwoStateMasterEquation eq( w1, w2 );
 
   // Integrate from an initial condition
-  array_f init( boost::extents[2] );
-  init[0] = 0.5;
-  init[1] = 0.5;
+  std::array<double,2> init{ 0.5, 0.5 };
 
-  auto integrator = RK4<float>( eq, init, 0, 1e-7 );
+  auto integrator = RK4<TwoStateMasterEquation>( eq, init, 0, 1e-7 );
 
   // step the integrator and check that the probability is conserved
   // throughout.
-  const array_f& state = integrator.getState();
+  const auto& state = integrator.getState();
 
   for( int i=0; i<200; i++ )
     {
@@ -866,6 +823,71 @@ TEST( Kramers, GammaValues )
     ASSERT_DOUBLE_EQ( 2.8932560768992421e6, ans2 );
 }
 
+// Test the magnetic state controller
+TEST( MagneticStateController, dipoleDipolePrefactor )
+{
+    maggie::axis uea{ 0, 0, 1 };
+
+    Particle::vector vec;
+    vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
+    vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
+
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+
+    ParticleCluster cluster(vec, locations);
+
+    StocLLG::vector llgs;
+    const maggie::field happ{ 3, 4, 5 };
+    llgs.push_back( StocLLG( 1, 2, happ ) );
+    llgs.push_back( StocLLG( 1, 2, happ ) );
+
+    std::vector<maggie::moment> init_state;
+    init_state.push_back( maggie::moment{ 0, 0, 0 } );
+    init_state.push_back( maggie::moment{ 0, 0, 0 } );
+
+    MagneticStateController<Euler<StocLLG> >
+      controller( cluster, happ, llgs, init_state, 0.1, 1001 );
+
+    // ASSERT
+}
+
+TEST( MagneticStateController, cubedParticleDisplacements )
+{
+    maggie::axis uea{ 0, 0, 1 };
+
+    Particle::vector vec;
+    vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
+    vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
+
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 1, 1, 1 } );
+    locations.push_back( maggie::position{ 2, 3, 4 } );
+
+    ParticleCluster cluster(vec, locations);
+
+    maggie::field heff{ 0, 0, 0 };
+    maggie::field happ{ 0, 0, 0 };
+
+    std::vector<StocLLG> llgs;
+    llgs.push_back( StocLLG( 1, 2, heff ) );
+    llgs.push_back( StocLLG( 1, 2, heff ) );
+
+    std::vector<maggie::moment> initial_state;
+    initial_state.push_back( maggie::moment{ 0, 0, 0 } );
+    initial_state.push_back( maggie::moment{ 0, 0, 0 } );
+
+    MagneticStateController<Euler<StocLLG> >
+      controller( cluster, happ, llgs, initial_state, 0.1, 4502 );
+
+    // ASSERT EQUAL
+}
+
+TEST( MagneticStateController, renormalise )
+{
+    // TODO
+}
 
 int main( int argc, char **argv )
 {

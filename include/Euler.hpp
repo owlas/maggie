@@ -10,38 +10,40 @@
 #include<SDE.hpp>
 #include<cmath>
 using std::sqrt;
+
 #include<boost/random.hpp>
 using boost::variate_generator;
 using boost::mt19937;
 using boost::normal_distribution;
-using boost::extents;
-#include<boost/multi_array.hpp>
-template <typename T> using array = boost::multi_array<T,1>;
-template <typename T> using matrix = boost::multi_array<T,2>;
 
-template <typename T>
-class Euler : public Integrator<SDE<T>, T>
+#include <vector>
+
+template <class C>
+class Euler : public Integrator<C>
 {
 public:
-    Euler( const SDE<T>& sde, const array<T>& init_state, const T time,
-           const T dt, mt19937& rng );
+    Euler( const C& sde, const typename C::array& init_state, const double time,
+           const double dt, mt19937& rng );
 
     virtual void step();
+
+    // useful aliases
+    using vector = std::vector<Euler<C>>;
 
     // Manual wiener process mode
     // allow user to control internal wiener increments themselves
     void setManualWienerMode( const bool );
-    void setWienerIncrements( const array<T> );
+    void setWienerIncrements( const typename C::array );
 
 private:
-    const T h;
-    const T dim, wDim;
-    array<T> dw;
-    array<T> tmp1;
-    matrix<T> tmp2;
-    array<T> xpred;
-    normal_distribution<T> dist;
-    variate_generator<mt19937 &, normal_distribution<T> > gen;
+    const double h;
+    const size_t dim, wDim;
+    typename C::array dw;
+    typename C::array tmp1;
+    typename C::matrix tmp2;
+    typename C::array xpred;
+    normal_distribution<double> dist;
+    variate_generator<mt19937 &, normal_distribution<double> > gen;
     bool manualWiener{ false };
 };
 

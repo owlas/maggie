@@ -1,4 +1,4 @@
-// StocLLG.h
+// StocLLG.hpp
 // Header for the stochastic LLG Langevin equation
 //
 // Oliver W. Laslett 2015
@@ -7,63 +7,58 @@
 #ifndef STOCLLG_H
 #define STOCLLG_H
 
-#include <SDE.hpp>
+#include "types.hpp"
+#include "SDE.hpp"
+#include <vector>
 
-#include <boost/multi_array.hpp>
-template <typename T> using array = boost::multi_array<T,1>;
-template <typename T> using matrix = boost::multi_array<T,2>;
-template <typename T> using array3 = boost::multi_array<T,3>;
-using bidx = boost::multi_array_types::index;
-
-template <typename T>
-class StocLLG : public SDE<T>
+class StocLLG : public SDE<3,3>
 {
  public:
     // Constructor when the thermal intensity (s) and damping (a) is
     // calculated in advance
-    StocLLG( const T s, const T a,
-             const T hx, const T hy, const T hz );
+    StocLLG( const maggie::stability s, const maggie::damping a,
+             const maggie::field h );
 
-  // returns the drift vector
-    virtual void computeDrift( array<T>&, const array<T>&, const T ) const;
-  // returns the diffusion marix
-    virtual void computeDiffusion( matrix<T>&, const array<T>&,
-				 const T ) const;
-  // returns a vector of derivative sums for Taylor
-    virtual void computeDiffusionDerivatives( array3<T> &out, const array<T> &in,
-					    const T ) const;
+    // useful aliases
+    using vector = std::vector<StocLLG>;
 
-  void setReducedHeff( const T, const T, const T );
-    array<T> getReducedHeff() const;
+    // returns the drift vector
+    virtual void computeDrift( StocLLG::array&, const StocLLG::array&, const double ) const;
+    // returns the diffusion matrix
+    virtual void computeDiffusion( StocLLG::matrix&, const StocLLG::array&,
+                                   const double ) const;
+    // returns a vector of derivative sums for Taylor
+    virtual void computeDiffusionDerivatives( StocLLG::array3 &out, const StocLLG::array &in,
+                                              const double ) const;
 
-  void setSigma( const T );
-  T getSigma() const;
+    void setReducedHeff( maggie::field );
+    maggie::field getReducedHeff() const;
 
-  void setAlpha( const T );
-  T getAlpha() const;
+    void setSigma( const maggie::stability );
+    maggie::stability getSigma() const;
+
+    void setAlpha( const maggie::damping );
+    maggie::damping getAlpha() const;
 
     // get a modifiable reference to the field
-    array<T>& getReducedFieldRef();
+    maggie::field& getReducedFieldRef();
 
  private:
-    array<T> h;
-    T
-    sigma;
-    T alpha;
+    maggie::field h;
+    maggie::stability sigma;
+    maggie::damping alpha;
 };
 
 // This is the Ito version of the Stochastic LLG
-template <typename T>
-class StocLLGIto : public StocLLG<T>
+class StocLLGIto : public StocLLG
 {
 public:
-    StocLLGIto( const T s, const T a,
-                const T hx, const T hy, const T hz );
+    StocLLGIto( const maggie::stability s, const maggie::damping a,
+                const maggie::field h );
 
     // returns the drift vector
-    void computeDrift( array<T>&, const array<T>&, const T ) const;
+    void computeDrift( StocLLGIto::array&, const StocLLGIto::array&, const double ) const;
 
 };
 
-#include <tpp/StocLLG.cpp>
 #endif

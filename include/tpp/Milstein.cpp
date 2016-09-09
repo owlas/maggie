@@ -6,38 +6,29 @@
 // Oliver W. Laslett (2015)
 // O.Laslett@soton.ac.uk
 //
-#include <Milstein.hpp>
 
 // Constructor
-template <typename T>
-Milstein<T>::Milstein( const SDE<T> &le, const array<T>& init_state,
-                       const T time, const T dt,
+template <class C>
+Milstein<C>::Milstein( const C &le, const typename C::array& init_state,
+                       const double time, const double dt,
                        mt19937& rng_1, mt19937& rng_2 )
-    : Integrator<SDE<T>, T>( le, init_state, time )
+    : Integrator<C>( le, init_state, time )
     , h( dt )
-    , dim( le.getDim() )
-    , wDim( le.getWDim() )
+    , dim( C::dim )
+    , wDim( C::wdim )
     , dist_1( 0,sqrt( h ) )
     , dist_2( 0,1 )
     , gen_1( rng_1, dist_1 )
     , gen_2( rng_2, dist_2 )
-    , next_state( boost::extents[dim] )
-    , dw( boost::extents[wDim] )
-    , dw2( boost::extents[wDim] )
-    , tmp1( boost::extents[dim] )
-    , tmp2( boost::extents[dim][wDim] )
-    , tmp22( boost::extents[wDim][wDim] )
-    , tmp3( boost::extents[dim][wDim][dim] )
     , p( 200 )
-    , mu( boost::extents[wDim] )
     , eta( boost::extents[wDim][p] )
     , zeta( boost::extents[wDim][p] )
 {
     // empty
 }
 
-template <typename T>
-void Milstein<T>::step()
+template <class C>
+void Milstein<C>::step()
 {
     // Compute the drift and diffusion at the current time step
     this->getLE().computeDrift( tmp1, this->state, this->getTime() );
@@ -50,18 +41,18 @@ void Milstein<T>::step()
             i = gen_1();
 
     // Scaled Wiener process for computation of multiple integrals below
-    for( bidx i=0; i<wDim; ++i )
+    for( unsigned int i=0; i<wDim; ++i )
         dw2[i] = dw[i]/sqrt( h );
 
     // rh0 for the calculation below
-    T rho=0.0;
+    double rho=0.0;
     for( unsigned int r=0; r!=p; ++r )
         rho += 1/pow( r+1, 2 );
     rho *= 1/( 2*pow( M_PI, 2 ) );
     rho += 1.0/12.;
 
     // Independent Gaussian RVs for integrals
-    for( unsigned int i=0; i!=mu.num_elements(); i++ )
+    for( unsigned int i=0; i!=dim; i++ )
         *( mu.data()+i ) = gen_2();
     for( unsigned int i=0; i!=eta.num_elements(); i++ )
         *( eta.data()+i ) = gen_2();
@@ -69,8 +60,8 @@ void Milstein<T>::step()
         *( zeta.data()+i ) = gen_2();
 
     // Compute the multiple Stratonovich integrals
-    for( bidx j1=0; j1!= wDim; ++j1 )
-        for( bidx j2=0; j2!=wDim; ++j2 )
+    for( unsigned int j1=0; j1!= wDim; ++j1 )
+        for( unsigned int j2=0; j2!=wDim; ++j2 )
         {
             if( j1==j2 )
                 tmp22[j1][j2] = 0.5*pow( dw[j1],2 );
@@ -89,16 +80,16 @@ void Milstein<T>::step()
         }
 
     // Compute the next state for each vector
-    for( bidx k=0; k!=dim; ++k )
+    for( unsigned int k=0; k!=dim; ++k )
     {
         next_state[k] = this->state[k] + tmp1[k]*h;
 
-        for( bidx j=0; j!=wDim; j++ )
+        for( unsigned int j=0; j!=wDim; j++ )
             next_state[k] += tmp2[k][j]*dw[j];
 
-        for( bidx j1=0; j1!=wDim; j1++ )
-            for( bidx j2=0; j2!=wDim; j2++ )
-                for( bidx j3=0; j3!=dim; j3++ )
+        for( unsigned int j1=0; j1!=wDim; j1++ )
+            for( unsigned int j2=0; j2!=wDim; j2++ )
+                for( unsigned int j3=0; j3!=dim; j3++ )
                     next_state[k] += tmp2[j3][j1]*tmp3[k][j2][j3]*tmp22[j1][j2];
     }
 
@@ -107,16 +98,13 @@ void Milstein<T>::step()
 }
 
 // Getters and setters for the truncation number
-template <typename T>
-void Milstein<T>::setP( const int pset ) { p=pset; }
-template <typename T>
-int Milstein<T>::getP() const { return p; }
+template <class C>
+void Milstein<C>::setP( const int pset ) { p=pset; }
+template <class C>
+int Milstein<C>::getP() const { return p; }
 
 // Set the manual wiener process mode
-template <typename T>
-void Milstein<T>::setManualWienerMode( const bool s ) { manualWiener=s; }
-template <typename T>
-void Milstein<T>::setWienerIncrements( const array<T> a ) { dw=a; }
-
-// Explicit class template instantiation
-template class Milstein<float>;
+template <class C>
+void Milstein<C>::setManualWienerMode( const bool s ) { manualWiener=s; }
+template <class C>
+void Milstein<C>::setWienerIncrements( const typename C::array a ) { dw=a; }

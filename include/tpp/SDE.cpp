@@ -9,31 +9,14 @@
 // Langevin Equation object is required to have a fixed dimension,
 // specify 'd' when constructing an instance.
 
-// Constructor
-template <typename T>
-SDE<T>::SDE( const int d, const int m )
-    : ODE<T>( d )
-    , wDim( m )
-{
-    // empty
-}
-
-// Get the dimensions of the equation
-template <typename T>
-int SDE<T>::getWDim() const
-{
-    return wDim;
-}
-
 // Langevin equation can be defined without specifying derivatives
-template <typename T>
-void SDE<T>::computeDiffusionDerivatives( array3<T> &out,
-                                          const array<T>&,
-                                          const T ) const
+template <size_t DIM, size_t WDIM>
+void SDE<DIM,WDIM>::computeDiffusionDerivatives( typename SDE<DIM,WDIM>::array3 &out,
+                                                 const typename SDE<DIM,WDIM>::array&,
+                                                 const double ) const
 {
-    std::fill( out.data(), out.data()+out.num_elements(), 0 );
+    for( auto &dim1 : out )
+        for( auto &dim2 : dim1 )
+            for( auto &val : dim2 )
+                val = 0;
 }
-
-// Explicit instatiation of template classes
-template class SDE<float>;
-template class SDE<double>;

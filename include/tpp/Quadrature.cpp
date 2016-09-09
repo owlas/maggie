@@ -5,7 +5,6 @@
 // Oliver W. Laslett
 // O.Laslett@soton.ac.uk
 //
-#include<Quadrature.hpp>
 
 namespace Quad
 {

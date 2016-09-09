@@ -4,26 +4,21 @@
 // Oliver Laslett <O.Laslett@soton.ac.uk>
 // 2015
 //
-#include <Euler.hpp>
 
 // Constructor
-template <typename T>
-Euler<T>::Euler( const SDE<T>& sde, const array<T>& init_state, const T time,
-                 const T dt, mt19937& rng )
-    : Integrator<SDE<T>, T>( sde, init_state, time )
+template <class C>
+Euler<C>::Euler( const C& sde, const typename C::array& init_state, const double time,
+                 const double dt, mt19937& rng )
+    : Integrator<C>( sde, init_state, time )
     , h( dt )
-    , dim( sde.getDim() )
-    , wDim( sde.getWDim() )
-    , dw( extents[wDim] )
-    , tmp1( extents[dim] )
-    , tmp2( extents[dim][wDim])
-    , xpred( extents[dim] )
+    , dim( C::dim )
+    , wDim( C::wdim )
     , dist( 0,1 )
     , gen( rng, dist )
 {}
 
-template <typename T>
-void Euler<T>::step()
+template <class C>
+void Euler<C>::step()
 {
     // generate the brownian path
     if( !manualWiener )
@@ -33,10 +28,10 @@ void Euler<T>::step()
     this->getLE().computeDrift( tmp1, this->state, this->getTime() );
     this->getLE().computeDiffusion( tmp2, this->state, this->getTime() );
 
-    for( bidx i=0; i!=dim; ++i )
+    for( unsigned int i=0; i!=dim; ++i )
     {
         xpred[i] = this->state[i] + tmp1[i]*h;
-        for( bidx j=0; j!=wDim; ++j )
+        for( unsigned int j=0; j!=wDim; ++j )
             xpred[i] += tmp2[i][j]*dw[j];
     }
 
@@ -45,10 +40,7 @@ void Euler<T>::step()
 }
 
 // Set the manual wiener process mode
-template <typename T>
-void Euler<T>::setManualWienerMode( const bool s ) { manualWiener=s; }
-template <typename T>
-void Euler<T>::setWienerIncrements( const array<T> a ) { dw=a; }
-
-// The following types are visible
-template class Euler<float>;
+template <class C>
+void Euler<C>::setManualWienerMode( const bool s ) { manualWiener=s; }
+template <class C>
+void Euler<C>::setWienerIncrements( const typename C::array a ) { dw=a; }

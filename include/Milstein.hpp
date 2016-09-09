@@ -8,10 +8,9 @@
 #define MILST_H
 
 #include <Integrator.hpp>
+
 #include <boost/multi_array.hpp>
-template <typename T> using array = boost::multi_array<T,1>;
-template <typename T> using matrix = boost::multi_array<T,2>;
-template <typename T> using array3 = boost::multi_array<T,3>;
+using boostdmatrix = boost::multi_array<double,2>;
 
 #include <boost/random.hpp>
 using boost::variate_generator;
@@ -22,13 +21,13 @@ using boost::normal_distribution;
 using std::sqrt; using std::pow;
 #include <algorithm>
 
-template <typename T>
-class Milstein : public Integrator<SDE<T>, T>
+template <class C>
+class Milstein : public Integrator<C>
 {
 public:
     // Constructor
-    Milstein( const SDE<T> &le, const array<T>& init_state,
-              const T time, const T dt,
+    Milstein( const C &le, const typename C::array& init_state,
+              const double time, const double dt,
               mt19937 &rng_1, mt19937 &rng_2 );
 
     // One step of the integrator
@@ -42,26 +41,26 @@ public:
     // Manual wiener process mode
     // allow user to control internal wiener increments themselves
     void setManualWienerMode( const bool );
-    void setWienerIncrements( const array<T> );
+    void setWienerIncrements( const typename C::array );
 
 private:
-    const T h;
-    const int dim, wDim;
-    normal_distribution<T> dist_1;
-    normal_distribution<T> dist_2;
-    variate_generator<mt19937&, normal_distribution<T> > gen_1;
-    variate_generator<mt19937&, normal_distribution<T> > gen_2;
-    array<T> next_state;
-    array<T> dw;
-    array<T> dw2;
-    array<T> tmp1;
-    matrix<T> tmp2;
-    matrix<T> tmp22;
-    array3<T> tmp3;
+    const double h;
+    const size_t dim, wDim;
+    normal_distribution<double> dist_1;
+    normal_distribution<double> dist_2;
+    variate_generator<mt19937&, normal_distribution<double> > gen_1;
+    variate_generator<mt19937&, normal_distribution<double> > gen_2;
+    typename C::array next_state;
+    typename C::array dw;
+    typename C::array dw2;
+    typename C::array tmp1;
+    typename C::matrix tmp2;
+    typename C::matrix tmp22;
+    typename C::array3 tmp3;
     unsigned int p; // Fourier series truncation
-    array<T> mu;
-    matrix<T> eta;
-    matrix<T> zeta;
+    typename C::array mu;
+    boostdmatrix eta;
+    boostdmatrix zeta;
     bool manualWiener{ false };
 };
 

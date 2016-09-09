@@ -7,25 +7,24 @@
 #ifndef ODE_H
 #define ODE_H
 
-#include <algorithm>
-#include <boost/multi_array.hpp>
-template <typename T> using array = boost::multi_array<T,1>;
-template <typename T> using matrix = boost::multi_array<T,2>;
+#include <cstddef>
+#include <array>
+template <size_t DIM>
+using darray = std::array<double,DIM>;
 
-template <typename T>
+template<size_t DIM>
 class ODE
 {
 public:
-    ODE( const int dim );
+    ODE() {};
 
-    int getDim() const; // get dimensions of equation
+    // Useful aliases
+    using array = darray<DIM>;
+    static const size_t dim = DIM;
 
     // Return derivative from a given state vector
-    virtual void computeDrift( array<T>& out, const array<T>& in,
-                               const T t ) const = 0;
-private:
-    const int dim;
+    virtual void computeDrift( array& out, const array& in,
+                               const double t ) const = 0;
 };
 
-#include <tpp/ODE.cpp>
 #endif

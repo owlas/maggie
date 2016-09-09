@@ -8,52 +8,42 @@
 //
 #include<Particle.hpp>
 
+using namespace maggie;
+
 // constructor
-Particle::Particle( double g, double a, double m, double diam, double anis,
-		    array_d anisAxis )
-  : uea( boost::extents[3] )
-  , gamma( g )
-  , alpha( a )
-  , ms( m )
-  , k( anis )
+Particle::Particle( magnetogyric _gamma, damping _alpha, double _ms,
+                    diameter diam, anisotropy _k, axis anis )
+    : gamma( _gamma )
+    , alpha( _alpha )
+    , ms( _ms )
+    , k( _k )
 {
-  setUea( anisAxis );
+  setUea( anis );
   setSize( diam );
 }
 
 // setters for particle properties
-void Particle::setGamma( double g ) { gamma=g; }
-void Particle::setMs( double m ) { ms=m; }
-void Particle::setAlpha( double a ) { alpha=a; }
-void Particle::setK( double anis ) { k = anis; }
-
-void Particle::setSize( double diam )
+void Particle::setGamma( magnetogyric _gamma ) { gamma=_gamma; }
+void Particle::setMs( double _ms ) { ms=_ms; }
+void Particle::setAlpha( damping _alpha ) { alpha=_alpha; }
+void Particle::setK( anisotropy _k ) { k = _k; }
+void Particle::setUea( axis _uea ) { uea = _uea; }
+void Particle::setSize( diameter diam )
 {
   d = diam;
   v = ( 4.0/3 )*M_PI*pow( d/2.0, 3 );
 }
 
-void Particle::setUea( array_d anisAxis )
-{
-  if( anisAxis.shape()[0] != 3 )
-    throw invalid_argument( "Error: anisotropy axis must be of length"
-			    " 3." );
-  if( fabs( sqrt( pow( anisAxis[0], 2 ) + pow( anisAxis[1], 2 )
-		   + pow( anisAxis[2], 2 ) ) - 1.0 ) > 1e-7 )
-    throw invalid_argument( "Error: anisotropy axis must have a"
-			    " magnitude of unity. Normalise vector" );
 
-  uea = anisAxis;
-}
 
 // getters for properties
-double Particle::getGamma() const { return gamma; }
-double Particle::getAlpha() const { return alpha; }
+magnetogyric Particle::getGamma() const { return gamma; }
+damping Particle::getAlpha() const { return alpha; }
 double Particle::getMs() const { return ms; }
-double Particle::getD() const { return d; }
-double Particle::getK() const { return k; }
-array_d Particle::getUea() const { return uea; }
-double Particle::getV() const { return v; }
+diameter Particle::getD() const { return d; }
+anisotropy Particle::getK() const { return k; }
+axis Particle::getUea() const { return uea; }
+volume Particle::getV() const { return v; }
 
 // Compute the energy barriers of the system in an aligned field.
 // happ is the reduced field intensity i.e. h/Hk
@@ -74,7 +64,7 @@ array_d
 // Compute the Neel-Arrhenius transition rates from energy barrier
 // calculations in at a set temperature
 array_d
-  Particle::neelTransitionRates( double T, double b1, double b2 ) const
+  Particle::neelTransitionRates( temperature T, double b1, double b2 ) const
 {
   // Assume tau_0
   double tau0 = 1e-10;
@@ -89,13 +79,13 @@ array_d
 
 
 // Computes the reduced effective field of the uniaxial anisotropy
-void Particle::computeAnisotropyField( array_d& field, const array_d& state ) const
+void Particle::computeAnisotropyField( field& h, const moment& state ) const
 {
     double mdote =
         uea[0] * state[0] +
         uea[1] * state[1] +
         uea[2] * state[2];
-    field[0] = mdote * uea[0];
-    field[1] = mdote * uea[1];
-    field[2] = mdote * uea[2];
+    h[0] = mdote * uea[0];
+    h[1] = mdote * uea[1];
+    h[2] = mdote * uea[2];
 }

@@ -6,68 +6,48 @@
 //
 
 // Constructor
-template<class C, typename T>
-Integrator<C, T>::Integrator( const C& le, const array<T>& init_state,
-			   const T time )
-  : state( boost::extents[le.getDim()] )
-  , lEq( &le )
-  , initial_state( boost::extents[le.getDim()] )
-{
-  initial_t = time;
-  setTime( time );
-  initial_state = init_state;
-  setState( init_state );
-}
+template<class EQ_C>
+Integrator<EQ_C>::Integrator( const EQ_C& le, const typename EQ_C::array& init_state, const double time )
+: state( init_state )
+    , lEq( &le )
+    , initial_state( init_state )
+    , t( time )
+    , initial_t( time )
+{}
 
 // Get state
-template<class C, typename T>
-const array<T>& Integrator<C, T>::getState() const { return state; }
+template<class EQ_C>
+const typename EQ_C::array& Integrator<EQ_C>::getState() const { return state; }
 // Set State
-template<class C, typename T>
-void Integrator<C, T>::setState( const array<T>& s )
+template<class EQ_C>
+void Integrator<EQ_C>::setState( const typename EQ_C::array& s )
 {
-if( int( s.shape()[0] ) != lEq->getDim() )
-    {
-      throw invalid_argument( "Error: state dimension does not match"
-			      " Langevin equation dimension");
-    }
-  else
-    {
-      state = s;
-    }
+    state=s;
 }
 
 // get time
-template<class C, typename T>
-T Integrator<C, T>::getTime() const { return t; }
+template<class EQ_C>
+double Integrator<EQ_C>::getTime() const { return t; }
 // set time
-template<class C, typename T>
-void Integrator<C, T>::setTime( const T time ) { t = time; }
+template<class EQ_C>
+void Integrator<EQ_C>::setTime( const double time ) { t = time; }
 
 // get the pointer to the integrator
-template<class C, typename T>
-const C& Integrator<C, T>::getLE() const { return *lEq; }
+template<class EQ_C>
+const EQ_C& Integrator<EQ_C>::getLE() const { return *lEq; }
 
 // reset the integrator to the initial condition
-template<class C, typename T>
-void Integrator<C, T>::reset()
+template<class EQ_C>
+void Integrator<EQ_C>::reset()
 {
   state = initial_state;
   t = initial_t;
 }
 
 // reset the integrator with a new inital condition
-template<class C, typename T>
-void Integrator<C, T>::reset( const array<T> new_init )
+template<class EQ_C>
+void Integrator<EQ_C>::reset( const typename EQ_C::array new_init )
 {
   initial_state = new_init;
   reset();
 }
-
-
-// Explicitly instantiate template instances
-// Only these type combinations are visible to user
-template class Integrator<ODE<float>, float>;
-template class Integrator<ODE<double>, double>;
-template class Integrator<SDE<float>, float>;
-template class Integrator<SDE<double>, double>;

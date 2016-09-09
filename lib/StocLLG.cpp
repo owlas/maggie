@@ -4,56 +4,41 @@
 // Oliver W. Laslett 2015
 // O.Laslett@soton.ac.uk
 //
-#include <iostream>
-using std::cout;
-using std::endl;
+#include "../include/StocLLG.hpp"
 
-#include <StocLLG.hpp>
+using namespace maggie;
 
 // Constructor
-template <typename T>
-StocLLG<T>::StocLLG( const T s, const T a,
-		  const T hx, const T hy, const T hz )
-    : SDE<T>( 3,3 )
-  , h( boost::extents[3] )
+StocLLG::StocLLG( const stability s, const damping a, const field h )
+    : SDE<3,3>()
 {
   setSigma( s );
   setAlpha( a );
-  setReducedHeff( hx, hy, hz );
+  setReducedHeff( h );
 }
 
 // set the reduced effective field
-template <typename T>
-void StocLLG<T>::setReducedHeff( const T hx, T hy, const T hz )
+void StocLLG::setReducedHeff( const field _h )
 {
-  h[0] = hx;
-  h[1] = hy;
-  h[2] = hz;
+    h = _h;
 }
 // get the reduced effective field
-template <typename T>
-array<T> StocLLG<T>::getReducedHeff() const { return h; }
+field StocLLG::getReducedHeff() const { return h; }
 
 // set and set sigma
-template <typename T>
-void StocLLG<T>::setSigma( const T s ) { sigma = s; }
-template <typename T>
-T StocLLG<T>::getSigma() const { return sigma; }
+void StocLLG::setSigma( const stability s ) { sigma = s; }
+stability StocLLG::getSigma() const { return sigma; }
 
 // set and set alpha
-template <typename T>
-void StocLLG<T>::setAlpha( const T s ) { alpha = s; }
-template <typename T>
-T StocLLG<T>::getAlpha() const { return alpha; }
+void StocLLG::setAlpha( const damping a ) { alpha = a; }
+damping StocLLG::getAlpha() const { return alpha; }
 
 // get a modifiable reference to the reduced field
-template <typename T>
-array<T>& StocLLG<T>::getReducedFieldRef() { return h; }
+field& StocLLG::getReducedFieldRef() { return h; }
 
 // compute the drift term of the stochastic LLG equation
-template <typename T>
-void StocLLG<T>::computeDrift( array<T>& out, const array<T>& state,
-			    const T ) const
+void StocLLG::computeDrift( array& out, const array& state,
+			    const double ) const
 {
   out[0] = state[2]*h[1] - state[1]*h[2]
     + alpha*(h[0]*(state[1]*state[1] + state[2]*state[2])
@@ -70,9 +55,8 @@ void StocLLG<T>::computeDrift( array<T>& out, const array<T>& state,
 }
 
 // compute the diffusion matrix for the stochastic LLG equation
-template <typename T>
-void StocLLG<T>::computeDiffusion( matrix<T>& out, const array<T>& state,
-				const T ) const
+void StocLLG::computeDiffusion( matrix& out, const array& state,
+				const double ) const
 {
   out[0][0] = alpha*sigma*(state[1]*state[1]+state[2]*state[2]);
   out[0][1] = sigma*(state[2]-alpha*state[0]*state[1]);
@@ -86,10 +70,9 @@ void StocLLG<T>::computeDiffusion( matrix<T>& out, const array<T>& state,
 }
 
 // compute the Taylor derivative sums L
-template <typename T>
-void StocLLG<T>::computeDiffusionDerivatives( array3<T> &out,
-                                              const array<T> &state,
-                                              const T ) const
+void StocLLG::computeDiffusionDerivatives( array3 &out,
+                                           const array& state,
+                                           const double ) const
 {
   out[0][0][0] = 0;
   out[0][0][1] = 2*alpha*sigma*state[1];
@@ -129,34 +112,26 @@ void StocLLG<T>::computeDiffusionDerivatives( array3<T> &out,
 }
 
 // constructor for the stoc llg
-template <typename T>
-StocLLGIto<T>::StocLLGIto( const T s, const T a, const T hx,
-                           const T hy, const T hz )
-    : StocLLG<T>( s, a, hx, hy, hz )
+
+StocLLGIto::StocLLGIto( const stability s, const damping a, const field h )
+    : StocLLG( s, a, h )
 {}
 
 // compute the drift in ito form
-template <typename T>
-void StocLLGIto<T>::computeDrift(array<T>& out, const array<T>& in,
-                                 const T t) const
+void StocLLGIto::computeDrift( array& out, const array& in,
+                               const double t) const
 {
-    const int d{ this->getDim() };
-    const int m{ this->getWDim() };
-    matrix<T> b( boost::extents[d][m] );
-    array3<T> bDash( boost::extents[d][m][d]);
+    const int d{ StocLLGIto::dim };
+    const int m{ StocLLGIto::wdim };
+    StocLLGIto::matrix b;
+    StocLLGIto::array3 bDash;
 
-    StocLLG<T>::computeDrift(out, in, t);
+    StocLLG::computeDrift(out, in, t);
     this->computeDiffusion(b, in, t );
     this->computeDiffusionDerivatives(bDash, in, t );
 
-    for ( bidx i=0; i!=d; ++i )
-        for( bidx j=0; j!=m; ++j )
-            for( bidx k=0; k!=d; ++k )
+    for ( unsigned int i=0; i!=d; ++i )
+        for( unsigned int j=0; j!=m; ++j )
+            for( unsigned int k=0; k!=d; ++k )
                 out[i] += 0.5 * b[k][j] * bDash[i][j][k];
 }
-
-// Explicit template class instatiation
-template class StocLLG<float>;
-template class StocLLG<double>;
-template class StocLLGIto<float>;
-template class StocLLGIto<double>;

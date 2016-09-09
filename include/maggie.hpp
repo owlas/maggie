@@ -27,5 +27,7 @@
 #include<Milstein.hpp>
 #include<Euler.hpp>
 #include<Simulation.hpp>
+#include<MagneticStateController.hpp>
+#include<types.hpp>
 
 #endif

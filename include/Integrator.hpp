@@ -8,37 +8,29 @@
 #define INTEGRATOR_H
 
 #include<SDE.hpp>
-#include<boost/multi_array.hpp>
-template<typename T>
-using array = boost::multi_array<T,1>;
-using bidx = boost::multi_array_types::index;
-#include<iostream>
-using std::cout;
-using std::endl;
 #include<Integrator.hpp>
 #include<stdexcept>
 using std::invalid_argument;
 
-template<class C, typename T>
+template<class EQ_C>
 class Integrator
 {
  public:
-
-    Integrator( const C& equation, const array<T>&,
-                const T time=0 );
+    Integrator( const EQ_C& equation, const typename EQ_C::array&,
+                const double time=0 );
 
     // Get the current state
-    const array<T>& getState() const;
+    const typename EQ_C::array& getState() const;
     // Set the integrator state
-    void setState( const array<T>& );
+    void setState( const typename EQ_C::array& );
 
     // Get the current time
-    T getTime() const;
+    double getTime() const;
     // Set the integrator time
-    void setTime( const T );
+    void setTime( const double );
 
     // Get the reference to the associated Langevin Equation
-    const C& getLE() const;
+    const EQ_C& getLE() const;
 
     // Compute an integration step
     virtual void step() = 0;
@@ -46,16 +38,16 @@ class Integrator
     // Reset the integrator to initial conditions
     // or a new initial condition
     void reset();
-    void reset( const array<T> );
+    void reset( const typename EQ_C::array );
 
 protected:
-    array<T> state;
+    typename EQ_C::array state;
 
 private:
-    const C* lEq;
-    array<T> initial_state;
-    T t;
-    T initial_t;
+    const EQ_C* lEq;
+    typename EQ_C::array initial_state;
+    double t;
+    double initial_t;
 };
 
 #include "tpp/Integrator.cpp"

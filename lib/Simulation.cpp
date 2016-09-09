@@ -10,42 +10,106 @@
 // ----- CONSTRUCTOR -----
 Simulation::Simulation( const ParticleCluster g, const ad_vec init_state,
                         const double stepsize, const unsigned int n,
-                        const double temp, const array_d field )
-  : geom( g )
-  , h( boost::extents[3] )
-  , stability( geom.computeStability( temp ) )
+                        const temperature temp, const field field,
+                        const unsigned int seed )
+    : geom( g )
+    , Nparticles( geom.getNParticles() )
+    , sigmas( geom.computeStability( temp ) )
+    , integrators_seed( seed )
 {
-  setTimeStep( stepsize );
-  setSimLength( n );
-  setState( init_state );
-  setTemp( temp );
-  setField( field );
-  equilibrium_rng.seed(1001);
+    setTimeStep( stepsize );
+    setSimLength( n );
+    setState( init_state );
+    setTemp( temp );
+    setField( field );
+    equilibrium_rng.seed(1001);
 
+    // Assert that all particles have the same Ms value
+    double ms( geom.getParticle( 0 ).getMs() );
+    for( unsigned int i=0; i!=Nparticles; ++i )
+        if( geom.getParticle( i ).getMs() != ms )
+            throw "Simulation requires that all particles in the cluster have "
+                "the same Ms value";
+
+
+    // Set up an LLG equation for each particle in the ensemble
+    // geom -- applied field reduced
+    // per particle:
+    //   thermal strength
+    //   alpha
+    std::vector<StocLLG> llgs;
+    for( unsigned int i=0; i!=Nparticles; ++i )
+    {
+        // Get the particle
+        auto p_ref = geom.getParticle( i );
+
+        // The thermal field intensity for reduced simulation
+        double therm_strength {
+            std::sqrt( p_ref.getAlpha() * Constants::KB * T
+                       / ( geom.getAverageAnisConstant() * p_ref.getV()
+                           * ( 1 + std::pow( p_ref.getAlpha(),2 ) ) ) )
+                };
+
+        // Initialise the LLG equation
+        maggie::field heff{ 0, 0, 0 };
+        llgs.push_back(
+            StocLLG( therm_strength, p_ref.getAlpha(), heff )
+            );
+    }
+
+
+    // Compute the reduced field constant
+    double Hk{
+        2 * geom.getAverageAnisConstant()
+            / ( Constants::MU0 * ms ) };
+
+
+    // compute the reduced external field
+    maggie::field happ{ h[0]/Hk, h[1]/Hk, h[2]/Hk };
+
+
+    // Compute the reduced time for the simulation
+    // TODO: check reduction factor
+    // TODO: what is happening with this alpha reference?
+    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
+            / ( 1+pow( geom.getParticle( 0 ).getAlpha(), 2 ) ) };
+    reduced_time_factor = t_factor;
+    double dtau = dt * t_factor;
+
+
+    // init magnetic state controller
+    // requires:
+    //  geometry
+    //  external field
+    //  llg equation list
+    //  integrators list
+    simulationController = MagneticStateController<Euler<StocLLG>>::unique_ptr(
+        new MagneticStateController<Euler<StocLLG>>(
+            geom, happ, llgs, state, dtau, integrators_seed
+            )
+        );
 }
 
 
 // ----- Setter methods -----
-void Simulation::setSimLength( const unsigned int n ) { N=n; }
+void Simulation::setSimLength( const unsigned int n ) { Nsteps=n; }
 
 void Simulation::setTimeStep( const double h ) { dt=h; }
 
-void Simulation::setField( const array_d field ) { h = field; }
+void Simulation::setField( const field _h ) { h = _h; }
 
-void Simulation::setTemp( const double t )
+void Simulation::setTemp( const temperature _T )
 {
-  if( t < 0 )
+  if( _T < 0 )
     throw std::invalid_argument("Temperature T must be greater than"
                                 " zero.");
-  T = t;
+  T = _T;
 }
 
-void Simulation::setState( const ad_vec s )
+void Simulation::setState( const std::vector<moment> s )
 {
-  size_t dim1=geom.getNParticles(), dim2=3;
-  if( ( s.size() != dim1 ) or
-      ( s[0].shape()[0] != dim2 ) )
-    throw std::invalid_argument( "State of the system must be (Nx2)"
+  if( s.size() != Nparticles )
+    throw std::invalid_argument( "Vector of moments must be N."
                                  " - where N is the number of "
                                  "particles" );
   state = s;
@@ -56,13 +120,13 @@ void Simulation::setState( const ad_vec s )
 // ----- Getter methods -----
 double Simulation::getTimeStep() const { return dt; }
 
-unsigned int Simulation::getSimLength() const { return N; }
+unsigned int Simulation::getSimLength() const { return Nsteps; }
 
-const ad_vec& Simulation::getState() const { return state; }
+const std::vector<moment>& Simulation::getState() const { return state; }
 
-double Simulation::getTemp() const { return T; }
+temperature Simulation::getTemp() const { return T; }
 
-array_d Simulation::getField() const { return h; }
+field Simulation::getField() const { return h; }
 
 ParticleCluster Simulation::getGeometry() const
 {
@@ -82,93 +146,50 @@ matrix_d Simulation::computeEnergyBarriers() const
   throw "NOT IMPLMENTED";
 }
 
+int Simulation::init()
+{
+
+
+    return 1;
+}
+
 // Run the simulation - currently an integration of the Langevin
 // dynamics without field
 int Simulation::runFull()
 {
-    // Currently only runs a single particle
-    if( geom.getNParticles() != 1 )
-        throw "Simulation only runs for a single particle.";
 
-    // Get the particle info
-    Particle p = geom.getParticle( 0 );
-
-    // The thermal field intensity for reduced simulation
-    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
-                                     / ( p.getK() * p.getV()
-                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
-
-
-    // Compute the reduced time for the simulation
-    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
-    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
-            / ( 1+pow( p.getAlpha(), 2 ) ) };
-    double dtau = dt * t_factor;
-
-
-    // compute the reduced external field
-    array_d happ( extents[3] );
-    for( bidx i=0; i!=3; ++i )
-        happ[i] = h[i]/Hk;
-
-    // Set up an LLG equation for the particle
-    // finite temperature with the reduced field
-    StocLLG<double> llg( therm_strength, p.getAlpha(),
-                        happ[0], happ[1], happ[2] );
-
-
-    // Get the initial condition of the particle
-    array_d init( boost::extents[3] );
-    for( array_d::index i=0; i!=3; ++i )
-        init[i] = state[0][i];
-
-
-    // Initialise the integrator and its RNG
-    mt19937 rng2( 301 );
-    auto inte = Heun<double>( llg, init, 0.0, dtau, rng2 );
-
+    // Initialise the simulation
+    simulationController->reset();
 
     // store the solutions here
-    matrix_d sols( boost::extents[N][3] );
-
-    // reference to the current state and the field
-    const array_d& currentState = inte.getState();
-    array_d& currentField = llg.getReducedFieldRef();
-
-    // temporary state vector
-    array_d state_temp( boost::extents[3] );
-
+    std::vector<matrix_d> sols;
+    for( unsigned int i=0; i!=Nparticles; ++i )
+    {
+        matrix_d sol_mat( boost::extents[Nsteps][3] );
+        sols.push_back( sol_mat );
+    }
 
     // Step the integrator and store the result at each step
-    for( array_d::index n=0; n!=N; ++n )
+    for( unsigned int n=0; n!=Nsteps; ++n )
     {
-        // first compute the field due to the anisotropy
-        // and put that in the field vector
-        p.computeAnisotropyField( currentField, currentState );
-
-        // then add the reduced external field
-        for( bidx j=0; j!=3; ++j )
-            currentField[j] += happ[j];
-
-        // step the integrator
-        inte.step();
-
-        // renormalise the solution
-        double norm = sqrt( currentState[0]*currentState[0]
-                            + currentState[1]*currentState[1]
-                            + currentState[2]*currentState[2] );
-        for( bidx k=0; k!=3; ++k )
-            state_temp[k] = currentState[k] / norm;
-        inte.setState( state_temp );
+        // Step the system
+        simulationController->step();
 
         // store the solutions
-        for( array_d::index i=0; i!=3; ++i )
-            sols[n][i] = currentState[i];
+        std::vector<maggie::moment> state = simulationController->getState();
+        for( unsigned int p=0; p!=Nparticles; ++p )
+        {
+            sols[p][n][0] = state[p][0];
+            sols[p][n][1] = state[p][1];
+            sols[p][n][2] = state[p][2];
+        }
+
     }
 
 
     // Write the results to the hardrive
-    boostToFile( sols, "llg.mag" );
+    for( unsigned int i=0; i!=Nparticles; ++i )
+       boostToFile( sols[i], "llg.mag" ); // TODO format filename
 
   return 1; // everything was fine
 }
@@ -178,80 +199,30 @@ int Simulation::runFull()
 // these states are then saved to the hard drive
 int Simulation::runEnsemble( unsigned int Nruns )
 {
-    // Currently only runs a single particle
-    if( geom.getNParticles() != 1 )
-        throw "Simulation only runs for a single particle.";
-
-    // Get the particle info
-    Particle p = geom.getParticle( 0 );
-
-    // The thermal field intensity for reduced simulation
-    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
-                                     / ( p.getK() * p.getV()
-                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
-
-
-    // Compute the reduced time for the simulation
-    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
-    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
-            / ( 1+pow( p.getAlpha(), 2 ) ) };
-    double dtau = dt * t_factor;
-
-
-    // compute the reduced external field
-    array_d happ( extents[3] );
-    for( bidx i=0; i!=3; ++i )
-        happ[i] = h[i]/Hk;
-
-    // Set up an LLG equation for the particle
-    // finite temperature with the reduced field
-    StocLLG<double> llg( therm_strength, p.getAlpha(),
-                        happ[0], happ[1], happ[2] );
-
-
-    // Get the initial condition of the particle
-    array_d init( boost::extents[3] );
-    for( array_d::index i=0; i!=3; ++i )
-        init[i] = state[0][i];
-
-
-    // Initialise the integrator and its RNG
-    mt19937 rng( 301 );
-    auto inte = Heun<double>( llg, init, 0.0, dtau, rng );
-
-
     // store the solutions here
     matrix_d sols( boost::extents[Nruns][3] );
 
-    // reference to the current state and the field
-    const array_d& currentState = inte.getState();
-    array_d& currentField = llg.getReducedFieldRef();
-
+    // initialise the simulation
+    simulationController->reset();
 
     // Run the integrator a number of times
     for( bidx m=0; m!=Nruns; ++m )
     {
-        // Reset the itegrator
-        inte.reset();
 
         // Step the integrator and store the result at each step
-        for( array_d::index n=0; n!=N; ++n )
+        for( array_d::index n=0; n!=Nsteps; ++n )
         {
-            // first compute the field due to the anisotropy
-            // and put that in the field vector
-            p.computeAnisotropyField( currentField, currentState );
-
-            // then add the reduced external field
-            for( bidx j=0; j!=3; ++j )
-                currentField[j] += happ[j];
-
-            // step the integrator
-            inte.step();
+            // step the system
+            simulationController->step();
         } // for each time step
 
-        // Store the final state of the system
-        for( bidx i=0; i!=3; ++i )
-            sols[m][i] = currentState[i];
+        // Store the final state of the first particle
+        auto currentstate = simulationController->getState();
+        for( int i=0; i!=3; ++i )
+            sols[m][i] = currentstate[0][i];
+
+        // reset the integrators
+        simulationController->reset();
     }
 
     // Write the results to the hardrive
@@ -268,168 +239,111 @@ int Simulation::runFPT( const int N_ensemble, const bool alignup )
     if( geom.getNParticles() != 1 )
         throw "Simulation only runs for a single particle.";
 
-    // Get the particle info
-    Particle p = geom.getParticle( 0 );
-
-    // The thermal field intensity for reduced simulation
-    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
-                                     / ( p.getK() * p.getV()
-                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
-
-    // compute the stability
-    double sr{ p.getK() * p.getV() / ( Constants::KB * T ) };
-
-    // Compute the reduced time for the simulation
-    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
-    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
-            / ( 1+pow( p.getAlpha(), 2 ) ) };
-    double dtau = dt * t_factor;
-
-
-    // compute the reduced external field
-    array_d happ( extents[3] );
-    for( bidx i=0; i!=3; ++i )
-        happ[i] = h[i]/Hk;
-
-    // each simulation in the ensemble has its own RNG
-    // generate seeds here
-    mt19937 seed_rng( 8888 );
-    std::vector<int> seeds;
-    boost::uniform_int<> int_dist(0, 2e7);
-    for( int i=0; i!=N_ensemble; ++i )
-        seeds.push_back( int_dist( seed_rng ) );
-
+    simulationController->reset();
 
     // store the fpt for each run
     array_d fpt( extents[N_ensemble] );
 
     // run for every simulation in the ensemble
-#pragma omp parallel for schedule(dynamic, 1)
+    //#pragma omp parallel for schedule(dynamic, 1)
     for( bidx i=0; i<N_ensemble; ++i )
     {
-        // Set up an LLG equation for the particle
-        // finite temperature with the reduced field
-        StocLLG<double> llg( therm_strength, p.getAlpha(),
-                             happ[0], happ[1], happ[2] );
-
 
         // The initial condition of the particle is determined by the flag
         // if align up is true, then particle is initially such that mz=1
-        array_d init( boost::extents[3] );
+        maggie::moment init;
         if( alignup )
         {
-            init[0] = 0; init[1] = 0; init[2] = 1;
+            init = maggie::moment{ 0, 0, 1 };
         }    // if it is false then the initial condition is drawn from the
         // equilibrium initial condition
         else
-            init = equilibriumState();
+            init = equilibriumState()[0];
 
-
-        // Initialise the integrator and its RNG
-        mt19937 heun_rng( seeds[i] );
-        auto inte = Heun<double>( llg, init, 0.0, dtau, heun_rng );
-
-
-        // reference to the current state and the field
-        const array_d& currentState = inte.getState();
-        array_d& currentField = llg.getReducedFieldRef();
-
-        array_d state_temp( boost::extents[3] );
+        std::vector<maggie::moment> init_states{ init };
+        simulationController->reset( init_states );
 
         // Step the integrator until switch occurs
         // then store the time
         while( 1 )
         {
-            // first compute the field due to the anisotropy
-            // and put that in the field vector
-            p.computeAnisotropyField( currentField, currentState );
-
-            // then add the reduced external field
-            for( bidx j=0; j!=3; ++j )
-                currentField[j] += happ[j];
-
-            // step the integrator
-            inte.step();
-
-            // renormalise the solution
-            double norm = sqrt( currentState[0]*currentState[0]
-                                + currentState[1]*currentState[1]
-                                + currentState[2]*currentState[2] );
-            for( bidx k=0; k!=3; ++k )
-                state_temp[k] = currentState[k] / norm;
-            inte.setState( state_temp );
+            // step the simulation
+            simulationController->step();
 
             // check the end condition
+            auto currentState = simulationController->getState()[0];
             if( currentState[2] < -0.5 )
                 break;
         }
 
         // store the time
-        fpt[i] = inte.getTime() / t_factor;
+        fpt[i] = simulationController->getTime() / reduced_time_factor;
         cout << i << endl;
 
     }
 
     // Write the results to the hardrive
+    auto stability_ratios = geom.computeStability( T );
+    auto sr = stability_ratios[0];
+
     std::ostringstream fname;
     fname << "llg" << sr << ".fpt";
     boostToFile( fpt, fname.str() );
 
-  return 1; // everything was fine
+    return 1; // everything was fine
 }
 
 
 // returns a random state from the equilibrium distribution
-array_d Simulation::equilibriumState()
+std::vector<maggie::moment> Simulation::equilibriumState()
 {
 
-    // Currently only runs a single particle
-    if( geom.getNParticles() != 1 )
-        throw "Simulation only runs for a single particle.";
+    std::vector<maggie::moment> random_state;
 
     // Get the particle info and compute the stability
-    Particle p = geom.getParticle( 0 );
-    double sr = p.getK() * p.getV() / ( Constants::KB * T );
-
-    // define the pdf
-    auto pdf = [sr]( double theta )
-        {
-            return sin( theta ) * exp( -sr * pow( sin( theta ), 2 ) );
-        };
-
-    // find the max
-    array_d angles( extents[1000] );
-    for( bidx i=0; i!=1000; ++i )
-        angles[i] = i * M_PI_4 / 1000;
-    double max = 0.0;
-    for( auto &t : angles )
-        if( pdf( t ) > max)
-            max = pdf( t );
-
-    // use uniform distribution as the candidate density
-    // with M 10% higher that the max of target dist
-    static boost::random::uniform_real_distribution<> gen_candidate( 0,M_PI_4 );
-    static boost::random::uniform_real_distribution<> gen_check( 0,1 );
-    double M = 1.1 * max;
-
-
-    // Rejection rate algorithm
-    double candidate = 0;
-    while( 1 )
+    for( unsigned int p=0; p!=Nparticles; ++p )
     {
-        candidate = gen_candidate( equilibrium_rng );
-        double acceptance = pdf( candidate ) / M;
-        double check = gen_check( equilibrium_rng );
-        if( acceptance > check )
-            break;
+        // Define the pdf
+        auto particle = geom.getParticle( p );
+        double stability_ratio =
+            particle.getK() * particle.getV() / ( Constants::KB * T );
+
+        auto pdf = [stability_ratio]( double theta )
+            {
+                return sin( theta ) * exp( -stability_ratio * pow( sin( theta ), 2 ) );
+            };
+
+        // find the max
+        array_d angles( extents[1000] );
+        for( bidx i=0; i!=1000; ++i )
+            angles[i] = i * M_PI_4 / 1000;
+        double max = 0.0;
+        for( auto &t : angles )
+            if( pdf( t ) > max)
+                max = pdf( t );
+
+        // use uniform distribution as the candidate density
+        // with M 10% higher that the max of target dist
+        static boost::random::uniform_real_distribution<> gen_candidate( 0,M_PI_4 );
+        static boost::random::uniform_real_distribution<> gen_check( 0,1 );
+        double M = 1.1 * max;
+
+
+        // Rejection rate algorithm
+        double candidate = 0;
+        while( 1 )
+        {
+            candidate = gen_candidate( equilibrium_rng );
+            double acceptance = pdf( candidate ) / M;
+            double check = gen_check( equilibrium_rng );
+            if( acceptance > check )
+                break;
+        }
+
+        random_state.push_back( maggie::moment{ 0, 0, cos( candidate ) } );
     }
 
-    array_d init_state( extents[3] );
-    init_state[0] = 0;
-    init_state[1] = 0;
-    init_state[2] = cos( candidate );
-
-    return init_state;
+    return random_state;
 }
 
 // Computes the time that switches occur for a single particle
@@ -439,75 +353,36 @@ int Simulation::runResidence( const unsigned int N_switches )
     if( geom.getNParticles() != 1 )
         throw "Simulation only runs for a single particle.";
 
-    // Get the particle info
-    Particle p = geom.getParticle( 0 );
-
-    // The thermal field intensity for reduced simulation
-    double therm_strength{std::sqrt( p.getAlpha() * Constants::KB * T
-                                     / ( p.getK() * p.getV()
-                                         * ( 1 + std::pow( p.getAlpha(),2 ) ) ) ) };
-
-
-    // Compute the reduced time for the simulation
-    double Hk{ 2 * p.getK() / ( Constants::MU0 * p.getMs() ) };
-    double t_factor{ Constants::GYROMAG * Constants::MU0 * Hk
-            / ( 1+pow( p.getAlpha(), 2 ) ) };
-    double dtau = dt * t_factor;
-
-
-    // compute the reduced external field
-    array_d happ( extents[3] );
-    for( bidx i=0; i!=3; ++i )
-        happ[i] = h[i]/Hk;
+    // initialise
+    simulationController->reset();
 
     // store the time of each switch
     array_d switch_times( extents[N_switches] );
 
-
-    // Set up an LLG equation for the particle
-    // finite temperature with the reduced field
-    StocLLG<double> llg( therm_strength, p.getAlpha(),
-                         happ[0], happ[1], happ[2] );
-
-
-    // Particle is prepared in the up state
-    array_d init( boost::extents[3] );
-    init[0] = 0; init[1] = 0; init[2] = 1;
-    int up = 1;
-
-
-    // Initialise the integrator and its RNG
-    mt19937 heun_rng( 1001 );
-    auto inte = Heun<double>( llg, init, 0.0, dtau, heun_rng );
-
-
-    // reference to the current state and the field
-    const array_d& currentState = inte.getState();
-    array_d& currentField = llg.getReducedFieldRef();
-
     // Number of switches
     unsigned int n = 0;
+
+    // Check if the initial state is up or down
+    maggie::moment currentState = simulationController->getState()[0];
+    int up;
+    if ( currentState[2] > 0 )
+        up = 1;
+    else
+        up = -1;
 
     // Step the integrator until switch occurs
     // then store the time
     while( n!=N_switches )
     {
-        // first compute the field due to the anisotropy
-        // and put that in the field vector
-        p.computeAnisotropyField( currentField, currentState );
-
-        // then add the reduced external field
-        for( bidx j=0; j!=3; ++j )
-            currentField[j] += happ[j];
-
-        // step the integrator
-        inte.step();
+        // step the simulation
+        simulationController->step();
 
         // check the end condition
+        currentState = simulationController->getState()[0];
         if( currentState[2]*up < 0 )
         {
             up *= -1;
-            switch_times[n] = inte.getTime();
+            switch_times[n] = simulationController->getTime();
             n++;
             cout << n << endl;
         }

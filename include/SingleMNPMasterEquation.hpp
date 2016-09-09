@@ -14,31 +14,29 @@
 #include<KramersTrig.hpp>
 #include<stdexcept>
 #include<functional>
-#include <boost/multi_array.hpp>
-using array_d = boost::multi_array<double,1>;
 #include <utility>
 using dpair = std::pair<double, double>;
 #include <cmath>
 using std::abs;
 
-class SingleMNPMasterEquation : public ODE<double>
+class SingleMNPMasterEquation : public ODE<2>
 {
 public:
-  // constructor for the general case
-  SingleMNPMasterEquation( double anis,
-			   double temp,
-			   const Field &field,
-			   double fieldangle,
-			   double radius,
-			   double alpha,
-			   double Ms,
-			   double gamma=Constants::GYROMAG );
+    // constructor for the general case
+    SingleMNPMasterEquation( double anis,
+                             double temp,
+                             const Field &field,
+                             double fieldangle,
+                             double radius,
+                             double alpha,
+                             double Ms,
+                             double gamma=Constants::GYROMAG );
 
-  // delegated constructor for aligned case
-  SingleMNPMasterEquation( double anis,
-			   double temp,
-			   const Field &field,
-			   double radius );
+    // delegated constructor for aligned case
+    SingleMNPMasterEquation( double anis,
+                             double temp,
+                             const Field &field,
+                             double radius );
 
 
 
@@ -50,7 +48,7 @@ public:
   dpair state_rotation( const double t ) const;
 
   // Compute the drift of the master equation
-  void computeDrift( array_d& out, const array_d& in, const double t ) const;
+    void computeDrift( ODE<2>::array& out, const ODE<2>::array& in, const double t ) const;
 
 private:
   double k;

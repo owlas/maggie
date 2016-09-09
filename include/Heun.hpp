@@ -14,18 +14,22 @@ using std::sqrt;
 using boost::variate_generator;
 using boost::mt19937;
 using boost::normal_distribution;
-#include<boost/multi_array.hpp>
-template <typename T> using array = boost::multi_array<T,1>;
-template <typename T> using matrix = boost::multi_array<T,2>;
+#include <vector>
 
-template <typename T>
-class Heun : public Integrator<SDE<T>, T>
+#include "types.hpp"
+using namespace maggie;
+
+template <class EQ>
+class Heun : public Integrator<EQ>
 {
 
 public:
     // Constructor
-    Heun( const SDE<T> &sde, const array<T>& init_state,
-          const T time, const T dt, mt19937 &rng );
+    Heun( const EQ &sde, const typename EQ::array& init_state,
+          const double time, const double dt, mt19937 &rng );
+
+    // Useful aliases
+    using vector = std::vector<Heun<EQ>>;
 
     // Step the integrator once
     virtual void step();
@@ -33,19 +37,19 @@ public:
     // Manual wiener process mode
     // allow user to control internal wiener increments themselves
     void setManualWienerMode( const bool );
-    void setWienerIncrements( const array<T> );
+    void setWienerIncrements( const typename EQ::array& );
 
 private:
-    const T h;
-    const int dim, wDim;
-    array<T> dw;
-    array<T> xPred;
-    array<T> tmp1;
-    array<T> tmp1Up;
-    matrix<T> tmp2;
-    matrix<T> tmp2Up;
-    normal_distribution<T> dist;
-    variate_generator<mt19937 &, normal_distribution<T> > gen;
+    const double h;
+    const size_t dim, wDim;
+    typename EQ::array dw;
+    typename EQ::array xPred;
+    typename EQ::array tmp1;
+    typename EQ::array tmp1Up;
+    typename EQ::matrix tmp2;
+    typename EQ::matrix tmp2Up;
+    normal_distribution<double> dist;
+    variate_generator<mt19937 &, normal_distribution<double> > gen;
     bool manualWiener{ false };
 };
 

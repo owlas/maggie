@@ -5,123 +5,131 @@
 // 2015
 //
 
-#include <SDEs.hpp>
+#include "../include/SDEs.hpp"
 
-OH::OH( const float t, const float m, const float s )
-  : SDE<float>( 1,1 )
-  , theta( t )
-  , mu( m )
-  , sigma( s )
+OH::OH( const double t, const double m, const double s )
+    : SDE<1,1>()
+    , theta( t )
+    , mu( m )
+    , sigma( s )
 {
-  // empty
+    // empty
 }
-float OH::getTheta() const { return theta; }
-float OH::getMu() const { return mu; }
-float OH::getSigma() const { return sigma; }
+double OH::getTheta() const { return theta; }
+double OH::getMu() const { return mu; }
+double OH::getSigma() const { return sigma; }
 
-void OH::computeDrift( array_f& out, const array_f& in, const float ) const
+void OH::computeDrift( OH::array& out, const OH::array& in, const double ) const
 {
-  out[0] = theta*( mu-in[0] );
+    out[0] = theta*( mu-in[0] );
 }
 
-void OH::computeDiffusion( matrix_f& out, const array_f&, const float ) const
+void OH::computeDiffusion( OH::matrix& out, const OH::array&, const double ) const
 {
-  out[0][0] = sigma;
+    out[0][0] = sigma;
 }
 
 Wiener::Wiener()
-  : SDE<float>( 1,1 )
+    : SDE<1,1>()
 {
-  // empty
+    // empty
 }
 
-void Wiener::computeDrift( array_f& out, const array_f&, const float ) const
+void Wiener::computeDrift( Wiener::array& out, const Wiener::array&, const double ) const
 {
-  out[0] = 0;
+    out[0] = 0;
 }
 
-void Wiener::computeDiffusion( matrix_f& out, const array_f&, const float )
-  const
+void Wiener::computeDiffusion( Wiener::matrix& out, const Wiener::array&, const double )
+    const
 {
-  out[0][0] = 1;
+    out[0][0] = 1;
 }
 
-ODEConstantDrift::ODEConstantDrift( const float drift )
-  : ODE( 1 )
-  , a( drift )
+ODEConstantDrift::ODEConstantDrift( const double drift )
+    : ODE<1>()
+    , a( drift )
 {
-  //empty
+    //empty
 }
 
-void ODEConstantDrift::computeDrift( array_f& out, const array_f&,
-				     const float ) const
+void ODEConstantDrift::computeDrift( ODEConstantDrift::array& out,
+                                     const ODEConstantDrift::array&,
+				     const double ) const
 {
-  out[0] = a;
+    out[0] = a;
 }
 
-SDE_AXpB::SDE_AXpB( const float drift, const float diff )
-  : SDE<float>( 1,1 )
-  , a( drift )
-  , b( diff )
+SDE_AXpB::SDE_AXpB( const double drift, const double diff )
+    : SDE<1,1>()
+    , a( drift )
+    , b( diff )
 {}
 
-void SDE_AXpB::computeDrift( array_f& out, const array_f& in, const float )
-  const
+void SDE_AXpB::computeDrift( SDE_AXpB::array& out,
+                             const SDE_AXpB::array& in,
+                             const double )
+    const
 {
-  out[0] = a*in[0];
+    out[0] = a*in[0];
 }
 
-void SDE_AXpB::computeDiffusion( matrix_f& out, const array_f&, const float )
-  const
+void SDE_AXpB::computeDiffusion( SDE_AXpB::matrix& out,
+                                 const SDE_AXpB::array&,
+                                 const double )
+    const
 {
-  out[0][0] = b;
+    out[0][0] = b;
 }
 
-SDE_AXpBX::SDE_AXpBX( const float drift, const float diff )
-  : SDE<float>( 1,1 )
-  , a( drift )
-  , b( diff )
+SDE_AXpBX::SDE_AXpBX( const double drift, const double diff )
+    : SDE<1,1>()
+    , a( drift )
+    , b( diff )
 {}
 
-void SDE_AXpBX::computeDrift( array_f& out, const array_f& in, const float )
-  const
+void SDE_AXpBX::computeDrift( SDE_AXpBX::array& out,
+                              const SDE_AXpBX::array& in,
+                              const double )
+    const
 {
-  out[0] = a*in[0];
+    out[0] = a*in[0];
 }
 
-void SDE_AXpBX::computeDiffusion( matrix_f& out, const array_f& in,
-				  const float ) const
+void SDE_AXpBX::computeDiffusion( SDE_AXpBX::matrix& out,
+                                  const SDE_AXpBX::array& in,
+				  const double ) const
 {
-  out[0][0] = b*in[0];
+    out[0][0] = b*in[0];
 }
 
-MultiplicativeConstantNoise::MultiplicativeConstantNoise( const float drift,
-							  const float diffusion )
-  : SDE<float>( 1,1 )
-  , a( drift )
-  , b( diffusion )
+MultiplicativeConstantNoise::MultiplicativeConstantNoise( const double drift,
+							  const double diffusion )
+    : SDE<1,1>()
+    , a( drift )
+    , b( diffusion )
 {
-  //empty
+    //empty
 }
 
-void MultiplicativeConstantNoise::computeDrift( array_f& out,
-						const array_f& in,
-						const float ) const
+void MultiplicativeConstantNoise::computeDrift( MultiplicativeConstantNoise::array& out,
+						const MultiplicativeConstantNoise::array& in,
+						const double ) const
 {
-  out[0] = a*in[0];
+    out[0] = a*in[0];
 }
 
-void MultiplicativeConstantNoise::computeDiffusion( matrix_f& out,
-						    const array_f& in,
-						    const float ) const
+void MultiplicativeConstantNoise::computeDiffusion( MultiplicativeConstantNoise::matrix& out,
+						    const MultiplicativeConstantNoise::array& in,
+						    const double ) const
 {
-  out[0][0] = b*in[0];
+    out[0][0] = b*in[0];
 }
 
-void MultiplicativeConstantNoise::computeDiffusionDerivatives( cube_f& out,
-							       const array_f&,
-							       const float )
-  const
+void MultiplicativeConstantNoise::computeDiffusionDerivatives(
+    MultiplicativeConstantNoise::array3& out,
+    const MultiplicativeConstantNoise::array&,
+    const double ) const
 {
-  out[0][0][0] = b;
+    out[0][0][0] = b;
 }

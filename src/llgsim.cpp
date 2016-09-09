@@ -7,13 +7,14 @@
 //
 #include <maggie.hpp>
 #include <vector>
-using plist=std::vector<Particle>;
 
 #include <boost/multi_array.hpp>
 using array_d=boost::multi_array<double, 1>;
 using matrix_d=boost::multi_array<double, 2>;
 using boost::extents;
 using bidx=boost::multi_array_types::index;
+
+#include "../include/types.hpp"
 
 #include <inih/INIReader.h>
 #include <iostream>
@@ -32,28 +33,27 @@ int main()
 
     // The first thing to do is to set up the particle cluster
     // in this case we just have one particle, so lets define that:
-    double gyromagnetic_constant{ Constants::GYROMAG };
-    double damping{ reader.GetReal( "particle", "alpha", -1 ) }; // 0.01
-    double Ms{ reader.GetReal( "particle", "ms", -1 ) }; // 1400e3
-    double diameter{ reader.GetReal( "particle", "diameter", -1 ) }; // 5e-9
-    double anisotropy_const{ reader.GetReal( "particle", "anisotropy", -1 ) };
-    array_d anisotropy_axis( extents[3] );
-    anisotropy_axis[0] = reader.GetReal( "particle", "anis_x", -1 );
-    anisotropy_axis[1] = reader.GetReal( "particle", "anis_y", -1 );
-    anisotropy_axis[2] = reader.GetReal( "particle", "anis_z", -1 );
+    maggie::magnetogyric gyromagnetic_constant{ Constants::GYROMAG };
+    maggie::damping damping{ reader.GetReal( "particle", "alpha", -1 ) }; // 0.01
+    maggie::magnetisation Ms{ reader.GetReal( "particle", "ms", -1 ) }; // 1400e3
+    maggie::diameter diameter{ reader.GetReal( "particle", "diameter", -1 ) }; // 5e-9
+    maggie::anisotropy anisotropy_const{ reader.GetReal( "particle", "anisotropy", -1 ) };
+    maggie::axis anisotropy{
+        reader.GetReal( "particle", "anis_x", -1 ),
+        reader.GetReal( "particle", "anis_y", -1 ),
+        reader.GetReal( "particle", "anis_z", -1 )
+    };
     auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
-                       anisotropy_const, anisotropy_axis );
+                       anisotropy_const, anisotropy );
 
 
     // The particle cluster then needs a list of particles and their
     // respective locations. In this case its easy.
-    plist ps;
+    Particle::vector ps;
     ps.push_back( p );
 
-    matrix_d locs( extents[1][3] );
-    for( auto &i : locs[0] )
-        i = 0.0;
-
+    std::vector<maggie::position> locs;
+    locs.push_back( maggie::position{ 0, 0, 0 } );
     auto cluster = ParticleCluster( ps, locs );
 
 
@@ -61,11 +61,8 @@ int main()
     // set up the environment
 
     // first the initial state of the magnetisation
-    array_d init( extents[3] );
-    init[0] = 0.0;
-    init[1] = 0.0;
-    init[2] = 1.0;
-    std::vector<array_d> states = { init };
+    maggie::moment init{ 0, 0, 1 };
+    std::vector<maggie::moment> states = { init };
 
     // now the time step and simulation length
     double dt{ 1e-14 };
@@ -73,10 +70,11 @@ int main()
 
     // Finally we choose the temperature and external field
     double temp{ 300 }; // 300
-    array_d field( extents[3] );
-    field[0] = reader.GetReal("particle", "Happ_x", -1 );
-    field[1] = reader.GetReal("particle", "Happ_y", -1 );
-    field[2] = reader.GetReal("particle", "Happ_z", -1 );
+    maggie::field field{
+        reader.GetReal("particle", "Happ_x", -1 ),
+        reader.GetReal("particle", "Happ_y", -1 ),
+        reader.GetReal("particle", "Happ_z", -1 )
+    };
 
     // print stability
     cout << "stability ratio: " << anisotropy_const * p.getV() / ( Constants::KB * temp ) << endl;

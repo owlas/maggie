@@ -16,7 +16,7 @@ SingleMNPMasterEquation( double anis,
                          double alpha,
                          double Ms,
                          double gamma )
-    : ODE<double>( 2 )
+    : ODE<2>()
     , k( anis )
     , T( temp )
     , r( radius )
@@ -38,8 +38,8 @@ SingleMNPMasterEquation( double anis,
     : SingleMNPMasterEquation( anis, temp, field, 0, radius,
                                0.1, 100 ) {}
 
-void SingleMNPMasterEquation::computeDrift( array_d& out,
-                                            const array_d& in,
+void SingleMNPMasterEquation::computeDrift( ODE<2>::array& out,
+                                            const ODE<2>::array& in,
                                             const double t ) const
 {
     double rate1, rate2;
