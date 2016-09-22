@@ -253,13 +253,13 @@ TEST(ParticleCluster, Distances)
   EXPECT_EQ( 0, dists[2][2][2] );
 
 
-  // check reduced field
+  // check reduced distances
   auto dists_red= pclust.getReducedDistancesRef();
 
   // p3 - p1
   EXPECT_EQ( 0, dists_red[0][2][0] );
-  EXPECT_EQ( 0.02984155182973038, dists_red[0][2][1] );
-  EXPECT_EQ( 0.02984155182973038, dists_red[0][2][2] );
+  EXPECT_EQ( 0.31017524544970004, dists_red[0][2][1] );
+  EXPECT_EQ( 0.31017524544970004, dists_red[0][2][2] );
 }
 
 // Test the average parameters computed by the ParticleCluster

@@ -39,9 +39,15 @@ ParticleCluster::ParticleCluster( const Particle::vector list,
 
   // Normalise the distances by the average volume
   for( unsigned int i=0; i!=N; ++i )
+  {
       for( unsigned int j=0; j!=N; ++j )
-          for( unsigned int k=0; k!=N; ++k )
-              reduced_dist[i][j][k] = dist[i][j][k] / v_av;
+      {
+          for( unsigned int k=0; k!=3; ++k )
+          {
+              reduced_dist[i][j][k] = dist[i][j][k] / std::cbrt(v_av);
+          }
+      }
+  }
 }
 
 // Set the particle list
