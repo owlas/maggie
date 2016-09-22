@@ -62,7 +62,9 @@ public:
                                  double barrier2 )     const;
 
     // Compute the effective field from the anisotropy
-    void computeAnisotropyField( maggie::field&, const maggie::moment& ) const;
+    void computeAnisotropyField(maggie::field&,
+                                const maggie::anisotropy,
+                                const maggie::moment& ) const;
 
 
 

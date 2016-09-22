@@ -79,13 +79,13 @@ array_d
 
 
 // Computes the reduced effective field of the uniaxial anisotropy
-void Particle::computeAnisotropyField( field& h, const moment& state ) const
+void Particle::computeAnisotropyField( field& h, anisotropy k, const moment& state ) const
 {
     double mdote =
         uea[0] * state[0] +
         uea[1] * state[1] +
         uea[2] * state[2];
-    h[0] = mdote * uea[0];
-    h[1] = mdote * uea[1];
-    h[2] = mdote * uea[2];
+    h[0] = mdote * uea[0] * k;
+    h[1] = mdote * uea[1] * k;
+    h[2] = mdote * uea[2] * k;
 }
