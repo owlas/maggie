@@ -4,10 +4,10 @@
 
 namespace Constants
 {
-    const float KB = 1.3806485e-23;
-    const double KB_d = 1.3806485e-23;
-    const float GYROMAG = 1.76086e11;
-    const float MU0 = 1.256637e-6;
+    const double KB = 1.3806485e-23;
+    const double KB_d = KB;
+    const double GYROMAG = 1.76086e11;
+    const double MU0 = 1.25663706e-6;
 }
 
 #endif
