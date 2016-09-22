@@ -30,6 +30,7 @@ int main()
     // Initialise those vectors here.
     Particle::vector ps;
     std::vector<maggie::position> locs;
+    std::vector<maggie::moment> states;
 
     if(reader.ParseError() < 0 )
     {
@@ -37,61 +38,64 @@ int main()
         return 1;
     }
 
+    // Global parameters
+    double temp, dt;
+    int time_steps;
+    maggie::field field;
+
     // For each section of the ini file specifies a single particle
     for( auto &section_name : reader.GetSections() )
     {
-        maggie::magnetogyric gyromagnetic_constant{ Constants::GYROMAG };
-        maggie::damping damping{ reader.GetReal( section_name, "alpha", -1 ) }; // 0.01
-        maggie::magnetisation Ms{ reader.GetReal( section_name, "ms", -1 ) }; // 1400e3
-        maggie::diameter diameter{ reader.GetReal( section_name, "diameter", -1 ) }; // 5e-9
-        maggie::anisotropy anisotropy_const{ reader.GetReal( section_name, "anisotropy", -1 ) };
-        maggie::axis anisotropy{
-                reader.GetReal( section_name, "anis_x", -1 ),
-                reader.GetReal( section_name, "anis_y", -1 ),
-                reader.GetReal( section_name, "anis_z", -1 )
-                };
-        auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
-                           anisotropy_const, anisotropy );
-        maggie::position loc{
-                reader.GetReal( section_name, "loc_x", -1 ),
-                reader.GetReal( section_name, "loc_y", -1 ),
-                reader.GetReal( section_name, "loc_z", -1 )
-                };
-        ps.push_back( p );
-        locs.push_back( loc );
+      if( section_name == "global")
+        {
+          temp =  reader.GetReal( section_name, "temperature", -1 );
+          dt = reader.GetReal( section_name, "time_step", -1 );
+          time_steps = reader.GetInteger( section_name, "number_steps", -1 );
+          field = maggie::field{
+              reader.GetReal( section_name, "Happ_x", -1 ),
+              reader.GetReal( section_name, "Happ_y", -1 ),
+              reader.GetReal( section_name, "Happ_z", -1 )
+            };
+        }
+      else
+        {
+          maggie::magnetogyric gyromagnetic_constant{ Constants::GYROMAG };
+          maggie::damping damping{ reader.GetReal( section_name, "alpha", -1 ) };
+          maggie::magnetisation Ms{ reader.GetReal( section_name, "ms", -1 ) };
+          maggie::diameter diameter{ reader.GetReal( section_name, "diameter", -1 ) };
+          maggie::anisotropy anisotropy_const{ reader.GetReal( section_name, "anisotropy", -1 ) };
+          maggie::axis anisotropy{
+            reader.GetReal( section_name, "anis_x", -1 ),
+              reader.GetReal( section_name, "anis_y", -1 ),
+              reader.GetReal( section_name, "anis_z", -1 )
+              };
+          auto p = Particle( gyromagnetic_constant, damping, Ms, diameter,
+                             anisotropy_const, anisotropy );
+          maggie::position loc{
+            reader.GetReal( section_name, "loc_x", -1 ),
+              reader.GetReal( section_name, "loc_y", -1 ),
+              reader.GetReal( section_name, "loc_z", -1 )
+              };
+          maggie::moment state{
+            reader.GetReal( section_name, "m_x", -1 ),
+              reader.GetReal( section_name, "m_y", -1 ),
+              reader.GetReal( section_name, "m_z", -1 )
+              };
+          states.push_back( state );
+          ps.push_back( p );
+          locs.push_back( loc );
+        }
     }
 
 
     // Create the cluster
     auto cluster = ParticleCluster( ps, locs );
 
-
-    // Now we have defined the particle parameters and geometry we can
-    // set up the environment
-
-    // first the initial state of the magnetisation
-    std::vector<maggie::moment> states;
-    for ( unsigned int i=0; i!=cluster.getNParticles(); ++i )
-        states.push_back( maggie::moment{ 0, 0, 1 } );
-
-    // now the time step and simulation length
-    double dt{ 1e-14 };
-    int time_steps{ 20000 };
-
-    // Finally we choose the temperature and external field
-    double temp{ 300 }; // 300
-    maggie::field field{
-        reader.GetReal("particle", "Happ_x", -1 ),
-        reader.GetReal("particle", "Happ_y", -1 ),
-        reader.GetReal("particle", "Happ_z", -1 )
-    };
-
     // print stability
     for( unsigned int p=0; p!=cluster.getNParticles(); ++p )
         cout << "stability ratio: " << ps[p].getK() * ps[p].getV() / ( Constants::KB * temp ) << endl;
 
     auto mysim = Simulation( cluster, states, dt, time_steps, temp, field );
-
 
     // The run command runs an LLG simulation of the particle for the
     // specified number of time steps and save the time domain signal
