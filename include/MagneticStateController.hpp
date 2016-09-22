@@ -56,6 +56,7 @@ public:
     matrix_d getCubeDisplacements() const;
     std::vector<moment> getState() const;
     double getTime() const;
+    std::vector<maggie::field> getEffectiveField() const;
 
 private:
     ParticleCluster geom;
@@ -63,12 +64,14 @@ private:
     StocLLG::vector llgs;
     int N;
     array3_d disp;
+    array3_d unit_disp;
     matrix_d cube_disps;
     std::vector<maggie::volume> v;
     double ddNorm;
     mt19937 integrator_rng;
     typename INTE::vector integrators;
     std::vector<maggie::field*> heff;
+    std::vector<maggie::anisotropy> k;
 };
 
 #include "tpp/MagneticStateController.cpp"

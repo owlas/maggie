@@ -13,8 +13,10 @@ MagneticStateController<INTE>::MagneticStateController(
     , llgs( _llgs )
     , N( geom.getNParticles() )
     , disp( geom.getReducedDistancesRef() )
+    , unit_disp( boost::extents[N][N][3] )
     , cube_disps( boost::extents[N][N] )
     , v( geom.getReducedVolumes() )
+    , k( geom.getReducedAnisConstants() )
 {
     // Set RNG seed
     integrator_rng.seed( seed );
@@ -24,7 +26,7 @@ MagneticStateController<INTE>::MagneticStateController(
         * geom.getParticle(0).getMs()
         / ( 8 * M_PI * geom.getAverageAnisConstant() );
 
-    // Compute the cube distances
+    // Compute the cube distances and displacement unit vectors
     for( int i=0; i!=N; ++i )
         for( int j=0; j!=N; ++j )
         {
@@ -33,7 +35,10 @@ MagneticStateController<INTE>::MagneticStateController(
                 + disp[i][j][1] * disp[i][j][1]
                 + disp[i][j][2] * disp[i][j][2]
                 );
-            cube_disps[i][j] = pow( mag, 3 );
+            unit_disp[i][j][0] = disp[i][j][0] / mag;
+            unit_disp[i][j][1] = disp[i][j][1] / mag;
+            unit_disp[i][j][2] = disp[i][j][2] / mag;
+            cube_disps[i][j] = mag * mag * mag;
         }
 
     // Create a vector of field references
@@ -49,7 +54,6 @@ MagneticStateController<INTE>::MagneticStateController(
             );
 
     integrators[0].reset();
-    std::cout<< "computed a reset" << std::endl;
 }
 
 template<class INTE>
@@ -65,7 +69,8 @@ void MagneticStateController<INTE>::updateEffectiveField()
         field& heff_ref = *(heff[i]);
 
         // Initialise the state with the anisotropy contribution
-        geom.getParticle( i ).computeAnisotropyField(heff_ref, state);
+        geom.getParticle( i ).computeAnisotropyField(heff_ref, k[i], state);
+
 
         // Add the Zeeman field contribution
         heff_ref[0] = heff_ref[0] + happ[0];
@@ -79,16 +84,16 @@ void MagneticStateController<INTE>::updateEffectiveField()
                 continue;
 
             moment coupled_state = integrators[j].getState();
-            double dot_prod = coupled_state[0] * disp[i][j][0]
-                + coupled_state[1] * disp[i][j][1]
-                + coupled_state[2] * disp[i][j][2];
+            double dot_prod = coupled_state[0] * unit_disp[i][j][0]
+                + coupled_state[1] * unit_disp[i][j][1]
+                + coupled_state[2] * unit_disp[i][j][2];
 
             heff_ref[0] = heff_ref[0] + ddNorm * v[j] / cube_disps[i][j]
-                * ( 3 * dot_prod * disp[i][j][0] - coupled_state[0] );
+                * ( 3 * dot_prod * unit_disp[i][j][0] - coupled_state[0] );
             heff_ref[1] = heff_ref[1] + ddNorm * v[j] / cube_disps[i][j]
-                * ( 3 * dot_prod * disp[i][j][1] - coupled_state[1] );
+                * ( 3 * dot_prod * unit_disp[i][j][1] - coupled_state[1] );
             heff_ref[2] = heff_ref[2] + ddNorm * v[j] / cube_disps[i][j]
-                * ( 3 * dot_prod * disp[i][j][2] - coupled_state[2] );
+                * ( 3 * dot_prod * unit_disp[i][j][2] - coupled_state[2] );
         }
     } // END for each particle in cluster
 } // END updateEffectiveField()
@@ -157,4 +162,13 @@ template<class INTE>
 double MagneticStateController<INTE>::getTime() const
 {
     return integrators[0].getTime();
+}
+
+template<class INTE>
+std::vector<maggie::field> MagneticStateController<INTE>::getEffectiveField() const
+{
+    std::vector<maggie::field> fields;
+    for ( auto heff_ptr : heff )
+        fields.push_back( *heff_ptr );
+    return fields;
 }

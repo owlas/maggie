@@ -669,7 +669,7 @@ TEST( IntegrationTests, EulerLLG )
 
       anSol[2] =
 	std::tanh( alpha*gamma*( H*t+sigma*W ) / ( 1+pow( alpha,2 ) ) );
- 
+
       ASSERT_LE( std::abs( anSol[0] - nmSol[0] ), 1e-1 )
         << "Steps completed: " << i << std::endl;
       ASSERT_LE( std::abs( anSol[1] - nmSol[1] ), 1e-1 )
@@ -823,70 +823,148 @@ TEST( Kramers, GammaValues )
     ASSERT_DOUBLE_EQ( 2.8932560768992421e6, ans2 );
 }
 
-// Test the magnetic state controller
-TEST( MagneticStateController, dipoleDipolePrefactor )
+TEST( MagneticStateController, dipolePrefactor )
 {
-    maggie::axis uea{ 0, 0, 1 };
+    maggie::axis uea1{ 1, 0, 0 };
+    maggie::axis uea2{ 0, 1, 0 };
 
     Particle::vector vec;
-    vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
-    vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
+    vec.push_back( Particle(1, 0.1, 1400e3, 2, 4000, uea1) );
+    vec.push_back( Particle(1, 0.1, 1400e3, 4, 6000, uea2) );
 
     std::vector<maggie::position> locations;
     locations.push_back( maggie::position{ 0, 0, 0 } );
-    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 8, 0 } );
 
     ParticleCluster cluster(vec, locations);
 
     StocLLG::vector llgs;
-    const maggie::field happ{ 3, 4, 5 };
-    llgs.push_back( StocLLG( 1, 2, happ ) );
-    llgs.push_back( StocLLG( 1, 2, happ ) );
+    const maggie::field happ{ 1, 2, 3 };
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
 
     std::vector<maggie::moment> init_state;
-    init_state.push_back( maggie::moment{ 0, 0, 0 } );
-    init_state.push_back( maggie::moment{ 0, 0, 0 } );
+    init_state.push_back( maggie::moment{ 1, 0, 0 } );
+    init_state.push_back( maggie::moment{ 0, 1, 0 } );
+
+    MagneticStateController<Euler<StocLLG> >
+        controller( cluster, happ, llgs, init_state, 0.1, 1001 );
+
+    ASSERT_DOUBLE_EQ( 19.599999977603733, controller.getDDPrefactor() );
+}
+
+TEST( MagneticStateController, cubedisplacements )
+{
+    maggie::axis uea1{ 1, 0, 0 };
+    maggie::axis uea2{ 0, 1, 0 };
+
+    Particle::vector vec;
+    vec.push_back( Particle(1, 0.1, 1400e3, 2, 4000, uea1) );
+    vec.push_back( Particle(1, 0.1, 1400e3, 4, 6000, uea2) );
+
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 8, 0 } );
+
+    ParticleCluster cluster(vec, locations);
+
+    StocLLG::vector llgs;
+    const maggie::field happ{ 1, 2, 3 };
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+
+    std::vector<maggie::moment> init_state;
+    init_state.push_back( maggie::moment{ 1, 0, 0 } );
+    init_state.push_back( maggie::moment{ 0, 1, 0 } );
+
+    MagneticStateController<Euler<StocLLG> >
+        controller( cluster, happ, llgs, init_state, 0.1, 1001 );
+
+    auto actual = controller.getCubeDisplacements();
+
+    ASSERT_DOUBLE_EQ( 0, actual[0][0] );
+    ASSERT_DOUBLE_EQ( 27.162443621016806, actual[0][1] );
+    ASSERT_DOUBLE_EQ( 27.162443621016806, actual[1][0] );
+    ASSERT_DOUBLE_EQ( 0, actual[1][1] );
+
+}
+
+// Test the magnetic state controller
+TEST( MagneticStateController, updatefield )
+{
+    maggie::axis uea1{ 1, 0, 0 };
+    maggie::axis uea2{ 0, 1, 0 };
+
+    Particle::vector vec;
+    vec.push_back( Particle(1, 0.1, 1400e3, 2, 4000, uea1) );
+    vec.push_back( Particle(1, 0.1, 1400e3, 4, 6000, uea2) );
+
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 8, 0 } );
+
+    ParticleCluster cluster(vec, locations);
+
+    StocLLG::vector llgs;
+    const maggie::field happ{ 1, 2, 3 };
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+
+    std::vector<maggie::moment> init_state;
+    init_state.push_back( maggie::moment{ 1, 0, 0 } );
+    init_state.push_back( maggie::moment{ 0, 1, 0 } );
 
     MagneticStateController<Euler<StocLLG> >
       controller( cluster, happ, llgs, init_state, 0.1, 1001 );
 
-    // ASSERT
-}
+    controller.updateEffectiveField();
+    auto effective_field = controller.getEffectiveField();
 
-TEST( MagneticStateController, cubedParticleDisplacements )
-{
-    maggie::axis uea{ 0, 0, 1 };
+    maggie::field actual = effective_field[0];
+    maggie::field expected{ 1.8, 4.5656339975, 3 };
 
-    Particle::vector vec;
-    vec.push_back( Particle(1, 2, 3, 4, 5, uea) );
-    vec.push_back( Particle(6, 5, 4, 3, 2, uea) );
-
-    std::vector<maggie::position> locations;
-    locations.push_back( maggie::position{ 1, 1, 1 } );
-    locations.push_back( maggie::position{ 2, 3, 4 } );
-
-    ParticleCluster cluster(vec, locations);
-
-    maggie::field heff{ 0, 0, 0 };
-    maggie::field happ{ 0, 0, 0 };
-
-    std::vector<StocLLG> llgs;
-    llgs.push_back( StocLLG( 1, 2, heff ) );
-    llgs.push_back( StocLLG( 1, 2, heff ) );
-
-    std::vector<maggie::moment> initial_state;
-    initial_state.push_back( maggie::moment{ 0, 0, 0 } );
-    initial_state.push_back( maggie::moment{ 0, 0, 0 } );
-
-    MagneticStateController<Euler<StocLLG> >
-      controller( cluster, happ, llgs, initial_state, 0.1, 4502 );
-
-    // ASSERT EQUAL
+    for( int i=0; i!=3; ++i )
+        ASSERT_DOUBLE_EQ(expected[i], actual[i]);
 }
 
 TEST( MagneticStateController, renormalise )
 {
-    // TODO
+    maggie::axis uea1{ 1, 0, 0 };
+    maggie::axis uea2{ 0, 1, 0 };
+
+    Particle::vector vec;
+    vec.push_back( Particle(1, 0.1, 1400e3, 2, 4000, uea1) );
+    vec.push_back( Particle(1, 0.1, 1400e3, 4, 6000, uea2) );
+
+    std::vector<maggie::position> locations;
+    locations.push_back( maggie::position{ 0, 0, 0 } );
+    locations.push_back( maggie::position{ 0, 8, 0 } );
+
+    ParticleCluster cluster(vec, locations);
+
+    StocLLG::vector llgs;
+    const maggie::field happ{ 1, 2, 3 };
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+    llgs.push_back( StocLLG( 1, 0.1, happ ) );
+
+    std::vector<maggie::moment> init_state;
+    init_state.push_back( maggie::moment{ 1, 1, 1 } );
+    init_state.push_back( maggie::moment{ 2, 3, 1 } );
+
+    MagneticStateController<Euler<StocLLG> >
+        controller( cluster, happ, llgs, init_state, 0.1, 1001 );
+
+    controller.renormaliseStates();
+    auto states = controller.getState();
+
+    maggie::moment state0_expected{ 0.5773502691896258, 0.5773502691896258, 0.5773502691896258 };
+    maggie::moment state1_expected{ 0.5345224838248488, 0.8017837257372732, 0.2672612419124244 };
+
+    for( int i=0; i!=3; ++i )
+    {
+        ASSERT_DOUBLE_EQ( state0_expected[i], states[0][i]);
+        ASSERT_DOUBLE_EQ( state1_expected[i], states[1][i]);
+    }
 }
 
 int main( int argc, char **argv )
