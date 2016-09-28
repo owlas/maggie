@@ -6,15 +6,28 @@
 
 # Emacs files #
 TAGS
+.dir-locals.el
 
 # Jupyter notebook data #
 *.ipynb_checkpoints/
 
 # OSX files #
 .DS_Store
+.cache/
+*.dSYM
 
 # executables #
 runtests
 
 # Backup files #
 *~
+
+# Output files #
+*.mag
+*.azimuth
+*.fpt
+*.switches
+*.out
+
+# Input files #
+*.ini
