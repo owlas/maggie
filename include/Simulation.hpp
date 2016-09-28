@@ -25,6 +25,8 @@ using bidx = boost::multi_array_types::index;
 #include "types.hpp"
 using namespace maggie;
 
+#include <omp.h>
+
 #include<memory>
 
 #include<vector>
@@ -48,7 +50,7 @@ public:
     // constructor
     Simulation( const ParticleCluster geom, const std::vector<moment>,
                 const double stepsize, const unsigned int n, const temperature t,
-                const field happ , const unsigned int seed=5091);
+                const field happ , const unsigned long int seed=5091);
 
     // Initialise the simulation
     int init();
@@ -106,7 +108,7 @@ private:
     std::vector<stability> sigmas;
     mt19937 equilibrium_rng;
     MagneticStateController<Euler<StocLLG>>::unique_ptr simulationController;
-    const unsigned int integrators_seed;
+    const unsigned long int integrators_seed;
     double reduced_time_factor;
 };
 #endif

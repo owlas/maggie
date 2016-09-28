@@ -11,7 +11,7 @@
 Simulation::Simulation( const ParticleCluster g, const ad_vec init_state,
                         const double stepsize, const unsigned int n,
                         const temperature temp, const field field,
-                        const unsigned int seed )
+                        const unsigned long int seed )
     : geom( g )
     , Nparticles( geom.getNParticles() )
     , sigmas( geom.computeStability( temp ) )
@@ -195,6 +195,18 @@ int Simulation::runFull()
         boostToFile( sols[i], fname.str() );
     }
 
+    // Compute the azimuth angles (cos m_z)
+    for( unsigned int i=0; i!=Nparticles; ++i )
+    {
+        array_d azimuth( boost::extents[Nsteps] );
+        for( unsigned int step=0; step!=Nsteps; ++step )
+            azimuth[step] = std::acos( sols[i][step][2] );
+
+        std::ostringstream fname;
+        fname << "llg" << i << ".azimuth";
+        boostToFile( azimuth, fname.str() );
+    }
+
   return 1; // everything was fine
 }
 
@@ -222,7 +234,7 @@ int Simulation::runEnsemble( unsigned int Nruns )
 
         // Store the final state of the first particle
         auto currentstate = simulationController->getState();
-        for( int i=0; i!=3; ++i )
+        for( unsigned int i=0; i!=3; ++i )
             sols[m][i] = currentstate[0][i];
 
         // reset the integrators

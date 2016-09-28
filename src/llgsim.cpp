@@ -7,6 +7,8 @@
 //
 #include <maggie.hpp>
 #include <vector>
+#include <omp.h>
+#include <fstream>
 
 #include <boost/multi_array.hpp>
 using array_d=boost::multi_array<double, 1>;
@@ -104,6 +106,26 @@ int main()
     mysim.runFull();
     cout << "done" << endl;
 
+    // Run something
+    cout << "Computing ensemble magnetisation... " << flush;
+    const int total_runs{ 100 };
+    const int n_threads{ omp_get_max_threads() };
+    const int runs_per_thread{ total_runs / n_threads};
+
+    // open seeds
+    std::vector<long int> seeds;
+    long int seed;
+
+    std::ifstream infile( "thread_seeds" );
+    while ( infile >> seed )
+        seeds.push_back( seed );
+
+    #pragma omp parallel
+    {
+        auto mysim = Simulation( cluster, states, dt, time_steps, temp, field, seeds[omp_get_thread_num()] );
+        mysim.runFullEnsemble( runs_per_thread );
+    }
+    cout << "done" << endl;
 
     // Run an ensemble of the system and save the final state of the each
     // member of the ensemble
