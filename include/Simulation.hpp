@@ -59,6 +59,9 @@ public:
     // Do a simulation of an ensemble of particles
     int runEnsemble( unsigned int );
 
+    // Do a simulation of an ensemble
+    int runFullEnsemble( unsigned int );
+
     // Do a simulation of a single particle until it switches
     int runFPT( const int N_ensemble, const bool alignup = false );
 

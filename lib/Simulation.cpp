@@ -235,6 +235,49 @@ int Simulation::runEnsemble( unsigned int Nruns )
   return 1; // everything was fine
 }
 
+// Stores the magnetisation of the particle cluster
+// for each in the ensemble
+int Simulation::runFullEnsemble( unsigned int Nruns )
+{
+    // store the solutions here
+    matrix_d sols( boost::extents[Nruns][Nsteps] );
+
+    // initialise the simulation
+    simulationController->reset();
+
+    // Run the integrator a number of times
+    for( bidx m=0; m<Nruns; ++m )
+    {
+
+        // Step the integrator and store the result at each step
+        for( array_d::index n=0; n!=Nsteps; ++n )
+        {
+            // step the system
+            simulationController->step();
+
+            // Store the current state
+            auto currentstate = simulationController->getState();
+
+            // compute the total magnetisation
+            sols[m][n] = 0;
+            for( unsigned int p=0; p!=Nparticles; ++p )
+                sols[m][n] += currentstate[p][2] / Nparticles;
+
+        } // for each time step
+
+        // reset the integrators
+        simulationController->reset();
+    }
+
+    // Write the results to the hardrive
+    std::ostringstream fname;
+    fname << "fullEnsemble-process" << omp_get_thread_num() << ".mag";
+    boostToFile( sols, fname.str() );
+
+  return 1; // everything was fine
+}
+
+
 // Computes the first passage time for a single particle in the absence of an
 // external field
 int Simulation::runFPT( const int N_ensemble, const bool alignup )
