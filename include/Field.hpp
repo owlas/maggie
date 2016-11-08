@@ -13,67 +13,78 @@
 class Field
 {
 public:
-  Field( float );
+  Field( double );
 
-  void setH( float );
-  float getH() const;
-  virtual float getField( float ) const = 0;
-  
+  void setH( double );
+  double getH() const;
+  virtual double getField( double ) const = 0;
+
 private:
-  float h;
+  double h;
 };
 
 class FieldConstant : public Field
 {
 public:
-  FieldConstant( float h );
-  virtual float getField( float ) const;
+  FieldConstant( double h );
+  virtual double getField( double ) const;
 };
 
 class FieldPeriodic : public Field
 {
 public:
-  FieldPeriodic( float h, float f );
-  void setF( float );
-  float getF() const;
-  virtual float getField( float ) const = 0;
+  FieldPeriodic( double h, double f );
+  void setF( double );
+  double getF() const;
+  virtual double getField( double ) const = 0;
 private:
-  float f;
+  double f;
 };
 
 class FieldACSine : public FieldPeriodic
 {
 public:
-  FieldACSine( float h, float f );
-  virtual float getField( float ) const;
+  FieldACSine( double h, double f );
+  virtual double getField( double ) const;
 };
 
 class FieldACCosine : public FieldPeriodic
 {
 public:
-  FieldACCosine( float h, float f );
-  virtual float getField( float ) const;
+  FieldACCosine( double h, double f );
+  virtual double getField( double ) const;
 };
 
 class FieldACSquare : public FieldPeriodic
 {
 public:
-  FieldACSquare( float h, float f );
-  virtual float getField( float ) const;
+  FieldACSquare( double h, double f );
+  virtual double getField( double ) const;
 };
 
 class FieldACRamp : public FieldPeriodic
 {
 public:
-  FieldACRamp( float h, float f, float rTime );
-  virtual float getField( float ) const;
-  float getRT() const;
-  void setRT( float );
+  FieldACRamp( double h, double f, double rTime );
+  virtual double getField( double ) const;
+  double getRT() const;
+  void setRT( double );
 private:
-  float rt;
-  float left;
-  float right;
-  float ramp;
+  double rt;
+  double left;
+  double right;
+  double ramp;
+};
+
+class FieldFourierSquare : public FieldPeriodic
+{
+public:
+    FieldFourierSquare( const double amplitude,
+                        const double frequency,
+                        const unsigned int n_components);
+    virtual double getField( double ) const;
+private:
+    unsigned int n_components;
 };
 
 #endif

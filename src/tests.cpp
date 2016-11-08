@@ -967,6 +967,13 @@ TEST( MagneticStateController, renormalise )
     }
 }
 
+TEST( Field, SquareFourier )
+{
+    FieldFourierSquare field( 0.5, 2.0, 3 );
+    double h = field.getField( 0.062506250625062501 );
+    ASSERT_DOUBLE_EQ( 0.51014388833729174, h );
+}
+
 int main( int argc, char **argv )
 {
   ::testing::InitGoogleTest( &argc, argv );

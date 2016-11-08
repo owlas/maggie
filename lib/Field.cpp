@@ -6,61 +6,61 @@
 #include<Field.hpp>
 
 // Abstract class to hold a field calculation
-Field::Field( float field )
+Field::Field( double field )
 {
   setH( field );
 }
-void Field::setH( float field ) { h=field; }
-float Field::getH() const { return h; }
+void Field::setH( double field ) { h=field; }
+double Field::getH() const { return h; }
 
 // The most basic field is simply a constant
-FieldConstant::FieldConstant( float field )
+FieldConstant::FieldConstant( double field )
   : Field( field ) {}
-float FieldConstant::getField( float ) const
+double FieldConstant::getField( double ) const
 { return getH(); }
 
 // Abstrsct class for periodic time-varying fields
-FieldPeriodic::FieldPeriodic( float field, float freq )
+FieldPeriodic::FieldPeriodic( double field, double freq )
         : Field( field )
 {
   setF( freq );
 }
-void FieldPeriodic::setF( float freq ) { f=freq; }
-float FieldPeriodic::getF() const { return f; }
+void FieldPeriodic::setF( double freq ) { f=freq; }
+double FieldPeriodic::getF() const { return f; }
 
 // Sine field
-FieldACSine::FieldACSine( float field, float freq )
+FieldACSine::FieldACSine( double field, double freq )
   : FieldPeriodic( field, freq ) {}
-float FieldACSine::getField( float t ) const
+double FieldACSine::getField( double t ) const
 {
   return getH()*std::sin( 2*M_PI*getF()*t );
 }
 
 // Cosine field
-FieldACCosine::FieldACCosine( float field, float freq )
+FieldACCosine::FieldACCosine( double field, double freq )
   : FieldPeriodic( field, freq ) {}
-float FieldACCosine::getField( float t ) const
+double FieldACCosine::getField( double t ) const
 {
   return getH()*std::cos( 2*M_PI*getF()*t );
 }
 
 // Square wave
-FieldACSquare::FieldACSquare( float field, float freq )
+FieldACSquare::FieldACSquare( double field, double freq )
   : FieldPeriodic( field, freq ) {}
-float FieldACSquare::getField( float t ) const
+double FieldACSquare::getField( double t ) const
 {
   return getH()*( int( t*getF()*2 )%2 ? -1 : 1 );
 }
 
 // Ramped square wave
-FieldACRamp::FieldACRamp( float field, float freq,
-			  float riseTime )
+FieldACRamp::FieldACRamp( double field, double freq,
+			  double riseTime )
   : FieldPeriodic( field, freq )
 {
   setRT( riseTime );
 }
-float FieldACRamp::getRT() const { return rt; }
-void FieldACRamp::setRT( float r )
+double FieldACRamp::getRT() const { return rt; }
+void FieldACRamp::setRT( double r )
 {
   // rise time must be 0-50%
   if( ( r>0.5 ) or ( r<0.0 ) )
@@ -70,20 +70,39 @@ void FieldACRamp::setRT( float r )
   // set the rise time
   rt = r;
   // compute the ramping gradient
-  float T=1/getF();
+  double T=1/getF();
   ramp = 2*getH()/( T*rt );
   // compute the max interval
   left=T/2*rt;
   right=T/2*( 1-rt );
 }
-  
-float FieldACRamp::getField( float t ) const
+
+double FieldACRamp::getField( double t ) const
 {
-  float tcyc = std::fmod( t, 1/( getF() ) );
-  float T2 = 1/( 2*getF() );
+  double tcyc = std::fmod( t, 1/( getF() ) );
+  double T2 = 1/( 2*getF() );
   return tcyc<left ? tcyc*ramp :
     tcyc<right ? getH() :
     tcyc<( T2+left ) ? getH() - ramp*( tcyc-right ) :
     tcyc<( T2+right ) ? -getH() :
     -getH() + ramp*( tcyc-T2-right );
+}
+
+FieldFourierSquare::FieldFourierSquare(
+    const double amplitude, const double frequency,
+    const unsigned int _n_components
+    )
+    : FieldPeriodic( amplitude, frequency )
+    , n_components( _n_components ) {}
+
+double FieldFourierSquare::getField( double t ) const
+{
+    double field = 0;
+    for( unsigned int k=1; k<n_components+1; ++k )
+    {
+        field += std::sin( 2*M_PI*( 2*k - 1 )*getF()*t )
+            / ( 2*k-1 );
+    }
+    field *= 4 / M_PI * getH();
+    return field;
 }
