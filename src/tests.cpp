@@ -159,6 +159,46 @@ TEST(RK4, BasicCircle)
   ASSERT_FLOAT_EQ( -sin( t ), state[1] );
 }
 
+// Test the RK4 algorithm
+TEST(RK45, BasicCircle)
+{
+    // declare array for initial state
+    ODE<2>::array init{ 1, 0 };
+
+    float t=0; // initial time
+
+    // Basic differential equation
+    class ode : public ODE<2>
+    {
+    public:
+        ode() : ODE<2>() {}; // constructor
+
+        // Differential equation
+        virtual void computeDrift( ode::array& out, const ode::array& in, const double )
+            const
+            {
+                out[0] = in[1];
+                out[1] = -in[0];
+            }
+    } testOde;
+
+
+    // Create an instance of the RK45 integrator
+    auto inte = RK45<ode>( testOde, init, t, 1e-15 );
+
+    // Run the integrator for 2000 steps
+    for( int i=0; i<500; i++ )
+        inte.step();
+
+    // Get the state and time
+    auto state = inte.getState();
+    t = inte.getTime();
+
+    // Check the solution
+    ASSERT_FLOAT_EQ( cos( t ), state[0] );
+    ASSERT_FLOAT_EQ( -sin( t ), state[1] );
+}
+
 // Test for the Particles
 TEST(Particle, SetSize)
 {

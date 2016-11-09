@@ -16,6 +16,7 @@
 #include<TwoStateMasterEquation.hpp>
 #include<Integrator.hpp>
 #include<RK4.hpp>
+#include<RK45.hpp>
 #include<Particle.hpp>
 #include<ParticleCluster.hpp>
 #include<Constants.hpp>
