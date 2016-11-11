@@ -1051,6 +1051,27 @@ TEST( Field, SquareFourier )
     ASSERT_DOUBLE_EQ( 0.51014388833729174, h );
 }
 
+TEST( InterpolateToGrid, onedim )
+{
+    std::array<double,5> arr;
+    std::array<double,5> time;
+    for( unsigned int i=0; i<time.size(); ++i )
+    {
+        time[i] = i*i*0.17;
+        arr[i] = time[i]*0.5 - time[i]*time[i]*0.3 + 0.1;
+    }
+
+    std::array<double,5> grid;
+    double spacing=0.544;
+    algos::interpolate_to_regular_line(arr, time, grid);
+    ASSERT_FLOAT_EQ( 0.1, grid[0] );
+    ASSERT_FLOAT_EQ( 0.30128, grid[1] );
+    ASSERT_FLOAT_EQ( 0.19044, grid[2] );
+    ASSERT_FLOAT_EQ( -0.23252, grid[3] );
+    ASSERT_FLOAT_EQ( -0.75952, grid[4] );
+
+}
+
 int main( int argc, char **argv )
 {
   ::testing::InitGoogleTest( &argc, argv );

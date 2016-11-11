@@ -30,5 +30,6 @@
 #include<Simulation.hpp>
 #include<MagneticStateController.hpp>
 #include<types.hpp>
+#include "algos.hpp"
 
 #endif
