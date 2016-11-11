@@ -22,6 +22,12 @@ public:
     // Step the integrator once
     virtual void step();
 
+    // Step the integrator until a time and save a certain number of steps
+    template <class Container2D>
+    void linspaceMultiStep( Container2D &out, const unsigned int Npoints,
+                            const double T );
+
+
     // update the step size
     void setStepSize( const double h );
 

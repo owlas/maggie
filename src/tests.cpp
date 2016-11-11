@@ -199,6 +199,43 @@ TEST(RK45, BasicCircle)
     ASSERT_FLOAT_EQ( -sin( t ), state[1] );
 }
 
+TEST(RK45, linspace)
+{
+    // declare array for initial state
+    ODE<2>::array init{ 1, 0 };
+
+    float t=0; // initial time
+
+    // Basic differential equation
+    class ode : public ODE<2>
+    {
+    public:
+        ode() : ODE<2>() {}; // constructor
+
+        // Differential equation
+        virtual void computeDrift( ode::array& out, const ode::array& in, const double )
+            const
+            {
+                out[0] = in[1];
+                out[1] = -in[0];
+            }
+    } testOde;
+
+
+    // Create an instance of the RK45 integrator
+    auto inte = RK45<ode>( testOde, init, t, 1e-15 );
+
+    // Run the integrator for 500 regular steps to 3.0
+    matrix_d output( boost::extents[500][2] );
+
+    inte.linspaceMultiStep( output, 500, 3.0 );
+
+    // Check the solution (due to interpolation, likely to be less accurate)
+    ASSERT_LE( std::abs( cos( 3.0 ) - output[499][0] ), 0.01 );
+    ASSERT_LE( std::abs( -sin( 3.0 ) - output[499][1] ), 0.01 );
+
+}
+
 // Test for the Particles
 TEST(Particle, SetSize)
 {

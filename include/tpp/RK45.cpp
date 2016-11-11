@@ -117,6 +117,50 @@ void RK45<C>::step()
 template <class C>
 void RK45<C>::setStepSize( const double _h ) { h=_h; }
 
-// explicit template instantiation
-// template class RK4<float>;
-// template class RK4<double>;
+
+template <class C>
+template <class Container2D>
+void RK45<C>::linspaceMultiStep( Container2D &out, const unsigned int Npoints,
+                                 const double T )
+{
+    // inits
+    double sampling_time = T/ (double) Npoints;
+    typename C::array current_state, old_state;
+    unsigned int states_written, current_state_number;
+    double old_time;
+
+    // get the initial state
+    current_state = this->getState();
+    states_written = 0;
+
+    // write the initial state
+    for( unsigned int i=0; i<dim; ++i )
+        out[states_written][i] = current_state[i];
+    states_written++;
+
+    while( states_written < Npoints )
+    {
+        old_time = this->getTime();
+        old_state = current_state;
+        this->step();
+        current_state = this->getState();
+        current_state_number = (int) ( this->getTime() / sampling_time );
+
+
+        for( ; states_written<=current_state_number; ++states_written )
+        {
+            // check for end condition
+            if( states_written >= Npoints )
+                break;
+
+            // linearlly interpolate between the old and current state
+            for( unsigned int i=0; i<dim; ++i )
+            {
+                out[states_written][i] = old_state[i]
+                    + ( states_written*sampling_time - old_time )
+                    * ( current_state[i] - old_state[i] )
+                    / ( this->getTime() - old_time );
+            }
+        }
+    }
+}
