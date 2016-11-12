@@ -50,11 +50,14 @@ namespace Quad
   // A single quadrature algorithm for discrete data
   // integrates from x = start to x = end at intervals of h
   // and vec = y( x ) for start, start+h, start+2h, ...
-    template <typename T>
-    T trapVec( array<T> vec, const T h );
+    template <class Container>
+    double trapVec( const Container vec, const double h );
 
-    template <typename T>
-    T trapVec( array<T> yvec, array<T> xvec );
+    template <class Container>
+    double trapVec( const Container yvec, const Container xvec, const int Npoints );
+
+    template <class Container>
+    double trapVec( const Container yvec, const Container xvec );
 }
 
 #include<tpp/Quadrature.cpp>

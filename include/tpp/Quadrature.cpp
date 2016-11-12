@@ -74,51 +74,52 @@ namespace Quad
     return s;
   }
 
-    template <typename T>
-    T trapVec( array<T> vec, const T h )
+    template <class Container>
+    double trapVec( const Container vec, const double h )
   {
-    T sum, s;
+    double sum, s;
     int i;
-    const int len = vec.shape()[0];
+    const int len = vec.size();
 
     // assert that the vector is at lest of length 3
     if( len<2 )
-      throw std::invalid_argument( "Vector for integration must be of"
-                                   " minimum length 3" );
+        throw std::invalid_argument( "Vector for integration must be of"
+                                     " minimum length 3" );
     // add the end points
     s = h/2.0*( vec[0] + vec[len-1] );
 
     // sum the points
     for( sum=0.0, i=0; i<len-1; i++ )
-      sum += h*vec[i+1];
+        sum += h*vec[i+1];
 
     s += sum;
     return s;
   }
 
-    template <typename T>
-    T trapVec( array<T> yvec, array<T> xvec )
-  {
-    T sum;
-    unsigned int i;
-    const unsigned int len = yvec.shape()[0];
-    if( xvec.shape()[0] != len )
-      throw std::invalid_argument( "vectors must be of the same"
-				   " length." );
+    template <class Container>
+    double trapVec( const Container yvec, const Container xvec, const int Npoints )
+    {
+        double sum;
+        unsigned int i;
+        const unsigned int len = Npoints;
 
-    // assert that the vector is at lest of length 3
-    if( len<2 )
-      throw std::invalid_argument( "Vector for integration must be of"
-                                   " minimum length 3" );
+        // assert that the vector is at lest of length 3
+        if( len<2 )
+            throw std::invalid_argument( "Vector for integration must be of"
+                                         " minimum length 3" );
 
-    // sum the points
-    for( sum=0.0, i=1; i<len; i++ )
-      sum += ( xvec[i]-xvec[i-1] )*( yvec[i]+yvec[i-1] );
+        // sum the points
+        for( sum=0.0, i=1; i<len; i++ )
+            sum += ( xvec[i]-xvec[i-1] )*( yvec[i]+yvec[i-1] );
 
-    sum/=2.0;
-    return sum;
-  }
+        sum/=2.0;
+        return sum;
+    }
 
-    template class Quadrature<float>;
-    template class Quadrature<double>;
+
+    template <class Container>
+    double trapVec( const Container yvec, const Container xvec )
+    {
+        return trapVec( yvec, xvec, xvec.size() );
+    }
 }
