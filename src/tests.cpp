@@ -797,7 +797,7 @@ TEST( Quadrature, LinearFunctionFromVector )
   for( int i=0; i<N; i++ ) vec[i] = 2*i*h+3;
 
   // get the result
-  double res = Quad::trapVec<double>( vec, h );
+  double res = Quad::trapVec( vec, h );
 
   ASSERT_FLOAT_EQ( 70.0, res );
 }
