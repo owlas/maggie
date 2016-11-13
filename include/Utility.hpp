@@ -49,6 +49,28 @@ int boostToFile( matrix<T> m, std::string name )
     return 1;
 }
 
+template <class Container>
+void containerToFile( const Container &in, const std::string name, const size_t Nwrite )
+{
+    // set to raise errors for fail read/write
+    std::ofstream fid;
+    fid.exceptions( std::ofstream::failbit | std::ofstream::badbit );
+
+    // open the file
+    fid.open( name );
+
+    // write each element
+    for( unsigned int i=0; i!=Nwrite; ++i )
+        fid << in[i] << " ";
+    fid.close();
+}
+
+template <class Container>
+void containerToFile( const Container &in, const std::string name )
+{
+    containerToFile( in, name, in.size() );
+}
+
 
 // Prints a progress bar
 void progress_bar( std::string, double );
