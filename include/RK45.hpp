@@ -28,10 +28,16 @@ public:
                             const double T );
 
 
+    // Overload the integrator reset to include resetting the adaptive time step
+    void reset();
+    void reset( const typename C::array );
+
+
     // update the step size
     void setStepSize( const double h );
 
 private:
+    const double default_time_step;
     double h;
     const unsigned dim;
     const double eps;

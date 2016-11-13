@@ -10,7 +10,8 @@ template <class C>
 RK45<C>::RK45( const C &le, const typename C::array& init_state,
                const double init_time, const double _eps )
     : Integrator<C>( le, init_state, init_time )
-    , h( 1e-3 )
+    , default_time_step( 1e-15 )
+    , h( default_time_step )
     , dim( C::dim )
     , eps( _eps )
 {}
@@ -163,4 +164,18 @@ void RK45<C>::linspaceMultiStep( Container2D &out, const unsigned int Npoints,
             }
         }
     }
+}
+
+template <class C>
+void RK45<C>::reset()
+{
+    h = default_time_step;
+    Integrator<C>::reset();
+}
+
+template <class C>
+void RK45<C>::reset( const typename C::array new_init )
+{
+    h = default_time_step;
+    Integrator<C>::reset( new_init );
 }
