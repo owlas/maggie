@@ -44,6 +44,25 @@ void SingleMNPMasterEquation::computeDrift( ODE<2>::array& out,
 {
     double rate1, rate2;
     double h = fieldPtr->getField( t );
+
+    // Error if the field is greater than 1
+    if( h>1.0 )
+    {
+        LOG( ERROR ) << "Reduced field on particle is greater than 1 - h=" << h;
+        throw std::invalid_argument("Reduced field on particle is greater than 1");
+    }
+    double sigma = k*v/( Constants::KB*T );
+    double ebar1 = k*v*std::pow( 1-h, 2 );
+    double ebar2 = k*v*std::pow( 1+h, 2 );
+    double norm_ebar1 = ebar1 / Constants::KB / T;
+    double norm_ebar2 = ebar2 / Constants::KB / T;
+
+    // Warn if energy barrier is too small
+    if( norm_ebar1<1 )
+        LOG( WARNING ) << "Energy barrier too low! dE=" << norm_ebar1;
+    else if( norm_ebar2<1 )
+        LOG( WARNING ) << "Energy barrier too low! dE=" << norm_ebar2;
+
     /* For weak fields and low angles approximate as aligned
        and use the Neel-Arrhenius laws */
     if( abs( h )*sin( psi )<0.03 )
@@ -52,13 +71,13 @@ void SingleMNPMasterEquation::computeDrift( ODE<2>::array& out,
         double ebar2 = k*v*std::pow( 1+h, 2 );
         rate2 = 1/( 1e-10*std::exp( ebar1/( Constants::KB*T ) ) );
         rate1 = 1/( 1e-10*std::exp( ebar2/( Constants::KB*T ) ) );
+
     }
     /* Otherwise use the Kramers theory approach
        This does not work for negative fields, so we exploit the symmetry to
        solve the problem */
     else
     {
-        double sigma = k*v/( Constants::KB*T );
         rate1 = KramersTrig::ihd_rate_1( sigma, abs( h ), psi, gam, M,
                                          a, v, T );
         rate2 = KramersTrig::ihd_rate_2( sigma, abs( h ), psi, gam, M,

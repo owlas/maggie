@@ -15,6 +15,7 @@
 #include<stdexcept>
 #include<functional>
 #include <utility>
+#include "easylogging++.h"
 using dpair = std::pair<double, double>;
 #include <cmath>
 using std::abs;
