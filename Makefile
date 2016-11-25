@@ -2,7 +2,7 @@
 # Make file for compiling the maggie executable
 #
 
-CXX=g++
+CXX=icpc
 INC_PATH=include
 OBJ_PATH=objects
 LIB_PATH=lib
@@ -12,9 +12,9 @@ GTEST_DIR=googletest/googletest
 GMOCK_DIR=googletest/googlemock
 
 LIB_DIR = .
-LIBS=-lgmock -lpthread -lmaggie -lpthread
+LIBS=-lgmock -lpthread -lmaggie
 
-CPP_FLAGS=--std=c++11 -W -Wall -pedantic -Wno-unused-local-typedefs -g -fopenmp
+CPP_FLAGS=--std=c++11 -W -Wall -pedantic -g -lz -fopenmp -unroll0 -mavx
 
 SOURCES=$(wildcard $(LIB_PATH)/*.cpp)
 TPP_SOURCES=$(wildcard $(INC_PATH)/tpp/*.cpp)
