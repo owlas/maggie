@@ -47,20 +47,22 @@ MagneticStateController<INTE>::MagneticStateController(
 
     // Create the integrators
     for( int i=0; i!=N; ++i )
+    {
         integrators.push_back(
             INTE(
-                 llgs[i], init_state[i], 0.0, time_step, integrator_rng
+                llgs[i], init_state[i], 0.0, time_step, integrator_rng
                 )
             );
-
-    integrators[0].reset();
+    }
+    for( int i=0; i!=N; ++i )
+        states.push_back( &( integrators[i].getState() ) );
 }
 
 template<class INTE>
 void MagneticStateController<INTE>::updateEffectiveField()
 {
     // For each particle in the ensemble
-    for( int i=0; i!=N; ++i )
+    for( int i=0; i<N; ++i )
     {
         // Get the current state
         moment state = integrators[i].getState();
@@ -78,11 +80,23 @@ void MagneticStateController<INTE>::updateEffectiveField()
         heff_ref[2] = heff_ref[2] + happ[2];
 
         // Add the contribution from the interacting field
-        for( int j=0; j!=N; ++j )
+        for( int j=0; j<i; ++j )
         {
-            if( i==j )
-                continue;
+            moment coupled_state = integrators[j].getState();
+            double dot_prod = coupled_state[0] * unit_disp[i][j][0]
+                + coupled_state[1] * unit_disp[i][j][1]
+                + coupled_state[2] * unit_disp[i][j][2];
 
+            heff_ref[0] = heff_ref[0] + ddNorm * v[j] / cube_disps[i][j]
+                * ( 3 * dot_prod * unit_disp[i][j][0] - coupled_state[0] );
+            heff_ref[1] = heff_ref[1] + ddNorm * v[j] / cube_disps[i][j]
+                * ( 3 * dot_prod * unit_disp[i][j][1] - coupled_state[1] );
+            heff_ref[2] = heff_ref[2] + ddNorm * v[j] / cube_disps[i][j]
+                * ( 3 * dot_prod * unit_disp[i][j][2] - coupled_state[2] );
+        }
+        // Split these loops to avoid continue statement (bad for CPU optimisation)
+        for( int j=i+1; j<N; ++j )
+        {
             moment coupled_state = integrators[j].getState();
             double dot_prod = coupled_state[0] * unit_disp[i][j][0]
                 + coupled_state[1] * unit_disp[i][j][1]
@@ -101,16 +115,17 @@ void MagneticStateController<INTE>::updateEffectiveField()
 template<class INTE>
 void MagneticStateController<INTE>::renormaliseStates()
 {
-    for( int i=0; i!=N; ++i )
-    {
-        moment state = integrators[i].getState();
-        double norm = sqrt( state[0]*state[0]
-                            + state[1]*state[1]
-                            + state[2]*state[2] );
-        for( unsigned int k=0; k!=3; ++k )
-            state[k] = state[k] / norm;
 
-        integrators[i].setState( state );
+    for( int i=0; i<N; ++i )
+    {
+        double mx=states[i]->at(0);
+        double my=states[i]->at(1);
+        double mz=states[i]->at(2);
+
+        double norm = sqrt( mx*mx + my*my + mz*mz );
+        moment newstate{ mx/norm, my/norm, mz/norm };
+
+        integrators[i].setState( newstate );
     } // END for each particle in the cluster
 } // END renormaliseStates()
 
@@ -150,12 +165,9 @@ matrix_d MagneticStateController<INTE>::getCubeDisplacements() const
 }
 
 template<class INTE>
-std::vector<moment> MagneticStateController<INTE>::getState() const
+const std::vector<moment const*>& MagneticStateController<INTE>::getState() const
 {
-    std::vector<moment> ret;
-    for( int i=0; i!=N; ++i )
-        ret.push_back( integrators[i].getState() );
-    return ret;
+    return states;
 }
 
 template<class INTE>

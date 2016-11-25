@@ -11,6 +11,7 @@ using namespace maggie;
 #include "Heun.hpp"
 #include "Euler.hpp"
 #include <iostream>
+#include <omp.h>
 
 #include<boost/random.hpp>
 using boost::mt19937;
@@ -54,7 +55,7 @@ public:
     // getters
     double getDDPrefactor() const;
     matrix_d getCubeDisplacements() const;
-    std::vector<moment> getState() const;
+    const std::vector<maggie::moment const*>& getState() const;
     double getTime() const;
     std::vector<maggie::field> getEffectiveField() const;
 
@@ -62,6 +63,7 @@ private:
     ParticleCluster geom;
     maggie::field happ;
     StocLLG::vector llgs;
+    maggie::moment tempstate;
     int N;
     array3_d disp;
     array3_d unit_disp;
@@ -72,6 +74,7 @@ private:
     typename INTE::vector integrators;
     std::vector<maggie::field*> heff;
     std::vector<maggie::anisotropy> k;
+    std::vector<maggie::moment const*> states;
 };
 
 #include "tpp/MagneticStateController.cpp"

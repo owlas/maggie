@@ -30,6 +30,7 @@
 #include<Simulation.hpp>
 #include<MagneticStateController.hpp>
 #include<types.hpp>
+#include "MagnetisationTrajectory.hpp"
 #include "algos.hpp"
 
 #endif

@@ -5,7 +5,8 @@
 // O.Laslett@soton.ac.uk
 //
 #include<SingleMNPMasterEquation.hpp>
-#include<iostream>
+#include "../include/easylogging++.h"
+
 
 SingleMNPMasterEquation::
 SingleMNPMasterEquation( double anis,
