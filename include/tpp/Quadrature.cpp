@@ -107,6 +107,8 @@ namespace Quad
         if( len<2 )
             throw std::invalid_argument( "Vector for integration must be of"
                                          " minimum length 3" );
+        if( len>yvec.size() )
+            throw std::invalid_argument( "Npoints cannot be greater than the vector length" );
 
         // sum the points
         for( sum=0.0, i=1; i<len; i++ )
