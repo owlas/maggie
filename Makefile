@@ -12,9 +12,9 @@ GTEST_DIR=googletest/googletest
 GMOCK_DIR=googletest/googlemock
 
 LIB_DIR = .
-LIBS=-lgmock -lpthread -lmaggie
+LIBS=-lgmock -lpthread -lmaggie -lz
 
-CPP_FLAGS=--std=c++11 -W -Wall -pedantic -g -lz -fopenmp -unroll0 -mavx
+CPP_FLAGS=--std=c++11 -W -Wall -pedantic -O3 -fopenmp
 
 SOURCES=$(wildcard $(LIB_PATH)/*.cpp)
 TPP_SOURCES=$(wildcard $(INC_PATH)/tpp/*.cpp)
